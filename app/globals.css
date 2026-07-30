@@ -1040,3 +1040,54 @@ body {
 }
 .story-nav-left { left: 0; }
 .story-nav-right { right: 0; }
+
+/* ======================= PLANS / MEETUPS ======================= */
+.plan-list { display: flex; flex-direction: column; gap: 12px; }
+.plan-card {
+  background: #12151D;
+  border: 1px solid #1E2330;
+  border-radius: 16px;
+  padding: 16px;
+}
+.plan-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.plan-cat {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #fff;
+  background: var(--aurora);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.plan-count { font-size: 12px; color: #8A93A3; }
+.plan-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 17px; }
+.plan-meta { font-size: 13px; color: #9AA3B2; margin-top: 3px; }
+.plan-desc { font-size: 14px; color: #CBD2E0; margin-top: 8px; line-height: 1.45; }
+.plan-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.plan-host { font-size: 12px; color: #8A93A3; }
+.plan-join {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  background: var(--aurora);
+  cursor: pointer;
+  font-family: inherit;
+}
+.plan-join.joined { background: #1A1E29; color: #CBD2E0; }
+.plan-join:disabled { opacity: 0.7; }
+.plan-badge { font-size: 12px; font-weight: 600; color: #FFB020; }
+.plan-badge.muted { color: #8A93A3; }

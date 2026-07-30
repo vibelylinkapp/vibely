@@ -171,6 +171,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      plans: {
+        Row: {
+          category: string;
+          county: string | null;
+          created_at: string;
+          description: string | null;
+          geo: unknown;
+          host_id: string;
+          id: string;
+          max_people: number | null;
+          starts_at: string | null;
+          status: Database["public"]["Enums"]["plan_status_t"];
+          title: string;
+        };
+        Insert: {
+          category: string;
+          county?: string | null;
+          created_at?: string;
+          description?: string | null;
+          geo?: unknown;
+          host_id: string;
+          id?: string;
+          max_people?: number | null;
+          starts_at?: string | null;
+          status?: Database["public"]["Enums"]["plan_status_t"];
+          title: string;
+        };
+        Update: {
+          category?: string;
+          county?: string | null;
+          created_at?: string;
+          description?: string | null;
+          geo?: unknown;
+          host_id?: string;
+          id?: string;
+          max_people?: number | null;
+          starts_at?: string | null;
+          status?: Database["public"]["Enums"]["plan_status_t"];
+          title?: string;
+        };
+        Relationships: [];
+      };
+      plan_participants: {
+        Row: { joined_at: string; plan_id: string; profile_id: string };
+        Insert: { joined_at?: string; plan_id: string; profile_id: string };
+        Update: { joined_at?: string; plan_id?: string; profile_id?: string };
+        Relationships: [];
+      };
       reports: {
         Row: {
           created_at: string;
