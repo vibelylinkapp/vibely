@@ -28,6 +28,8 @@ body {
   padding: 24px;
 }
 
+.app-page { padding-bottom: 96px; }
+
 .glow {
   position: absolute;
   inset: 0;
@@ -172,12 +174,7 @@ body {
   margin-bottom: 2px;
 }
 
-.auth-title {
-  font-family: 'Sora', sans-serif;
-  font-weight: 800;
-  font-size: 24px;
-}
-
+.auth-title { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 24px; }
 .auth-sub { color: #B9BEC9; font-size: 14px; margin-top: -6px; }
 
 .auth-form { display: flex; flex-direction: column; gap: 12px; }
@@ -218,6 +215,8 @@ body {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .chip-on { background: var(--aurora); color: #fff; border-color: transparent; }
@@ -234,6 +233,194 @@ body {
   font-size: 14px;
   font-family: inherit;
 }
+
+/* --- Feed / Discover --- */
+.feed-wrap {
+  position: relative;
+  min-height: 100dvh;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 20px 16px 104px;
+}
+
+.feed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.feed-title { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 22px; }
+
+.filter-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 6px;
+}
+
+.filter-row .chip { white-space: nowrap; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.pcard {
+  background: #12151D;
+  border: 1px solid #1E2330;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pcard-photo {
+  aspect-ratio: 1 / 1;
+  background: #1A1E29;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.pcard-photo img { width: 100%; height: 100%; object-fit: cover; }
+.pcard-initial { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 40px; color: #3A4152; }
+
+.pcard-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px #12151D;
+}
+
+.pcard-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.pcard-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.pcard-meta { font-size: 12px; color: #8A93A3; }
+.pcard-intents { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+
+.mini {
+  font-size: 10px;
+  text-transform: capitalize;
+  color: #CBD2E0;
+  background: #0E1116;
+  border: 1px solid #232838;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.pcard-actions { display: flex; gap: 12px; margin-top: 6px; }
+.pcard-actions button {
+  background: none;
+  border: 0;
+  color: #7C8598;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+.pcard-actions button:hover { color: #F5307E; }
+
+/* --- Report modal --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 380px;
+  background: #12151D;
+  border: 1px solid #1E2330;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal h3 { font-family: 'Sora', sans-serif; font-size: 18px; }
+
+.modal-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #2A2F3D;
+  background: #0E1116;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+}
+
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* --- Profile view --- */
+.profile-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding-top: 12px;
+}
+
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--aurora);
+  display: grid;
+  place-items: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 40px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.profile-name { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 22px; }
+
+/* --- Bottom nav --- */
+.bottomnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 64px;
+  background: rgba(14, 17, 22, 0.92);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #1E2330;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 40;
+}
+
+.bottomnav a {
+  color: #7C8598;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 999px;
+}
+
+.bottomnav a.active { color: #fff; background: rgba(122, 47, 242, 0.18); }
 
 @media (max-width: 480px) {
   .wordmark { font-size: 34px; }

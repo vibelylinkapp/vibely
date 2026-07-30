@@ -1,4 +1,4 @@
-// Minimal, hand-trimmed database types for the tables the app touches today.
+// Hand-trimmed database types for the tables the app touches today.
 // Regenerate the full set anytime with:
 //   npx supabase gen types typescript --project-id gimllbqpcytshovqdnfm > lib/database.types.ts
 export type Json =
@@ -111,6 +111,57 @@ export type Database = {
         Update: {
           intent?: Database["public"]["Enums"]["intent_t"];
           profile_id?: string;
+        };
+        Relationships: [];
+      };
+      blocks: {
+        Row: {
+          blocked_id: string;
+          blocker_id: string;
+          created_at: string;
+        };
+        Insert: {
+          blocked_id: string;
+          blocker_id: string;
+          created_at?: string;
+        };
+        Update: {
+          blocked_id?: string;
+          blocker_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      reports: {
+        Row: {
+          created_at: string;
+          detail: string | null;
+          id: string;
+          reason: string;
+          reported_id: string | null;
+          reporter_id: string | null;
+          resolved_at: string | null;
+          status: Database["public"]["Enums"]["report_status_t"];
+        };
+        Insert: {
+          created_at?: string;
+          detail?: string | null;
+          id?: string;
+          reason: string;
+          reported_id?: string | null;
+          reporter_id?: string | null;
+          resolved_at?: string | null;
+          status?: Database["public"]["Enums"]["report_status_t"];
+        };
+        Update: {
+          created_at?: string;
+          detail?: string | null;
+          id?: string;
+          reason?: string;
+          reported_id?: string | null;
+          reporter_id?: string | null;
+          resolved_at?: string | null;
+          status?: Database["public"]["Enums"]["report_status_t"];
         };
         Relationships: [];
       };

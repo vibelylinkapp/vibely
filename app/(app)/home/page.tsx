@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import SignOutButton from "@/components/SignOutButton";
+import BottomNav from "@/components/BottomNav";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ export default async function HomePage() {
     .eq("profile_id", user.id);
 
   return (
-    <main className="wrap">
+    <main className="wrap app-page">
       <div className="glow" />
       <section className="hero">
         <div className="logo">
@@ -54,8 +55,8 @@ export default async function HomePage() {
 
         <h1 className="headline">Karibu, {profile.display_name}.</h1>
         <p className="sub">
-          Your profile is live in {profile.county ?? "Kenya"}. Discovery, chat,
-          and stories are coming next — this is your home base.
+          Your profile is live in {profile.county ?? "Kenya"}. Start meeting
+          your people.
         </p>
 
         {intents && intents.length > 0 && (
@@ -68,8 +69,14 @@ export default async function HomePage() {
           </div>
         )}
 
-        <SignOutButton />
+        <div className="cta-row">
+          <Link href="/discover" className="btn">
+            Discover people nearby
+          </Link>
+        </div>
       </section>
+
+      <BottomNav />
     </main>
   );
 }
