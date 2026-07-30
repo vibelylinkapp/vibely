@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Vibely">
+  <defs>
+    <linearGradient id="aurora" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF7A59"/>
+      <stop offset="0.45" stop-color="#F5307E"/>
+      <stop offset="1" stop-color="#7A2FF2"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#aurora)"/>
+  <path d="M256 96 C181 96 120 157 120 232 C120 316 200 360 256 424 C312 360 392 316 392 232 C392 157 331 96 256 96 Z" fill="#FFFFFF"/>
+  <path d="M168 216 L210 216 L232 172 L262 268 L292 184 L314 216 L356 216" fill="none" stroke="#7A2FF2" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
