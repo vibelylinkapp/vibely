@@ -770,3 +770,26 @@ body {
   height: 1px;
   background: #232838;
 }
+
+.method-tabs {
+  display: flex;
+  gap: 6px;
+  background: #0E1116;
+  border: 1px solid #232838;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 2px;
+}
+.method-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #9AA3B2;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 9px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.method-tab.on { background: var(--aurora); color: #fff; }

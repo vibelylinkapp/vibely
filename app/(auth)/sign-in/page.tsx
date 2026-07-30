@@ -5,11 +5,26 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+// Normalise a user-typed Kenyan number to E.164 (what Supabase/Twilio expect).
+// Accepts: +254712345678, 254712345678, 0712345678, 712345678.
+function normalizeKE(raw: string): string | null {
+  let s = raw.replace(/[\s\-()]/g, "");
+  if (s.startsWith("+")) return /^\+\d{7,15}$/.test(s) ? s : null;
+  if (s.startsWith("0")) s = s.slice(1);
+  if (s.startsWith("254")) s = s.slice(3);
+  if (/^\d{9}$/.test(s)) return "+254" + s;
+  return null;
+}
+
 export default function SignInPage() {
   const router = useRouter();
+  const [method, setMethod] = useState<"email" | "phone">("email");
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [sentPhone, setSentPhone] = useState<string | null>(null);
+  const [code, setCode] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,10 +40,9 @@ export default function SignInPage() {
       setMsg(error.message);
       setLoading(false);
     }
-    // On success the browser is redirected to Google, then back to /auth/callback.
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setMsg(null);
@@ -67,6 +81,65 @@ export default function SignInPage() {
     }
   }
 
+  async function sendCode(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    const normalized = normalizeKE(phone);
+    if (!normalized) {
+      setMsg("Enter a valid phone number, e.g. 0712 345 678.");
+      return;
+    }
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
+    if (error) {
+      setMsg(error.message);
+      setLoading(false);
+      return;
+    }
+    setSentPhone(normalized);
+    setMsg(`Code sent to ${normalized}.`);
+    setLoading(false);
+  }
+
+  async function verifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (!sentPhone) return;
+    setLoading(true);
+    setMsg(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.verifyOtp({
+      phone: sentPhone,
+      token: code.trim(),
+      type: "sms",
+    });
+    if (error) {
+      setMsg(error.message);
+      setLoading(false);
+      return;
+    }
+    router.push("/home");
+    router.refresh();
+  }
+
+  function switchMethod(m: "email" | "phone") {
+    setMethod(m);
+    setMsg(null);
+  }
+
+  const title =
+    method === "phone"
+      ? "Sign in with your phone"
+      : mode === "in"
+        ? "Welcome back"
+        : "Create your account";
+  const sub =
+    method === "phone"
+      ? "We'll text you a one-time code."
+      : mode === "in"
+        ? "Sign in to keep meeting your people."
+        : "It takes less than a minute.";
+
   return (
     <main className="wrap">
       <div className="glow" />
@@ -99,14 +172,8 @@ export default function SignInPage() {
           </span>
         </Link>
 
-        <h1 className="auth-title">
-          {mode === "in" ? "Welcome back" : "Create your account"}
-        </h1>
-        <p className="auth-sub">
-          {mode === "in"
-            ? "Sign in to keep meeting your people."
-            : "It takes less than a minute."}
-        </p>
+        <h1 className="auth-title">{title}</h1>
+        <p className="auth-sub">{sub}</p>
 
         <button
           type="button"
@@ -139,45 +206,107 @@ export default function SignInPage() {
           <span>or</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <input
-            type="email"
-            required
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            required
-            minLength={6}
-            placeholder="Password (min 6 characters)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="btn" type="submit" disabled={loading}>
-            {loading
-              ? "Please wait..."
-              : mode === "in"
-                ? "Sign in"
-                : "Create account"}
-          </button>
-        </form>
-
-        {msg && <p className="auth-msg">{msg}</p>}
-
-        <p className="auth-toggle">
-          {mode === "in" ? "New to Vibely?" : "Already have an account?"}{" "}
+        <div className="method-tabs">
           <button
             type="button"
-            onClick={() => {
-              setMode(mode === "in" ? "up" : "in");
-              setMsg(null);
-            }}
+            className={"method-tab" + (method === "email" ? " on" : "")}
+            onClick={() => switchMethod("email")}
           >
-            {mode === "in" ? "Create an account" : "Sign in"}
+            Email
           </button>
-        </p>
+          <button
+            type="button"
+            className={"method-tab" + (method === "phone" ? " on" : "")}
+            onClick={() => switchMethod("phone")}
+          >
+            Phone
+          </button>
+        </div>
+
+        {method === "email" ? (
+          <>
+            <form onSubmit={handleEmail} className="auth-form">
+              <input
+                type="email"
+                required
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                required
+                minLength={6}
+                placeholder="Password (min 6 characters)"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button className="btn" type="submit" disabled={loading}>
+                {loading
+                  ? "Please wait..."
+                  : mode === "in"
+                    ? "Sign in"
+                    : "Create account"}
+              </button>
+            </form>
+
+            <p className="auth-toggle">
+              {mode === "in" ? "New to Vibely?" : "Already have an account?"}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(mode === "in" ? "up" : "in");
+                  setMsg(null);
+                }}
+              >
+                {mode === "in" ? "Create an account" : "Sign in"}
+              </button>
+            </p>
+          </>
+        ) : !sentPhone ? (
+          <form onSubmit={sendCode} className="auth-form">
+            <input
+              type="tel"
+              required
+              placeholder="Phone (e.g. 0712 345 678)"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+            <button className="btn" type="submit" disabled={loading}>
+              {loading ? "Sending..." : "Send code"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={verifyCode} className="auth-form">
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              maxLength={6}
+              placeholder="6-digit code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+            <button className="btn" type="submit" disabled={loading}>
+              {loading ? "Verifying..." : "Verify & continue"}
+            </button>
+            <p className="auth-toggle">
+              <button
+                type="button"
+                onClick={() => {
+                  setSentPhone(null);
+                  setCode("");
+                  setMsg(null);
+                }}
+              >
+                Use a different number
+              </button>
+            </p>
+          </form>
+        )}
+
+        {msg && <p className="auth-msg">{msg}</p>}
       </section>
     </main>
   );
