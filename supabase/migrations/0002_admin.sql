@@ -25,9 +25,11 @@ alter table public.admin_actions enable row level security;
 
 -- =====================================================================
 -- >>> MAKE YOURSELF AN ADMIN <<<
--- Replace the email below with the address you used to sign up to Vibely,
--- then run this statement. (You can re-run it any time to add more admins.)
+-- This grants admin to mosesvibely@gmail.com. To add more admins later,
+-- copy this statement and change the email. (Safe to re-run.)
+-- Note: the account must have signed up in Vibely first (so it exists in
+-- auth.users and has a profiles row) for this to take effect.
 -- =====================================================================
 update public.profiles
 set is_admin = true
-where id = (select id from auth.users where email = 'YOUR_EMAIL_HERE@example.com');
+where id = (select id from auth.users where email = 'mosesvibely@gmail.com');
