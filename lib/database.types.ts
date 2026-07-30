@@ -192,6 +192,69 @@ export type Database = {
         };
         Relationships: [];
       };
+      conversations: {
+        Row: { created_at: string; id: string; last_msg_at: string | null };
+        Insert: { created_at?: string; id?: string; last_msg_at?: string | null };
+        Update: { created_at?: string; id?: string; last_msg_at?: string | null };
+        Relationships: [];
+      };
+      conversation_members: {
+        Row: {
+          conversation_id: string;
+          last_read_at: string | null;
+          profile_id: string;
+        };
+        Insert: {
+          conversation_id: string;
+          last_read_at?: string | null;
+          profile_id: string;
+        };
+        Update: {
+          conversation_id?: string;
+          last_read_at?: string | null;
+          profile_id?: string;
+        };
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          body: string | null;
+          conversation_id: string;
+          created_at: string;
+          deleted_at: string | null;
+          edited_at: string | null;
+          id: string;
+          is_flagged: boolean;
+          kind: Database["public"]["Enums"]["message_kind_t"];
+          media_url: string | null;
+          sender_id: string;
+        };
+        Insert: {
+          body?: string | null;
+          conversation_id: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          edited_at?: string | null;
+          id?: string;
+          is_flagged?: boolean;
+          kind?: Database["public"]["Enums"]["message_kind_t"];
+          media_url?: string | null;
+          sender_id: string;
+        };
+        Update: {
+          body?: string | null;
+          conversation_id?: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          edited_at?: string | null;
+          id?: string;
+          is_flagged?: boolean;
+          kind?: Database["public"]["Enums"]["message_kind_t"];
+          media_url?: string | null;
+          sender_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -213,6 +276,10 @@ export type Database = {
           is_online: boolean;
           is_verified: boolean;
         }[];
+      };
+      start_conversation: {
+        Args: { other_id: string };
+        Returns: string;
       };
     };
     Enums: {

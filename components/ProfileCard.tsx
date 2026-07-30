@@ -1,4 +1,5 @@
 import ProfileActions from "@/components/ProfileActions";
+import MessageButton from "@/components/MessageButton";
 
 type P = {
   id: string;
@@ -70,6 +71,7 @@ export default function ProfileCard({
             ))}
           </div>
         )}
+        <MessageButton targetId={p.id} />
         <ProfileActions targetId={p.id} targetName={p.display_name} />
       </div>
     </div>
