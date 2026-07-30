@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import SignOutButton from "@/components/SignOutButton";
+import AvatarUpload from "@/components/AvatarUpload";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
@@ -44,9 +45,11 @@ export default async function ProfilePage() {
       </div>
 
       <section className="profile-view">
-        <div className="profile-avatar">
-          {profile.display_name.charAt(0).toUpperCase()}
-        </div>
+        <AvatarUpload
+          userId={user.id}
+          avatarUrl={profile.avatar_url}
+          displayName={profile.display_name}
+        />
         <h2 className="profile-name">{profile.display_name}</h2>
         {meta && <p className="pcard-meta">{meta}</p>}
         {profile.bio && (
