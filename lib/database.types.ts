@@ -16,6 +16,8 @@ export type Database = {
         Row: {
           area: string | null;
           avatar_url: string | null;
+          banned_at: string | null;
+          banned_reason: string | null;
           bio: string | null;
           birthdate: string | null;
           county: string | null;
@@ -29,6 +31,8 @@ export type Database = {
           height_cm: number | null;
           id: string;
           invisible_mode: boolean;
+          is_admin: boolean;
+          is_banned: boolean;
           is_online: boolean;
           is_private: boolean;
           is_verified: boolean | null;
@@ -44,6 +48,8 @@ export type Database = {
         Insert: {
           area?: string | null;
           avatar_url?: string | null;
+          banned_at?: string | null;
+          banned_reason?: string | null;
           bio?: string | null;
           birthdate?: string | null;
           county?: string | null;
@@ -57,6 +63,8 @@ export type Database = {
           height_cm?: number | null;
           id: string;
           invisible_mode?: boolean;
+          is_admin?: boolean;
+          is_banned?: boolean;
           is_online?: boolean;
           is_private?: boolean;
           is_verified?: boolean | null;
@@ -72,6 +80,8 @@ export type Database = {
         Update: {
           area?: string | null;
           avatar_url?: string | null;
+          banned_at?: string | null;
+          banned_reason?: string | null;
           bio?: string | null;
           birthdate?: string | null;
           county?: string | null;
@@ -85,6 +95,8 @@ export type Database = {
           height_cm?: number | null;
           id?: string;
           invisible_mode?: boolean;
+          is_admin?: boolean;
+          is_banned?: boolean;
           is_online?: boolean;
           is_private?: boolean;
           is_verified?: boolean | null;
@@ -115,21 +127,9 @@ export type Database = {
         Relationships: [];
       };
       blocks: {
-        Row: {
-          blocked_id: string;
-          blocker_id: string;
-          created_at: string;
-        };
-        Insert: {
-          blocked_id: string;
-          blocker_id: string;
-          created_at?: string;
-        };
-        Update: {
-          blocked_id?: string;
-          blocker_id?: string;
-          created_at?: string;
-        };
+        Row: { blocked_id: string; blocker_id: string; created_at: string };
+        Insert: { blocked_id: string; blocker_id: string; created_at?: string };
+        Update: { blocked_id?: string; blocker_id?: string; created_at?: string };
         Relationships: [];
       };
       reports: {
@@ -162,6 +162,33 @@ export type Database = {
           reporter_id?: string | null;
           resolved_at?: string | null;
           status?: Database["public"]["Enums"]["report_status_t"];
+        };
+        Relationships: [];
+      };
+      admin_actions: {
+        Row: {
+          action: string;
+          admin_id: string | null;
+          created_at: string;
+          detail: string | null;
+          id: string;
+          target_id: string | null;
+        };
+        Insert: {
+          action: string;
+          admin_id?: string | null;
+          created_at?: string;
+          detail?: string | null;
+          id?: string;
+          target_id?: string | null;
+        };
+        Update: {
+          action?: string;
+          admin_id?: string | null;
+          created_at?: string;
+          detail?: string | null;
+          id?: string;
+          target_id?: string | null;
         };
         Relationships: [];
       };

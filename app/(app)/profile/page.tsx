@@ -70,6 +70,11 @@ export default async function ProfilePage() {
           <Link href="/onboarding" className="btn-ghost">
             Edit profile
           </Link>
+          {profile.is_admin && (
+            <Link href="/admin" className="btn-ghost">
+              Admin panel
+            </Link>
+          )}
           <SignOutButton />
         </div>
       </section>
