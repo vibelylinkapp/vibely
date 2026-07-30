@@ -246,6 +246,78 @@ export type Database = {
         };
         Relationships: [];
       };
+      payments: {
+        Row: {
+          amount_kes: number;
+          created_at: string;
+          id: string;
+          mpesa_checkout_id: string | null;
+          mpesa_receipt: string | null;
+          phone: string | null;
+          profile_id: string | null;
+          provider: string;
+          raw_callback: Json | null;
+          status: string;
+          tier: Database["public"]["Enums"]["sub_tier_t"] | null;
+        };
+        Insert: {
+          amount_kes: number;
+          created_at?: string;
+          id?: string;
+          mpesa_checkout_id?: string | null;
+          mpesa_receipt?: string | null;
+          phone?: string | null;
+          profile_id?: string | null;
+          provider?: string;
+          raw_callback?: Json | null;
+          status?: string;
+          tier?: Database["public"]["Enums"]["sub_tier_t"] | null;
+        };
+        Update: {
+          amount_kes?: number;
+          created_at?: string;
+          id?: string;
+          mpesa_checkout_id?: string | null;
+          mpesa_receipt?: string | null;
+          phone?: string | null;
+          profile_id?: string | null;
+          provider?: string;
+          raw_callback?: Json | null;
+          status?: string;
+          tier?: Database["public"]["Enums"]["sub_tier_t"] | null;
+        };
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: {
+          created_at: string;
+          expires_at: string | null;
+          id: string;
+          profile_id: string;
+          started_at: string;
+          status: Database["public"]["Enums"]["sub_status_t"];
+          tier: Database["public"]["Enums"]["sub_tier_t"];
+        };
+        Insert: {
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          profile_id: string;
+          started_at?: string;
+          status?: Database["public"]["Enums"]["sub_status_t"];
+          tier?: Database["public"]["Enums"]["sub_tier_t"];
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          profile_id?: string;
+          started_at?: string;
+          status?: Database["public"]["Enums"]["sub_status_t"];
+          tier?: Database["public"]["Enums"]["sub_tier_t"];
+        };
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: {
           created_at: string;

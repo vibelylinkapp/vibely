@@ -97,6 +97,9 @@ export default async function ProfilePage() {
         />
         <PushSetup />
         <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>
+          <Link href="/upgrade" className="btn-ghost">
+            Upgrade
+          </Link>
           <Link href="/onboarding" className="btn-ghost">
             Edit profile
           </Link>
