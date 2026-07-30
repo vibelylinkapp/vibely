@@ -5,6 +5,7 @@ import BottomNav from "@/components/BottomNav";
 import SignOutButton from "@/components/SignOutButton";
 import AvatarUpload from "@/components/AvatarUpload";
 import PushSetup from "@/components/PushSetup";
+import GalleryUpload from "@/components/GalleryUpload";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
@@ -34,6 +35,12 @@ export default async function ProfilePage() {
     .from("profile_intents")
     .select("intent")
     .eq("profile_id", user.id);
+
+  const { data: myPhotos } = await supabase
+    .from("photos")
+    .select("id, url")
+    .eq("profile_id", user.id)
+    .order("position", { ascending: true });
 
   const age = profile.birthdate ? ageFrom(profile.birthdate) : null;
   const place = [profile.area, profile.county].filter(Boolean).join(", ");
@@ -70,6 +77,8 @@ export default async function ProfilePage() {
             ))}
           </div>
         )}
+        <GalleryUpload userId={user.id} initialPhotos={myPhotos ?? []} />
+        <PushSetup />
         <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>
           <Link href="/onboarding" className="btn-ghost">
             Edit profile

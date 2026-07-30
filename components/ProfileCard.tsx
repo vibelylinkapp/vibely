@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ProfileActions from "@/components/ProfileActions";
 import LikeButton from "@/components/LikeButton";
 
@@ -33,7 +34,11 @@ export default function ProfileCard({
 
   return (
     <div className="pcard">
-      <div className="pcard-photo">
+      <Link
+        href={`/u/${p.id}`}
+        className="pcard-photo"
+        aria-label={`View ${p.display_name}`}
+      >
         {p.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={p.avatar_url} alt={p.display_name} />
@@ -43,10 +48,12 @@ export default function ProfileCard({
           </span>
         )}
         {p.is_online && <span className="pcard-dot" />}
-      </div>
+      </Link>
       <div className="pcard-body">
         <div className="pcard-name">
-          {p.display_name}
+          <Link href={`/u/${p.id}`} className="pcard-name-link">
+            {p.display_name}
+          </Link>
           {p.is_verified && (
             <svg width="14" height="14" viewBox="0 0 24 24" aria-label="Verified">
               <circle cx="12" cy="12" r="12" fill="#FFB020" />

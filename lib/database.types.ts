@@ -219,6 +219,33 @@ export type Database = {
         Update: { joined_at?: string; plan_id?: string; profile_id?: string };
         Relationships: [];
       };
+      photos: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_approved: boolean;
+          position: number;
+          profile_id: string;
+          url: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_approved?: boolean;
+          position?: number;
+          profile_id: string;
+          url: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_approved?: boolean;
+          position?: number;
+          profile_id?: string;
+          url?: string;
+        };
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: {
           created_at: string;
