@@ -1254,3 +1254,115 @@ body {
 }
 .pcard-name-link { color: inherit; text-decoration: none; }
 .pcard-name-link:hover { text-decoration: underline; }
+
+/* ======================= VERIFICATION (MEMBER) ======================= */
+.verify-box {
+  width: 100%;
+  max-width: 340px;
+  margin: 16px auto 0;
+  padding: 16px;
+  background: #12151D;
+  border: 1px solid #1E2330;
+  border-radius: 14px;
+  text-align: left;
+}
+.verify-box.verified { border-color: #FFB020; }
+.verify-head { display: flex; align-items: center; gap: 8px; }
+.verify-head strong { font-size: 15px; }
+.verify-box .sub { display: block; font-size: 13px; color: #8A93A3; margin-top: 4px; }
+.verify-rejected {
+  font-size: 13px;
+  color: #FF8080;
+  background: rgba(255, 80, 80, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 10px;
+}
+.verify-kinds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.verify-kind {
+  border: 1px solid #2A3040;
+  background: #0F121A;
+  color: #CBD2E0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.verify-kind.active { background: var(--aurora); color: #fff; border-color: transparent; }
+.verify-uploads { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.verify-pick {
+  border: 1px dashed #2A3040;
+  background: #0F121A;
+  color: #9AA3B2;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ======================= VERIFICATION (ADMIN QUEUE) ======================= */
+.verify-queue {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.verify-card {
+  background: #12151D;
+  border: 1px solid #1E2330;
+  border-radius: 14px;
+  padding: 14px;
+}
+.verify-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.verify-kind-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #12151D;
+  background: #FFB020;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.verify-imgs { display: flex; gap: 8px; margin-bottom: 12px; }
+.verify-imgs a { position: relative; flex: 1; }
+.verify-imgs img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #1A1E29;
+}
+.verify-imgs a span {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.verify-img-missing {
+  flex: 1;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #8A93A3;
+  background: #0F121A;
+  border: 1px dashed #2A3040;
+  border-radius: 10px;
+}

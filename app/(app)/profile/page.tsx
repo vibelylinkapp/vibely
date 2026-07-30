@@ -6,6 +6,7 @@ import SignOutButton from "@/components/SignOutButton";
 import AvatarUpload from "@/components/AvatarUpload";
 import PushSetup from "@/components/PushSetup";
 import GalleryUpload from "@/components/GalleryUpload";
+import VerificationSetup from "@/components/VerificationSetup";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
@@ -41,6 +42,14 @@ export default async function ProfilePage() {
     .select("id, url")
     .eq("profile_id", user.id)
     .order("position", { ascending: true });
+
+  const { data: verifReq } = await supabase
+    .from("verification_requests")
+    .select("status, note")
+    .eq("profile_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   const age = profile.birthdate ? ageFrom(profile.birthdate) : null;
   const place = [profile.area, profile.county].filter(Boolean).join(", ");
@@ -78,6 +87,14 @@ export default async function ProfilePage() {
           </div>
         )}
         <GalleryUpload userId={user.id} initialPhotos={myPhotos ?? []} />
+        <VerificationSetup
+          userId={user.id}
+          verification={profile.verification}
+          pending={verifReq?.status === "pending"}
+          rejectedNote={
+            verifReq?.status === "rejected" ? verifReq.note : null
+          }
+        />
         <PushSetup />
         <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>
           <Link href="/onboarding" className="btn-ghost">

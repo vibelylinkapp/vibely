@@ -59,3 +59,49 @@ export async function banUser(
   revalidatePath("/admin/reports");
   revalidatePath("/admin");
 }
+
+export async function approveVerification(
+  requestId: string,
+  profileId: string,
+  kind: "selfie" | "national_id" | "passport"
+) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  const now = new Date().toISOString();
+  // Setting profiles.verification flips the generated is_verified flag.
+  await admin.from("profiles").update({ verification: kind }).eq("id", profileId);
+  await admin
+    .from("verification_requests")
+    .update({ status: "approved", reviewed_by: adminId, reviewed_at: now })
+    .eq("id", requestId);
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    target_id: profileId,
+    action: "approve_verification",
+    detail: kind,
+  });
+  revalidatePath("/admin/verifications");
+  revalidatePath("/admin");
+}
+
+export async function rejectVerification(
+  requestId: string,
+  profileId: string,
+  note: string
+) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  const now = new Date().toISOString();
+  await admin
+    .from("verification_requests")
+    .update({ status: "rejected", note, reviewed_by: adminId, reviewed_at: now })
+    .eq("id", requestId);
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    target_id: profileId,
+    action: "reject_verification",
+    detail: note,
+  });
+  revalidatePath("/admin/verifications");
+  revalidatePath("/admin");
+}

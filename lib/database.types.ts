@@ -270,6 +270,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      verification_requests: {
+        Row: {
+          created_at: string;
+          doc_path: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["verification_t"];
+          note: string | null;
+          profile_id: string;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          selfie_path: string;
+          status: Database["public"]["Enums"]["verif_status_t"];
+        };
+        Insert: {
+          created_at?: string;
+          doc_path?: string | null;
+          id?: string;
+          kind: Database["public"]["Enums"]["verification_t"];
+          note?: string | null;
+          profile_id: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          selfie_path: string;
+          status?: Database["public"]["Enums"]["verif_status_t"];
+        };
+        Update: {
+          created_at?: string;
+          doc_path?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["verification_t"];
+          note?: string | null;
+          profile_id?: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          selfie_path?: string;
+          status?: Database["public"]["Enums"]["verif_status_t"];
+        };
+        Relationships: [];
+      };
       reports: {
         Row: {
           created_at: string;
