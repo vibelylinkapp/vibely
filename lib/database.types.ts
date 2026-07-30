@@ -1,0 +1,181 @@
+// Minimal, hand-trimmed database types for the tables the app touches today.
+// Regenerate the full set anytime with:
+//   npx supabase gen types typescript --project-id gimllbqpcytshovqdnfm > lib/database.types.ts
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export type Database = {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          area: string | null;
+          avatar_url: string | null;
+          bio: string | null;
+          birthdate: string | null;
+          county: string | null;
+          cover_url: string | null;
+          created_at: string;
+          display_name: string;
+          education: string | null;
+          gender: Database["public"]["Enums"]["gender_t"] | null;
+          geo: unknown;
+          handle: string | null;
+          height_cm: number | null;
+          id: string;
+          invisible_mode: boolean;
+          is_online: boolean;
+          is_private: boolean;
+          is_verified: boolean | null;
+          languages: string[] | null;
+          last_active_at: string | null;
+          occupation: string | null;
+          onboarding_done: boolean;
+          religion: string | null;
+          safety_score: number;
+          updated_at: string;
+          verification: Database["public"]["Enums"]["verification_t"];
+        };
+        Insert: {
+          area?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          birthdate?: string | null;
+          county?: string | null;
+          cover_url?: string | null;
+          created_at?: string;
+          display_name: string;
+          education?: string | null;
+          gender?: Database["public"]["Enums"]["gender_t"] | null;
+          geo?: unknown;
+          handle?: string | null;
+          height_cm?: number | null;
+          id: string;
+          invisible_mode?: boolean;
+          is_online?: boolean;
+          is_private?: boolean;
+          is_verified?: boolean | null;
+          languages?: string[] | null;
+          last_active_at?: string | null;
+          occupation?: string | null;
+          onboarding_done?: boolean;
+          religion?: string | null;
+          safety_score?: number;
+          updated_at?: string;
+          verification?: Database["public"]["Enums"]["verification_t"];
+        };
+        Update: {
+          area?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          birthdate?: string | null;
+          county?: string | null;
+          cover_url?: string | null;
+          created_at?: string;
+          display_name?: string;
+          education?: string | null;
+          gender?: Database["public"]["Enums"]["gender_t"] | null;
+          geo?: unknown;
+          handle?: string | null;
+          height_cm?: number | null;
+          id?: string;
+          invisible_mode?: boolean;
+          is_online?: boolean;
+          is_private?: boolean;
+          is_verified?: boolean | null;
+          languages?: string[] | null;
+          last_active_at?: string | null;
+          occupation?: string | null;
+          onboarding_done?: boolean;
+          religion?: string | null;
+          safety_score?: number;
+          updated_at?: string;
+          verification?: Database["public"]["Enums"]["verification_t"];
+        };
+        Relationships: [];
+      };
+      profile_intents: {
+        Row: {
+          intent: Database["public"]["Enums"]["intent_t"];
+          profile_id: string;
+        };
+        Insert: {
+          intent: Database["public"]["Enums"]["intent_t"];
+          profile_id: string;
+        };
+        Update: {
+          intent?: Database["public"]["Enums"]["intent_t"];
+          profile_id?: string;
+        };
+        Relationships: [];
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      nearby_profiles: {
+        Args: {
+          in_lat: number;
+          in_lng: number;
+          radius_m?: number;
+          wanted?: Database["public"]["Enums"]["intent_t"];
+        };
+        Returns: {
+          avatar_url: string;
+          county: string;
+          display_name: string;
+          distance_m: number;
+          id: string;
+          is_online: boolean;
+          is_verified: boolean;
+        }[];
+      };
+    };
+    Enums: {
+      gender_t: "male" | "female" | "nonbinary" | "other";
+      intent_t:
+        | "dating"
+        | "friendship"
+        | "hangout"
+        | "weekend"
+        | "gym"
+        | "hiking"
+        | "coffee"
+        | "networking"
+        | "business"
+        | "travel"
+        | "movies"
+        | "nightlife";
+      message_kind_t:
+        | "text"
+        | "image"
+        | "video"
+        | "voice"
+        | "system"
+        | "meet_request";
+      plan_status_t: "open" | "full" | "closed" | "cancelled";
+      report_status_t: "open" | "reviewing" | "actioned" | "dismissed";
+      sub_status_t: "active" | "past_due" | "cancelled" | "expired";
+      sub_tier_t: "free" | "plus" | "gold" | "vip";
+      verification_t: "none" | "phone" | "selfie" | "national_id" | "passport";
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
+};
+
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Insert"];
+export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Update"];
+export type Enums<T extends keyof Database["public"]["Enums"]> =
+  Database["public"]["Enums"][T];

@@ -1,17 +1,12 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-
-export default function Home() {
-  const [email, setEmail] = useState("");
-  const [joined, setJoined] = useState(false);
-
+export default function Landing() {
   return (
     <main className="wrap">
       <div className="glow" />
       <section className="hero">
         <div className="logo">
-          <svg width="60" height="60" viewBox="0 0 512 512" role="img" aria-label="Vibely">
+          <svg width="60" height="60" viewBox="0 0 512 512" aria-hidden="true">
             <defs>
               <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0" stopColor="#FF7A59" />
@@ -44,28 +39,14 @@ export default function Home() {
           people across Kenya and East Africa.
         </p>
 
-        {joined ? (
-          <p className="ok">You are on the list. We will be in touch soon.</p>
-        ) : (
-          <form
-            className="waitlist"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (email) setJoined(true);
-            }}
-          >
-            <input
-              type="email"
-              required
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button className="btn" type="submit">
-              Join the waitlist
-            </button>
-          </form>
-        )}
+        <div className="cta-row">
+          <Link href="/sign-in" className="btn">
+            Get started
+          </Link>
+          <Link href="/sign-in" className="btn-ghost">
+            I already have an account
+          </Link>
+        </div>
 
         <div className="tags">
           <span className="tag">Nairobi first</span>
