@@ -2,6 +2,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
+import Stories from "@/components/Stories";
+
+export const dynamic = "force-dynamic";
+
+type Author = { id: string; display_name: string; avatar_url: string | null };
+type Story = {
+  id: string;
+  media_url: string;
+  caption: string | null;
+  created_at: string;
+};
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -12,7 +23,7 @@ export default async function HomePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, county, onboarding_done")
+    .select("display_name, county, avatar_url, onboarding_done")
     .eq("id", user.id)
     .single();
 
@@ -23,9 +34,61 @@ export default async function HomePage() {
     .select("intent")
     .eq("profile_id", user.id);
 
+  // Active (non-expired) stories, grouped by author.
+  const nowISO = new Date().toISOString();
+  const [{ data: storyRows }, { data: myBlocks }] = await Promise.all([
+    supabase
+      .from("stories")
+      .select("id, profile_id, media_url, caption, created_at")
+      .gt("expires_at", nowISO)
+      .order("created_at", { ascending: true }),
+    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+  ]);
+  const blocked = new Set((myBlocks ?? []).map((b) => b.blocked_id));
+  const authorIds = Array.from(
+    new Set((storyRows ?? []).map((s) => s.profile_id))
+  ).filter((id) => !blocked.has(id));
+
+  const authorMap: Record<string, Author> = {};
+  if (authorIds.length) {
+    const { data: authors } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .in("id", authorIds);
+    (authors ?? []).forEach((a) => {
+      authorMap[a.id] = a;
+    });
+  }
+
+  const grouped: Record<string, Story[]> = {};
+  (storyRows ?? []).forEach((s) => {
+    if (!authorMap[s.profile_id]) return; // blocked or hidden author
+    (grouped[s.profile_id] ??= []).push({
+      id: s.id,
+      media_url: s.media_url,
+      caption: s.caption,
+      created_at: s.created_at,
+    });
+  });
+  const groups = Object.entries(grouped)
+    .map(([aid, stories]) => ({ author: authorMap[aid], stories }))
+    .sort((a, b) =>
+      a.author.id === user.id ? -1 : b.author.id === user.id ? 1 : 0
+    );
+
   return (
-    <main className="wrap app-page">
+    <main className="home-wrap">
       <div className="glow" />
+
+      <section className="home-stories">
+        <Stories
+          currentUserId={user.id}
+          myName={profile.display_name}
+          myAvatar={profile.avatar_url}
+          groups={groups}
+        />
+      </section>
+
       <section className="hero">
         <div className="logo">
           <svg width="48" height="48" viewBox="0 0 512 512" aria-hidden="true">
@@ -72,6 +135,9 @@ export default async function HomePage() {
         <div className="cta-row">
           <Link href="/discover" className="btn">
             Discover people nearby
+          </Link>
+          <Link href="/plans" className="btn-ghost">
+            Plans &amp; meetups
           </Link>
         </div>
       </section>

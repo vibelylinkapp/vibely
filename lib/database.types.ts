@@ -138,6 +138,39 @@ export type Database = {
         Update: { created_at?: string; liked_id?: string; liker_id?: string };
         Relationships: [];
       };
+      stories: {
+        Row: {
+          caption: string | null;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          is_approved: boolean;
+          media_url: string;
+          mood: string | null;
+          profile_id: string;
+        };
+        Insert: {
+          caption?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          is_approved?: boolean;
+          media_url: string;
+          mood?: string | null;
+          profile_id: string;
+        };
+        Update: {
+          caption?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          is_approved?: boolean;
+          media_url?: string;
+          mood?: string | null;
+          profile_id?: string;
+        };
+        Relationships: [];
+      };
       reports: {
         Row: {
           created_at: string;
