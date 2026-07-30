@@ -576,6 +576,7 @@ export type Database = {
       sub_status_t: "active" | "past_due" | "cancelled" | "expired";
       sub_tier_t: "free" | "plus" | "gold" | "vip";
       verification_t: "none" | "phone" | "selfie" | "national_id" | "passport";
+      verif_status_t: "pending" | "approved" | "rejected";
     };
     CompositeTypes: {
       [_ in never]: never;
