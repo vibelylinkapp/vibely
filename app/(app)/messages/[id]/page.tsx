@@ -89,6 +89,7 @@ export default async function ThreadPage({
       <Chat
         conversationId={id}
         currentUserId={user.id}
+        otherUserId={otherId}
         initialMessages={messages ?? []}
       />
     </main>

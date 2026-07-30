@@ -9,10 +9,12 @@ type Msg = Pick<Tables<"messages">, "id" | "sender_id" | "body" | "created_at">;
 export default function Chat({
   conversationId,
   currentUserId,
+  otherUserId,
   initialMessages,
 }: {
   conversationId: string;
   currentUserId: string;
+  otherUserId: string | null;
   initialMessages: Msg[];
 }) {
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
@@ -70,6 +72,14 @@ export default function Chat({
       setMessages((prev) =>
         prev.some((x) => x.id === data.id) ? prev : [...prev, data]
       );
+      // Fire a push to the recipient (best-effort; server match-gates it).
+      if (otherUserId) {
+        fetch("/api/push/send", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ toUserId: otherUserId, kind: "message" }),
+        }).catch(() => {});
+      }
     }
     setSending(false);
   }

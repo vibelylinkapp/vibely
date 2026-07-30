@@ -219,6 +219,30 @@ export type Database = {
         Update: { joined_at?: string; plan_id?: string; profile_id?: string };
         Relationships: [];
       };
+      push_subscriptions: {
+        Row: {
+          created_at: string;
+          endpoint: string;
+          id: string;
+          profile_id: string;
+          subscription: Json;
+        };
+        Insert: {
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          profile_id: string;
+          subscription: Json;
+        };
+        Update: {
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          profile_id?: string;
+          subscription?: Json;
+        };
+        Relationships: [];
+      };
       reports: {
         Row: {
           created_at: string;

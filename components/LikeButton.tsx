@@ -35,6 +35,14 @@ export default function LikeButton({
       .eq("liked_id", me)
       .maybeSingle();
     setState(back ? "matched" : "liked");
+    if (back) {
+      // Notify the other person that they matched (best-effort).
+      fetch("/api/push/send", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ toUserId: targetId, kind: "match" }),
+      }).catch(() => {});
+    }
     setBusy(false);
   }
 

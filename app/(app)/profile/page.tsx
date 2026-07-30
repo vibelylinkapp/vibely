@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import SignOutButton from "@/components/SignOutButton";
 import AvatarUpload from "@/components/AvatarUpload";
+import PushSetup from "@/components/PushSetup";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
