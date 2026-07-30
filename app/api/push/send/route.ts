@@ -47,15 +47,19 @@ export async function POST(req: Request) {
 
   const db = admin();
 
-  // Match-gate: only deliver if sender and recipient are a mutual match.
-  const { data: matched } = await db
-    .from("matches")
-    .select("a")
+  // Match-gate: only deliver if sender and recipient mutually liked each other.
+  // Check the likes table directly (service role) rather than the deduped view.
+  const { data: likeRows } = await db
+    .from("likes")
+    .select("liker_id, liked_id")
     .or(
-      `and(a.eq.${user.id},b.eq.${toUserId}),and(a.eq.${toUserId},b.eq.${user.id})`
-    )
-    .limit(1);
-  if (!matched || matched.length === 0) {
+      `and(liker_id.eq.${user.id},liked_id.eq.${toUserId}),and(liker_id.eq.${toUserId},liked_id.eq.${user.id})`
+    );
+  const rows = likeRows ?? [];
+  const mutual =
+    rows.some((r) => r.liker_id === user.id && r.liked_id === toUserId) &&
+    rows.some((r) => r.liker_id === toUserId && r.liked_id === user.id);
+  if (!mutual) {
     return NextResponse.json({ ok: false, reason: "not_matched" });
   }
 
