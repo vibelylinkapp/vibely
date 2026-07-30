@@ -793,3 +793,87 @@ body {
   font-family: inherit;
 }
 .method-tab.on { background: var(--aurora); color: #fff; }
+
+/* ======================= LIKES / MATCHING ======================= */
+.pcard-like {
+  width: 100%;
+  margin-top: 8px;
+  border: none;
+  border-radius: 10px;
+  padding: 9px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  background: var(--aurora);
+  cursor: pointer;
+  font-family: inherit;
+}
+.pcard-like.liked { background: #1A1E29; color: #8A93A3; cursor: default; }
+.pcard-like:disabled { opacity: 0.85; }
+
+.like-matched {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.match-tag {
+  text-align: center;
+  font-weight: 800;
+  font-size: 12px;
+  background: linear-gradient(90deg, #F5307E, #7A2FF2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.match-strip {
+  padding: 4px 0 12px;
+  border-bottom: 1px solid #14171F;
+  margin-bottom: 6px;
+}
+.match-strip-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8A93A3;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+}
+.match-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 4px; }
+.match-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  width: 64px;
+  flex-shrink: 0;
+}
+.match-chip:disabled { opacity: 0.6; }
+.match-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--aurora);
+  display: grid;
+  place-items: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px #0B0D12, 0 0 0 4px #F5307E;
+}
+.match-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.match-chip-name {
+  font-size: 12px;
+  color: #CBD2E0;
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,5 +1,5 @@
 import ProfileActions from "@/components/ProfileActions";
-import MessageButton from "@/components/MessageButton";
+import LikeButton from "@/components/LikeButton";
 
 type P = {
   id: string;
@@ -71,7 +71,7 @@ export default function ProfileCard({
             ))}
           </div>
         )}
-        <MessageButton targetId={p.id} />
+        <LikeButton targetId={p.id} targetName={p.display_name} />
         <ProfileActions targetId={p.id} targetName={p.display_name} />
       </div>
     </div>

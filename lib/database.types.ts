@@ -132,6 +132,12 @@ export type Database = {
         Update: { blocked_id?: string; blocker_id?: string; created_at?: string };
         Relationships: [];
       };
+      likes: {
+        Row: { created_at: string; liked_id: string; liker_id: string };
+        Insert: { created_at?: string; liked_id: string; liker_id: string };
+        Update: { created_at?: string; liked_id?: string; liker_id?: string };
+        Relationships: [];
+      };
       reports: {
         Row: {
           created_at: string;

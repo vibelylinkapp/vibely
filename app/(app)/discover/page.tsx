@@ -31,11 +31,14 @@ export default async function DiscoverPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: blockedRows } = await supabase
-    .from("blocks")
-    .select("blocked_id")
-    .eq("blocker_id", user.id);
-  const blockedIds = (blockedRows ?? []).map((b) => b.blocked_id);
+  const [{ data: blockedRows }, { data: likedRows }] = await Promise.all([
+    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+    supabase.from("likes").select("liked_id").eq("liker_id", user.id),
+  ]);
+  const excludeIds = new Set<string>([
+    ...(blockedRows ?? []).map((b) => b.blocked_id),
+    ...(likedRows ?? []).map((l) => l.liked_id),
+  ]);
 
   let matchIds: string[] | null = null;
   if (active !== "all") {
@@ -56,7 +59,7 @@ export default async function DiscoverPage({
     .eq("invisible_mode", false)
     .neq("id", user.id)
     .order("last_active_at", { ascending: false, nullsFirst: false })
-    .limit(60);
+    .limit(80);
 
   if (matchIds) {
     query = query.in(
@@ -66,9 +69,9 @@ export default async function DiscoverPage({
   }
 
   const { data: profilesData } = await query;
-  const profiles = (profilesData ?? []).filter(
-    (p) => !blockedIds.includes(p.id)
-  );
+  const profiles = (profilesData ?? [])
+    .filter((p) => !excludeIds.has(p.id))
+    .slice(0, 60);
 
   const ids = profiles.map((p) => p.id);
   const intentMap: Record<string, string[]> = {};
@@ -105,8 +108,9 @@ export default async function DiscoverPage({
 
       {profiles.length === 0 ? (
         <p className="sub" style={{ textAlign: "center", marginTop: 40 }}>
-          No one here yet. As more people join Vibely, they will show up here.
-          Invite a friend to sign up and watch this fill in.
+          You&apos;re all caught up. As more people join Vibely — or once you
+          clear your current likes — new faces will show up here. Invite a
+          friend to sign up and watch this fill in.
         </p>
       ) : (
         <div className="grid">
