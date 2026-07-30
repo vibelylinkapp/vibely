@@ -734,3 +734,39 @@ body {
 }
 .chat-input input:focus { border-color: var(--violet); }
 .chat-input .btn { padding: 10px 18px; }
+
+/* ======================= GOOGLE / OAUTH SIGN-IN ======================= */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #2A2F3D;
+  background: #fff;
+  color: #1F2430;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-google:hover { background: #F1F1F4; }
+.btn-google:disabled { opacity: 0.6; cursor: default; }
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #7C8598;
+  font-size: 12px;
+  margin: 2px 0;
+}
+.or-divider::before,
+.or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #232838;
+}
