@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SUBSCRIPTION_DAYS } from "@/lib/tiers";
+import type { Json } from "@/lib/database.types";
 
 // Safaricom calls this endpoint (no user session). Must be public + https.
 export const runtime = "nodejs";
@@ -9,7 +10,14 @@ export const dynamic = "force-dynamic";
 type CallbackItem = { Name: string; Value?: string | number };
 
 export async function POST(req: Request) {
-  let payload: {
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" });
+  }
+
+  const payload = raw as {
     Body?: {
       stkCallback?: {
         CheckoutRequestID?: string;
@@ -18,12 +26,6 @@ export async function POST(req: Request) {
       };
     };
   };
-  try {
-    payload = await req.json();
-  } catch {
-    return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" });
-  }
-
   const cb = payload?.Body?.stkCallback;
   if (cb?.CheckoutRequestID) {
     const admin = createAdminClient();

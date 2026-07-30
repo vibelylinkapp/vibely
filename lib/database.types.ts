@@ -246,6 +246,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      profile_views: {
+        Row: {
+          viewed_at: string;
+          viewed_id: string;
+          viewer_id: string;
+        };
+        Insert: {
+          viewed_at?: string;
+          viewed_id: string;
+          viewer_id: string;
+        };
+        Update: {
+          viewed_at?: string;
+          viewed_id?: string;
+          viewer_id?: string;
+        };
+        Relationships: [];
+      };
       payments: {
         Row: {
           amount_kes: number;

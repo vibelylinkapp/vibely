@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { Json } from "@/lib/database.types";
 
 type State = "loading" | "unsupported" | "off" | "on" | "denied" | "busy";
 
@@ -71,7 +72,7 @@ export default function PushSetup() {
         {
           profile_id: user.id,
           endpoint: sub.endpoint,
-          subscription: json as unknown as Record<string, unknown>,
+          subscription: json as unknown as Json,
         },
         { onConflict: "endpoint" }
       );
