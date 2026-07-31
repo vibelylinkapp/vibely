@@ -2676,3 +2676,43 @@ body {
 .report-post-link:hover {
   text-decoration: underline;
 }
+
+/* --- Password reveal (auth) -------------------------------------- */
+.pw-field {
+  position: relative;
+  width: 100%;
+}
+.pw-field input {
+  width: 100%;
+  padding-right: 46px;
+}
+.pw-eye {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.pw-eye:hover {
+  color: var(--violet);
+  background: var(--raised);
+}
+.pw-eye svg {
+  width: 18px;
+  height: 18px;
+}
+.pw-hint {
+  margin: -4px 2px 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}

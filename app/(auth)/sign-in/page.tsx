@@ -22,6 +22,7 @@ export default function SignInPage() {
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [phone, setPhone] = useState("");
   const [sentPhone, setSentPhone] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -230,17 +231,47 @@ export default function SignInPage() {
                 type="email"
                 required
                 placeholder="Email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <input
-                type="password"
-                required
-                minLength={6}
-                placeholder="Password (min 6 characters)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="pw-field">
+                <input
+                  type={showPw ? "text" : "password"}
+                  required
+                  minLength={6}
+                  placeholder="Password (min 6 characters)"
+                  autoComplete={mode === "in" ? "current-password" : "new-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="pw-eye"
+                  onClick={() => setShowPw((v) => !v)}
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                  aria-pressed={showPw}
+                  tabIndex={-1}
+                >
+                  {showPw ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 3l18 18" />
+                      <path d="M10.6 10.6a3 3 0 0 0 4.2 4.2" />
+                      <path d="M9.9 5.1A9.4 9.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.4 4.3M6.2 6.2A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.4 9.4 0 0 0 3-.5" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <p className="pw-hint">
+                {mode === "up"
+                  ? "Use at least 6 characters. Tap the eye to check what you typed."
+                  : "Tap the eye to reveal your password."}
+              </p>
               <button className="btn" type="submit" disabled={loading}>
                 {loading
                   ? "Please wait..."
