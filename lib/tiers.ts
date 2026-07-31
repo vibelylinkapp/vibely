@@ -4,9 +4,9 @@ export type PaidTier = "plus" | "gold" | "vip";
 export type Tier = "free" | PaidTier;
 
 export const TIER_PRICES: Record<PaidTier, number> = {
-  plus: 249,
-  gold: 499,
-  vip: 899,
+  plus: 199,
+  gold: 399,
+  vip: 599,
 };
 
 export const TIERS: {
