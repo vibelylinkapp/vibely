@@ -26,10 +26,12 @@ export default function ProfileCard({
   p,
   intents,
   boosted,
+  vip,
 }: {
   p: P;
   intents: string[];
   boosted?: boolean;
+  vip?: boolean;
 }) {
   const age = p.birthdate ? ageFrom(p.birthdate) : null;
   const meta = [age ? String(age) : null, p.county].filter(Boolean).join(" · ");
@@ -70,6 +72,7 @@ export default function ProfileCard({
               />
             </svg>
           )}
+          {vip && <span className="vip-badge">VIP</span>}
         </div>
         {meta && <div className="pcard-meta">{meta}</div>}
         {intents.length > 0 && (

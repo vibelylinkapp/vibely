@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import LikeButton from "@/components/LikeButton";
 import ProfileActions from "@/components/ProfileActions";
+import { effectiveTier } from "@/lib/entitlements";
 
 export const dynamic = "force-dynamic";
 
@@ -41,14 +42,22 @@ export default async function UserDetailPage({
   // Never expose banned or hidden members to others.
   if (profile.is_banned || profile.is_private) notFound();
 
-  const [{ data: intents }, { data: photos }] = await Promise.all([
-    supabase.from("profile_intents").select("intent").eq("profile_id", id),
-    supabase
-      .from("photos")
-      .select("id, url")
-      .eq("profile_id", id)
-      .order("position", { ascending: true }),
-  ]);
+  const [{ data: intents }, { data: photos }, { data: sub }] =
+    await Promise.all([
+      supabase.from("profile_intents").select("intent").eq("profile_id", id),
+      supabase
+        .from("photos")
+        .select("id, url")
+        .eq("profile_id", id)
+        .order("position", { ascending: true }),
+      supabase
+        .from("subscriptions")
+        .select("tier, status, expires_at")
+        .eq("profile_id", id)
+        .maybeSingle(),
+    ]);
+
+  const isVip = effectiveTier(sub).tier === "vip";
 
   // Best-effort: record that this member was viewed.
   await supabase
@@ -113,6 +122,7 @@ export default async function UserDetailPage({
               />
             </svg>
           )}
+          {isVip && <span className="vip-badge">VIP</span>}
         </div>
         {meta && <p className="pcard-meta">{meta}</p>}
 

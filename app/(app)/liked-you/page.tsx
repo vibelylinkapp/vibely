@@ -82,6 +82,20 @@ export default async function LikedYouPage() {
     });
   }
 
+  // VIP members get a badge on their card.
+  const vipSet = new Set<string>();
+  if (ids.length) {
+    const nowIso = new Date().toISOString();
+    const { data: vipRows } = await supabase
+      .from("subscriptions")
+      .select("profile_id")
+      .in("profile_id", ids)
+      .eq("tier", "vip")
+      .eq("status", "active")
+      .gt("expires_at", nowIso);
+    (vipRows ?? []).forEach((r) => vipSet.add(r.profile_id));
+  }
+
   return (
     <main className="feed-wrap">
       <div className="feed-head">
@@ -95,7 +109,12 @@ export default async function LikedYouPage() {
       ) : (
         <div className="grid">
           {profiles.map((p) => (
-            <ProfileCard key={p.id} p={p} intents={intentMap[p.id] ?? []} />
+            <ProfileCard
+              key={p.id}
+              p={p}
+              intents={intentMap[p.id] ?? []}
+              vip={vipSet.has(p.id)}
+            />
           ))}
         </div>
       )}

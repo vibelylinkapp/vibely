@@ -108,6 +108,19 @@ export default async function DiscoverPage({
     });
   }
 
+  // VIP members get a badge on their card.
+  const vipSet = new Set<string>();
+  if (ids.length) {
+    const { data: vipRows } = await supabase
+      .from("subscriptions")
+      .select("profile_id")
+      .in("profile_id", ids)
+      .eq("tier", "vip")
+      .eq("status", "active")
+      .gt("expires_at", nowIso);
+    (vipRows ?? []).forEach((r) => vipSet.add(r.profile_id));
+  }
+
   return (
     <main className="feed-wrap">
       <div className="feed-head">
@@ -143,6 +156,7 @@ export default async function DiscoverPage({
               p={p}
               intents={intentMap[p.id] ?? []}
               boosted={boostedIdSet.has(p.id)}
+              vip={vipSet.has(p.id)}
             />
           ))}
         </div>

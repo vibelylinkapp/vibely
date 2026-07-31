@@ -99,7 +99,10 @@ export default async function ProfilePage() {
           avatarUrl={profile.avatar_url}
           displayName={profile.display_name}
         />
-        <h2 className="profile-name">{profile.display_name}</h2>
+        <div className="profile-name-row">
+          <h2 className="profile-name">{profile.display_name}</h2>
+          {ent.tier === "vip" && <span className="vip-badge">VIP</span>}
+        </div>
         {meta && <p className="pcard-meta">{meta}</p>}
         {profile.bio && (
           <p className="sub" style={{ marginTop: 8 }}>
