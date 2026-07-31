@@ -18,6 +18,7 @@ export default async function AdminLayout({
         </div>
         <nav>
           <Link href="/admin">Dashboard</Link>
+          <Link href="/admin/analytics">Analytics</Link>
           <Link href="/admin/reports">Reports</Link>
           <Link href="/admin/verifications">Verifications</Link>
           <Link href="/home">Back to app</Link>

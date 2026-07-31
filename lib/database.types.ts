@@ -548,7 +548,13 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      matches: {
+        Row: {
+          u1: string | null;
+          u2: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       nearby_profiles: {
