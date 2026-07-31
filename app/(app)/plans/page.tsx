@@ -1,23 +1,10 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import CreatePlan from "@/components/CreatePlan";
-import JoinPlanButton from "@/components/JoinPlanButton";
+import PlansExplorer, { PlanItem } from "@/components/PlansExplorer";
 
 export const dynamic = "force-dynamic";
-
-function fmt(dt: string | null): string {
-  if (!dt) return "Flexible timing";
-  return new Date(dt).toLocaleString("en-GB", {
-    timeZone: "Africa/Nairobi",
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export default async function PlansPage() {
   const supabase = await createClient();
@@ -25,6 +12,14 @@ export default async function PlansPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
+
+  const { data: meProfile } = await supabase
+    .from("profiles")
+    .select("county, onboarding_done")
+    .eq("id", user.id)
+    .single();
+  if (!meProfile || !meProfile.onboarding_done) redirect("/onboarding");
+  const myCounty = meProfile.county ?? null;
 
   const nowISO = new Date().toISOString();
   const { data: plansData } = await supabase
@@ -35,88 +30,92 @@ export default async function PlansPage() {
     .eq("status", "open")
     .or(`starts_at.is.null,starts_at.gte.${nowISO}`)
     .order("starts_at", { ascending: true, nullsFirst: false })
-    .limit(50);
-
+    .limit(60);
   const list = plansData ?? [];
+
   const planIds = list.map((p) => p.id);
   const hostIds = Array.from(new Set(list.map((p) => p.host_id)));
 
-  const hostMap: Record<string, string> = {};
-  if (hostIds.length) {
-    const { data: hosts } = await supabase
-      .from("profiles")
-      .select("id, display_name")
-      .in("id", hostIds);
-    (hosts ?? []).forEach((h) => {
-      hostMap[h.id] = h.display_name;
-    });
-  }
-
-  const countMap: Record<string, number> = {};
-  const joinedSet = new Set<string>();
+  let participants: { plan_id: string; profile_id: string }[] = [];
   if (planIds.length) {
     const { data: parts } = await supabase
       .from("plan_participants")
       .select("plan_id, profile_id")
       .in("plan_id", planIds);
-    (parts ?? []).forEach((pt) => {
-      countMap[pt.plan_id] = (countMap[pt.plan_id] ?? 0) + 1;
-      if (pt.profile_id === user.id) joinedSet.add(pt.plan_id);
+    participants = parts ?? [];
+  }
+
+  const partProfileIds = Array.from(
+    new Set(participants.map((p) => p.profile_id))
+  );
+  const profileIds = Array.from(new Set([...hostIds, ...partProfileIds]));
+  const profMap: Record<
+    string,
+    { display_name: string; avatar_url: string | null; is_verified: boolean }
+  > = {};
+  if (profileIds.length) {
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url, is_verified")
+      .in("id", profileIds);
+    (profs ?? []).forEach((pr) => {
+      profMap[pr.id] = {
+        display_name: pr.display_name,
+        avatar_url: pr.avatar_url,
+        is_verified: Boolean(pr.is_verified),
+      };
     });
   }
+
+  const countMap: Record<string, number> = {};
+  const joinedSet = new Set<string>();
+  const goersMap: Record<
+    string,
+    { id: string; name: string; avatar: string | null }[]
+  > = {};
+  participants.forEach((pt) => {
+    countMap[pt.plan_id] = (countMap[pt.plan_id] ?? 0) + 1;
+    if (pt.profile_id === user.id) joinedSet.add(pt.plan_id);
+    const pr = profMap[pt.profile_id];
+    (goersMap[pt.plan_id] ??= []).push({
+      id: pt.profile_id,
+      name: pr?.display_name ?? "Member",
+      avatar: pr?.avatar_url ?? null,
+    });
+  });
+
+  const norm = (s: string | null) => (s ?? "").trim().toLowerCase();
+  const plans: PlanItem[] = list.map((p) => {
+    const host = profMap[p.host_id];
+    return {
+      id: p.id,
+      title: p.title,
+      category: p.category,
+      description: p.description,
+      county: p.county,
+      startsAt: p.starts_at,
+      maxPeople: p.max_people,
+      hostId: p.host_id,
+      hostName: host?.display_name ?? "A member",
+      hostAvatar: host?.avatar_url ?? null,
+      hostVerified: Boolean(host?.is_verified),
+      count: countMap[p.id] ?? 0,
+      joined: joinedSet.has(p.id),
+      isHost: p.host_id === user.id,
+      near: Boolean(myCounty && p.county && norm(p.county) === norm(myCounty)),
+      goers: goersMap[p.id] ?? [],
+    };
+  });
 
   return (
     <main className="feed-wrap">
       <div className="feed-head">
-        <span className="feed-title">Plans & meetups</span>
+        <span className="feed-title">Plans &amp; meetups</span>
       </div>
-
-      <div style={{ marginBottom: 16 }}>
+      <div className="plan-create-row">
         <CreatePlan />
       </div>
-
-      {list.length === 0 ? (
-        <p className="sub" style={{ textAlign: "center", marginTop: 30 }}>
-          No plans yet. Create the first one and invite people to join you.
-        </p>
-      ) : (
-        <div className="plan-list">
-          {list.map((p) => {
-            const count = countMap[p.id] ?? 0;
-            const full = p.max_people != null && count >= p.max_people;
-            return (
-              <div key={p.id} className="plan-card">
-                <div className="plan-top">
-                  <span className="plan-cat">{p.category}</span>
-                  <span className="plan-count">
-                    {count} going{p.max_people ? ` / ${p.max_people}` : ""}
-                  </span>
-                </div>
-                <Link href={`/plans/${p.id}`} className="plan-title">
-                  {p.title}
-                </Link>
-                <div className="plan-meta">
-                  {fmt(p.starts_at)}
-                  {p.county ? ` · ${p.county}` : ""}
-                </div>
-                {p.description && <p className="plan-desc">{p.description}</p>}
-                <div className="plan-foot">
-                  <span className="plan-host">
-                    Hosted by {hostMap[p.host_id] ?? "a member"}
-                  </span>
-                  <JoinPlanButton
-                    planId={p.id}
-                    isHost={p.host_id === user.id}
-                    joined={joinedSet.has(p.id)}
-                    full={full}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
+      <PlansExplorer plans={plans} myCounty={myCounty} />
       <BottomNav />
     </main>
   );
