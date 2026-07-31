@@ -255,6 +255,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      post_comments: {
+        Row: {
+          author_id: string;
+          body: string;
+          created_at: string;
+          id: string;
+          post_id: string;
+        };
+        Insert: {
+          author_id: string;
+          body: string;
+          created_at?: string;
+          id?: string;
+          post_id: string;
+        };
+        Update: {
+          author_id?: string;
+          body?: string;
+          created_at?: string;
+          id?: string;
+          post_id?: string;
+        };
+        Relationships: [];
+      };
       plan_participants: {
         Row: { joined_at: string; plan_id: string; profile_id: string };
         Insert: { joined_at?: string; plan_id: string; profile_id: string };

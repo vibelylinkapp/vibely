@@ -139,6 +139,17 @@ export default async function HomePage() {
     });
   }
 
+  const commentCount: Record<string, number> = {};
+  if (postIds.length) {
+    const { data: commentRows } = await supabase
+      .from("post_comments")
+      .select("post_id")
+      .in("post_id", postIds);
+    (commentRows ?? []).forEach((r) => {
+      commentCount[r.post_id] = (commentCount[r.post_id] ?? 0) + 1;
+    });
+  }
+
   return (
     <main className="home-wrap">
       <div className="glow" />
@@ -190,6 +201,7 @@ export default async function HomePage() {
                 createdAt={p.created_at}
                 likeCount={likeCount[p.id] ?? 0}
                 liked={myLiked.has(p.id)}
+                commentCount={commentCount[p.id] ?? 0}
               />
             );
           })}

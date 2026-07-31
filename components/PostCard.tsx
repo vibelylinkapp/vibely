@@ -26,6 +26,7 @@ export default function PostCard({
   createdAt,
   likeCount,
   liked,
+  commentCount,
 }: {
   postId: string;
   author: Author;
@@ -34,6 +35,7 @@ export default function PostCard({
   createdAt: string;
   likeCount: number;
   liked: boolean;
+  commentCount: number;
 }) {
   return (
     <article className="post">
@@ -58,7 +60,15 @@ export default function PostCard({
         <img className="post-media" src={mediaUrl} alt="" />
       )}
       <div className="post-body">
-        <PostLike postId={postId} initialLiked={liked} initialCount={likeCount} />
+        <div className="post-actions">
+          <PostLike postId={postId} initialLiked={liked} initialCount={likeCount} />
+          <Link href={`/posts/${postId}`} className="post-comment" aria-label="Comments">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-6.5A8 8 0 1 1 21 12z" />
+            </svg>
+            <span className="post-comment-n">{commentCount}</span>
+          </Link>
+        </div>
         {caption && (
           <p className="post-caption">
             <span className="post-caption-name">
