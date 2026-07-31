@@ -576,7 +576,7 @@ body {
 }
 
 /* ============================ ADMIN PANEL ============================ */
-.admin { display: flex; min-height: 100dvh; }
+.admin { display: flex; min-height: 100dvh; background: var(--bg-soft); }
 
 .admin-side {
   width: 210px;
@@ -616,7 +616,7 @@ body {
   gap: 14px;
   margin-bottom: 24px;
 }
-.stat { background: #ffffff; border: 1px solid #ece9f2; border-radius: 16px; padding: 18px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px; box-shadow: var(--shadow-sm); }
 .stat-value { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 30px; }
 .stat-rose { color: var(--rose); }
 .stat-gold { color: #FFB020; }
@@ -624,7 +624,7 @@ body {
 .stat-hint { font-size: 11px; color: #8a8397; margin-top: 4px; }
 
 .admin-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.admin-panel { background: #ffffff; border: 1px solid #ece9f2; border-radius: 16px; padding: 18px; }
+.admin-panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px; box-shadow: var(--shadow-sm); }
 
 .vbars { display: flex; align-items: flex-end; gap: 6px; height: 160px; }
 .vbar-col {
@@ -647,7 +647,7 @@ body {
 .hbars { display: flex; flex-direction: column; gap: 10px; }
 .hbar-row { display: grid; grid-template-columns: 120px 1fr 30px; align-items: center; gap: 10px; }
 .hbar-label { font-size: 12px; color: #4a4458; text-align: right; text-transform: capitalize; }
-.hbar-track { background: #ffffff; border-radius: 999px; height: 10px; overflow: hidden; }
+.hbar-track { background: var(--line-2); border-radius: 999px; height: 10px; overflow: hidden; }
 .hbar-fill { height: 100%; background: linear-gradient(90deg, #FF7A59, #7A2FF2); border-radius: 999px; }
 .hbar-val { font-size: 12px; color: #8a8397; }
 
