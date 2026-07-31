@@ -10,6 +10,7 @@ import NotifBell from "@/components/NotifBell";
 import FeedLoadMore from "@/components/FeedLoadMore";
 import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 import AdminNotice from "@/components/AdminNotice";
+import VerifyNudge from "@/components/VerifyNudge";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,7 @@ export default async function HomePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, county, avatar_url, onboarding_done")
+    .select("display_name, county, avatar_url, onboarding_done, verification")
     .eq("id", user.id)
     .single();
 
@@ -53,6 +54,23 @@ export default async function HomePage() {
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  // Nudge unverified members to get the badge (unless a review is pending).
+  const verified =
+    profile.verification === "selfie" ||
+    profile.verification === "national_id" ||
+    profile.verification === "passport";
+  let showVerifyNudge = false;
+  if (!verified) {
+    const { data: vReq } = await supabase
+      .from("verification_requests")
+      .select("status")
+      .eq("profile_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    showVerifyNudge = vReq?.status !== "pending";
+  }
 
   let winback: {
     state: "expiring" | "lapsed";
@@ -258,6 +276,8 @@ export default async function HomePage() {
       {notice && (
         <AdminNotice id={notice.id} body={notice.body} link={notice.link} />
       )}
+
+      {showVerifyNudge && <VerifyNudge />}
 
       <section className="home-stories">
         <Stories

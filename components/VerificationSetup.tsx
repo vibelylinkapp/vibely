@@ -32,6 +32,8 @@ export default function VerificationSetup({
   const [kind, setKind] = useState<Kind>("selfie");
   const [selfie, setSelfie] = useState<File | null>(null);
   const [doc, setDoc] = useState<File | null>(null);
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const [docPreview, setDocPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +46,17 @@ export default function VerificationSetup({
     if (!ACCEPTED.includes(file.type)) return "Use a JPG, PNG, or WebP image.";
     if (file.size > MAX_BYTES) return "Image must be under 10 MB.";
     return null;
+  }
+
+  function pickSelfie(f: File | null) {
+    setError(null);
+    setSelfie(f);
+    setSelfiePreview(f ? URL.createObjectURL(f) : null);
+  }
+  function pickDoc(f: File | null) {
+    setError(null);
+    setDoc(f);
+    setDocPreview(f ? URL.createObjectURL(f) : null);
   }
 
   async function upload(file: File, label: string): Promise<string> {
@@ -132,8 +145,8 @@ export default function VerificationSetup({
           <strong>Verification under review</strong>
         </div>
         <span className="sub">
-          Our team is reviewing your photos. You&apos;ll get the badge once
-          approved.
+          Our team is reviewing your photos, usually within 24 hours. You&apos;ll
+          get the badge as soon as it&apos;s approved.
         </span>
       </div>
     );
@@ -148,6 +161,19 @@ export default function VerificationSetup({
         Verified members stand out and build trust. Your photos are private and
         only seen by our review team.
       </span>
+
+      <ol className="verify-steps">
+        <li>
+          <span className="verify-step-n">1</span> Choose what you&apos;ll send
+        </li>
+        <li>
+          <span className="verify-step-n">2</span> Upload a clear selfie (and ID
+          if needed)
+        </li>
+        <li>
+          <span className="verify-step-n">3</span> We review and add your badge
+        </li>
+      </ol>
 
       {rejectedNote && (
         <p className="verify-rejected">
@@ -169,42 +195,65 @@ export default function VerificationSetup({
       </div>
 
       <div className="verify-uploads">
-        <button
-          type="button"
-          className="verify-pick"
-          onClick={() => selfieRef.current?.click()}
-        >
-          {selfie ? `Selfie: ${selfie.name}` : "Upload selfie"}
-        </button>
-        <input
-          ref={selfieRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          hidden
-          onChange={(e) => setSelfie(e.target.files?.[0] ?? null)}
-        />
+        <div className="verify-slot">
+          <button
+            type="button"
+            className="verify-pick"
+            onClick={() => selfieRef.current?.click()}
+          >
+            {selfie ? "Change selfie" : "Upload selfie"}
+          </button>
+          {selfiePreview && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="verify-preview" src={selfiePreview} alt="Selfie preview" />
+          )}
+          <input
+            ref={selfieRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+            onChange={(e) => pickSelfie(e.target.files?.[0] ?? null)}
+          />
+        </div>
+
         {kind !== "selfie" && (
-          <>
+          <div className="verify-slot">
             <button
               type="button"
               className="verify-pick"
               onClick={() => docRef.current?.click()}
             >
               {doc
-                ? `Document: ${doc.name}`
+                ? "Change document"
                 : kind === "passport"
                   ? "Upload passport photo"
                   : "Upload National ID photo"}
             </button>
+            {docPreview && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="verify-preview" src={docPreview} alt="Document preview" />
+            )}
             <input
               ref={docRef}
               type="file"
               accept="image/jpeg,image/png,image/webp"
               hidden
-              onChange={(e) => setDoc(e.target.files?.[0] ?? null)}
+              onChange={(e) => pickDoc(e.target.files?.[0] ?? null)}
             />
-          </>
+          </div>
         )}
+      </div>
+
+      <div className="verify-tips">
+        <span className="verify-tips-t">Tips for a fast approval</span>
+        <ul>
+          <li>Face clearly visible, no sunglasses or hats.</li>
+          <li>Good, even lighting — no heavy filters.</li>
+          <li>Look like your profile photos.</li>
+          {kind !== "selfie" && (
+            <li>All four corners of the ID visible and readable.</li>
+          )}
+        </ul>
       </div>
 
       {error && <p className="auth-msg">{error}</p>}
@@ -216,7 +265,7 @@ export default function VerificationSetup({
         disabled={busy}
         style={{ marginTop: 12 }}
       >
-        {busy ? "Submitting…" : "Submit for review"}
+        {busy ? "Submitting..." : "Submit for review"}
       </button>
     </div>
   );
