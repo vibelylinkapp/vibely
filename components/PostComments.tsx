@@ -21,10 +21,12 @@ function timeAgo(iso: string): string {
 
 export default function PostComments({
   postId,
+  authorId,
   me,
   initial,
 }: {
   postId: string;
+  authorId: string;
   me: Commenter;
   initial: Comment[];
 }) {
@@ -51,6 +53,14 @@ export default function PostComments({
       { id: data.id, author: me, body, created_at: data.created_at },
     ]);
     setText("");
+    if (authorId !== me.id) {
+      // Best-effort: let the author know someone commented on their post.
+      fetch("/api/push/send", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ kind: "post_comment", postId }),
+      }).catch(() => {});
+    }
     setBusy(false);
   }
 

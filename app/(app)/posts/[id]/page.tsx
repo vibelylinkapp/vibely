@@ -108,7 +108,12 @@ export default async function PostDetailPage({
           commentCount={comments.length}
           canDelete={post.author_id === user.id}
         />
-        <PostComments postId={post.id} me={me} initial={comments} />
+        <PostComments
+          postId={post.id}
+          authorId={post.author_id}
+          me={me}
+          initial={comments}
+        />
       </div>
 
       <BottomNav />

@@ -5,10 +5,12 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function PostLike({
   postId,
+  authorId,
   initialLiked,
   initialCount,
 }: {
   postId: string;
+  authorId: string;
   initialLiked: boolean;
   initialCount: number;
 }) {
@@ -36,6 +38,13 @@ export default function PostLike({
       if (error) {
         setLiked(false);
         setCount((c) => Math.max(0, c - 1));
+      } else if (authorId !== me) {
+        // Best-effort: let the author know someone liked their post.
+        fetch("/api/push/send", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ kind: "post_like", postId }),
+        }).catch(() => {});
       }
     } else {
       const { error } = await supabase
