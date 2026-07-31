@@ -5009,3 +5009,161 @@ button.create-alt {
   background: #22c55e;
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
 }
+
+/* ==================================================================
+   Home v2 — greeting, online-now card, search, big people cards, CTA
+   ================================================================== */
+.appbar-loc {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--bg-soft);
+  border-radius: 999px;
+  padding: 8px 11px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.appbar-loc svg { width: 15px; height: 15px; color: var(--rose); }
+.appbar-loc svg.appbar-loc-chev { width: 12px; height: 12px; color: var(--ink-3); }
+
+.home-hi { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; }
+.home-hi-av {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--bg-soft);
+  box-shadow: 0 0 0 2px var(--line-2);
+}
+.home-hi-av img { width: 100%; height: 100%; object-fit: cover; }
+.home-hi-initial { font-family: "Sora", sans-serif; font-weight: 800; font-size: 20px; color: #c9c2da; }
+.home-hi-dot { position: absolute; right: 1px; bottom: 1px; width: 12px; height: 12px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 2px #fff; }
+.home-hi-tx { min-width: 0; }
+.home-hi-greet { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.home-hi-h {
+  font-family: "Sora", sans-serif;
+  font-weight: 800;
+  font-size: 19px;
+  line-height: 1.16;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  margin: 2px 0 0;
+}
+.home-hi-stat {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 9px 12px;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+.home-hi-stat-top { display: inline-flex; align-items: center; gap: 6px; }
+.home-hi-fire { width: 17px; height: 17px; color: var(--coral); }
+.home-hi-stat-top b { font-family: "Sora", sans-serif; font-weight: 800; font-size: 18px; color: var(--ink); }
+.home-hi-stat small { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-3); font-weight: 600; }
+.home-hi-live { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.home-hi-avs { display: flex; margin-top: 5px; }
+.home-hi-avs img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; margin-left: -7px; }
+.home-hi-avs img:first-child { margin-left: 0; }
+
+.home-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 13px;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: var(--ink-3);
+}
+.home-search > svg { width: 20px; height: 20px; color: var(--ink-3); flex: none; }
+.home-search > span:not(.home-search-filter) { flex: 1; font-size: 14.5px; font-weight: 500; }
+.home-search-filter { flex: none; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--aurora); color: #fff; }
+.home-search-filter svg { width: 17px; height: 17px; }
+
+.home-pnear { display: flex; flex-direction: column; }
+.pnear-card { flex: 0 0 170px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 8px; }
+.pnear-photo {
+  position: relative;
+  display: block;
+  width: 170px;
+  height: 210px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+.pnear-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pnear-initial { position: absolute; inset: 0; display: grid; place-items: center; font-family: "Sora", sans-serif; font-weight: 800; font-size: 46px; color: #c9c2da; }
+.pnear-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.74), transparent 54%); }
+.pnear-dot { position: absolute; top: 10px; right: 10px; width: 12px; height: 12px; border-radius: 50%; background: var(--green); border: 2px solid rgba(0, 0, 0, 0.35); }
+.pnear-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(122, 47, 242, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+.pnear-badge svg { width: 12px; height: 12px; color: #ffd54a; }
+.pnear-ov { position: absolute; left: 11px; right: 11px; bottom: 9px; z-index: 2; display: flex; flex-direction: column; gap: 2px; }
+.pnear-ov b { display: inline-flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 800; color: #fff; }
+.pnear-ver { width: 14px; height: 14px; flex: none; }
+.pnear-ov small { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: rgba(255, 255, 255, 0.9); }
+.pnear-ov small svg { width: 12px; height: 12px; }
+.pnear-tags { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 2px; }
+.pnear-tags .mini { font-size: 11px; font-weight: 700; color: var(--ink-2); background: var(--bg-soft); border: 1px solid var(--line); padding: 3px 9px; border-radius: 999px; text-transform: capitalize; }
+.pnear-like { padding: 0 2px; }
+
+.home-share {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(120deg, rgba(245, 48, 126, 0.1), rgba(122, 47, 242, 0.1));
+  border: 1px solid var(--line-2);
+  border-radius: 18px;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+.home-share-ic { flex: none; width: 44px; height: 44px; border-radius: 14px; background: var(--aurora); color: #fff; display: grid; place-items: center; }
+.home-share-ic svg { width: 22px; height: 22px; }
+.home-share-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.home-share-tx b { font-size: 15px; font-weight: 800; color: var(--ink); }
+.home-share-tx small { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+.home-share-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--violet);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+.home-share-btn svg { width: 15px; height: 15px; }
+@media (max-width: 400px) {
+  .home-share-btn span { display: none; }
+}

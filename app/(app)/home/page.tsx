@@ -7,6 +7,7 @@ import WinbackBanner from "@/components/WinbackBanner";
 import PostCard from "@/components/PostCard";
 import EventCard, { EventCardData } from "@/components/EventCard";
 import NotifBell from "@/components/NotifBell";
+import LikeButton from "@/components/LikeButton";
 import FeedLoadMore from "@/components/FeedLoadMore";
 import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 import AdminNotice from "@/components/AdminNotice";
@@ -23,6 +24,15 @@ type Story = {
   caption: string | null;
   created_at: string;
 };
+
+function ageFrom(dateStr: string): number {
+  const d = new Date(dateStr);
+  const now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
+  return a;
+}
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -45,6 +55,13 @@ export default async function HomePage() {
     .select("tier, status, expires_at")
     .eq("profile_id", user.id)
     .maybeSingle();
+
+  // Live "online now" count for the greeting card.
+  const { count: onlineCount } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("is_online", true)
+    .neq("id", user.id);
 
   // Latest active admin notice -> dismissible banner at the top of Home.
   const { data: notice } = await supabase
@@ -141,7 +158,9 @@ export default async function HomePage() {
   // ---- People near you rail (welcoming faces right under the stories) ----
   const { data: nearbyRows } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, area, county, is_online, birthdate")
+    .select(
+      "id, display_name, avatar_url, area, county, is_online, birthdate, is_verified"
+    )
     .eq("onboarding_done", true)
     .eq("is_private", false)
     .eq("invisible_mode", false)
@@ -151,6 +170,28 @@ export default async function HomePage() {
   const nearbyPeople = (nearbyRows ?? [])
     .filter((p) => !blocked.has(p.id))
     .slice(0, 14);
+
+  // Interest tags + my existing likes for the People-near-you cards.
+  const nearIds = nearbyPeople.map((p) => p.id);
+  const nearIntents: Record<string, string[]> = {};
+  const myLikes = new Set<string>();
+  if (nearIds.length) {
+    const [{ data: ints }, { data: likeRows }] = await Promise.all([
+      supabase
+        .from("profile_intents")
+        .select("profile_id, intent")
+        .in("profile_id", nearIds),
+      supabase
+        .from("likes")
+        .select("liked_id")
+        .eq("liker_id", user.id)
+        .in("liked_id", nearIds),
+    ]);
+    (ints ?? []).forEach((r) => {
+      (nearIntents[r.profile_id] ??= []).push(r.intent);
+    });
+    (likeRows ?? []).forEach((r) => myLikes.add(r.liked_id));
+  }
 
   // ---- Feed: first page (blocked authors + hidden posts filtered out) ----
   const { items: feedItems, nextCursor: feedNextCursor } = await getFeedPage(
@@ -242,25 +283,61 @@ export default async function HomePage() {
       } => Boolean(c.author)
     );
 
+  const nairobiHour = (new Date().getUTCHours() + 3) % 24;
+  const greeting =
+    nairobiHour < 12
+      ? "Good morning"
+      : nairobiHour < 17
+        ? "Good afternoon"
+        : "Good evening";
+  const firstName = profile.display_name.split(" ")[0];
+  const stackAvatars = nearbyPeople
+    .filter((p) => p.avatar_url)
+    .slice(0, 4)
+    .map((p) => p.avatar_url as string);
+
   return (
     <main className="home-wrap">
       <div className="glow" />
 
       <header className="appbar">
         <div className="appbar-brand">
+          <svg width="30" height="30" viewBox="0 0 512 512" aria-hidden="true">
+            <defs>
+              <linearGradient id="hbg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#FF7A59" />
+                <stop offset="0.45" stopColor="#F5307E" />
+                <stop offset="1" stopColor="#7A2FF2" />
+              </linearGradient>
+            </defs>
+            <rect width="512" height="512" rx="120" fill="url(#hbg)" />
+            <path
+              d="M256 96 C181 96 120 157 120 232 C120 316 200 360 256 424 C312 360 392 316 392 232 C392 157 331 96 256 96 Z"
+              fill="#fff"
+            />
+            <path
+              d="M168 216 L210 216 L232 172 L262 268 L292 184 L314 216 L356 216"
+              fill="none"
+              stroke="#7A2FF2"
+              strokeWidth="22"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
           <span className="wordmark">Vibely</span>
         </div>
         <div className="appbar-actions">
-          <Link
-            href="/nearby"
-            className="appbar-btn nearby"
-            aria-label="People nearby"
-          >
+          <Link href="/nearby" className="appbar-loc">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
               <circle cx="12" cy="10" r="2.5" />
             </svg>
+            {profile.county || "Kenya"}
+            <svg className="appbar-loc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
           </Link>
+          <NotifBell />
           <Link
             href="/matches"
             className="appbar-btn matches"
@@ -289,6 +366,60 @@ export default async function HomePage() {
 
       {showVerifyNudge && <VerifyNudge />}
 
+      <section className="home-hi">
+        <Link href="/profile" className="home-hi-av">
+          {profile.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profile.avatar_url} alt={profile.display_name} />
+          ) : (
+            <span className="home-hi-initial">
+              {firstName.charAt(0).toUpperCase()}
+            </span>
+          )}
+          <span className="home-hi-dot" />
+        </Link>
+        <div className="home-hi-tx">
+          <span className="home-hi-greet">
+            {greeting}, {firstName}
+          </span>
+          <h1 className="home-hi-h">
+            People, vibes and moments <span className="grad">near you.</span>
+          </h1>
+        </div>
+        <Link href="/nearby" className="home-hi-stat" aria-label="See who is online">
+          <span className="home-hi-stat-top">
+            <svg className="home-hi-fire" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2c1 3-1 4.5-2 6-1.2 1.8-1 3.4 0 4.4.8-.4 1.3-1.2 1.5-2.2 1.6 1.2 2.5 2.7 2.5 4.3A4.5 4.5 0 0 1 9.5 19 5 5 0 0 1 7 10c.8.6 1.6.8 2.3.6C8 8.7 9.3 5 12 2z" />
+            </svg>
+            <b>{(onlineCount ?? 0).toLocaleString()}</b>
+          </span>
+          <small>
+            <span className="home-hi-live" /> online now
+          </small>
+          {stackAvatars.length > 0 && (
+            <span className="home-hi-avs">
+              {stackAvatars.map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={src} alt="" />
+              ))}
+            </span>
+          )}
+        </Link>
+      </section>
+
+      <Link href="/discover" className="home-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4-4" />
+        </svg>
+        <span>Search people, events, or places</span>
+        <span className="home-search-filter" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+        </span>
+      </Link>
+
       <section className="home-stories">
         <Stories
           currentUserId={user.id}
@@ -299,31 +430,77 @@ export default async function HomePage() {
       </section>
 
       {nearbyPeople.length > 0 && (
-        <section className="home-nearby">
+        <section className="home-pnear">
           <div className="sec">
             <h3>People near you</h3>
             <Link href="/nearby">See all</Link>
           </div>
           <div className="hscroll">
-            {nearbyPeople.map((p) => (
-              <Link key={p.id} href={`/u/${p.id}`} className="near-chip">
-                <span className="near-av">
-                  {p.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.avatar_url} alt={p.display_name} />
-                  ) : (
-                    <span className="near-initial">
-                      {p.display_name.charAt(0).toUpperCase()}
+            {nearbyPeople.map((p, idx) => {
+              const age = p.birthdate ? ageFrom(p.birthdate) : null;
+              const tags = nearIntents[p.id] ?? [];
+              return (
+                <div key={p.id} className="pnear-card">
+                  <Link href={`/u/${p.id}`} className="pnear-photo">
+                    {p.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.avatar_url} alt={p.display_name} />
+                    ) : (
+                      <span className="pnear-initial">
+                        {p.display_name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="pnear-scrim" />
+                    {p.is_online && <span className="pnear-dot" />}
+                    {idx === 0 && (
+                      <span className="pnear-badge">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M12 3l2.6 5.3 5.9.8-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.1l5.9-.8z" />
+                        </svg>
+                        Popular
+                      </span>
+                    )}
+                    <span className="pnear-ov">
+                      <b>
+                        {p.display_name.split(" ")[0]}
+                        {age ? `, ${age}` : ""}
+                        {p.is_verified && (
+                          <svg className="pnear-ver" viewBox="0 0 24 24" aria-label="Verified">
+                            <circle cx="12" cy="12" r="12" fill="#7A2FF2" />
+                            <path d="M7 12.5l3 3 7-7" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </b>
+                      {(p.area || p.county) && (
+                        <small>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
+                            <circle cx="12" cy="10" r="2.5" />
+                          </svg>
+                          {p.area || p.county}
+                        </small>
+                      )}
                     </span>
+                  </Link>
+                  {tags.length > 0 && (
+                    <div className="pnear-tags">
+                      {tags.slice(0, 2).map((t) => (
+                        <span className="mini" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                  {p.is_online && <span className="near-dot" />}
-                </span>
-                <span className="near-nm">{p.display_name.split(" ")[0]}</span>
-                {(p.area || p.county) && (
-                  <span className="near-meta">{p.area || p.county}</span>
-                )}
-              </Link>
-            ))}
+                  <div className="pnear-like">
+                    <LikeButton
+                      targetId={p.id}
+                      targetName={p.display_name}
+                      initialLiked={myLikes.has(p.id)}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
@@ -372,6 +549,27 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <Link href="/create" className="home-share">
+        <span className="home-share-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </span>
+        <span className="home-share-tx">
+          <b>Share your vibe</b>
+          <small>A post can start your next connection</small>
+        </span>
+        <span className="home-share-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+          </svg>
+          Create a post
+        </span>
+      </Link>
 
       {winback && (
         <WinbackBanner
