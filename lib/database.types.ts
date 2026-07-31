@@ -270,6 +270,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      nudges: {
+        Row: {
+          created_at: string;
+          id: string;
+          kind: string;
+          profile_id: string;
+          ref: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          kind: string;
+          profile_id: string;
+          ref?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          profile_id?: string;
+          ref?: string | null;
+        };
+        Relationships: [];
+      };
       profile_views: {
         Row: {
           viewed_at: string;
