@@ -180,6 +180,9 @@ export default async function HomePage() {
           <Link href="/plans" className="btn-ghost">
             Plans &amp; meetups
           </Link>
+          <Link href="/liked-you" className="btn-ghost">
+            See who likes you
+          </Link>
         </div>
       </section>
 

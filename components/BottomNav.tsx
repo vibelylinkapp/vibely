@@ -5,12 +5,39 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const ITEMS = [
-  { href: "/home", label: "Home" },
-  { href: "/discover", label: "Discover" },
-  { href: "/liked-you", label: "Likes" },
-  { href: "/messages", label: "Messages" },
-  { href: "/profile", label: "Profile" },
+const ICONS = {
+  home: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 11 12 3l9 8" />
+      <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" />
+    </svg>
+  ),
+  discover: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4-4" />
+    </svg>
+  ),
+  messages: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-6.5A8 8 0 1 1 21 12z" />
+    </svg>
+  ),
+  profile: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+    </svg>
+  ),
+} as const;
+
+type TabKey = keyof typeof ICONS;
+
+const TABS: { href: string; label: string; key: TabKey }[] = [
+  { href: "/home", label: "Home", key: "home" },
+  { href: "/discover", label: "Discover", key: "discover" },
+  { href: "/messages", label: "Chats", key: "messages" },
+  { href: "/profile", label: "Profile", key: "profile" },
 ];
 
 export default function BottomNav() {
@@ -29,12 +56,10 @@ export default function BottomNav() {
     }
   }, []);
 
-  // Refetch on navigation — also clears the badge after a thread is opened.
   useEffect(() => {
     refetch();
   }, [path, refetch]);
 
-  // Refetch when the tab regains focus / visibility.
   useEffect(() => {
     const onWake = () => refetch();
     window.addEventListener("focus", onWake);
@@ -45,8 +70,6 @@ export default function BottomNav() {
     };
   }, [refetch]);
 
-  // Live-update when a message lands in any of my conversations (RLS scopes
-  // the stream to threads I'm a member of).
   useEffect(() => {
     const channel = supabase
       .channel("nav-unread")
@@ -61,24 +84,59 @@ export default function BottomNav() {
     };
   }, [supabase, refetch]);
 
+  const isActive = (href: string) =>
+    path === href || path.startsWith(href + "/");
+
+  const renderTab = (t: (typeof TABS)[number]) => {
+    const active = isActive(t.href);
+    const showBadge = t.href === "/messages" && unread > 0;
+    return (
+      <Link
+        key={t.href}
+        href={t.href}
+        className={active ? "bn-tab active" : "bn-tab"}
+        aria-label={t.label}
+        aria-current={active ? "page" : undefined}
+      >
+        <span className="bn-icon">
+          {ICONS[t.key]}
+          {showBadge && (
+            <span className="bn-badge" aria-label={`${unread} unread`}>
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
+        </span>
+        <span className="bn-label">{t.label}</span>
+      </Link>
+    );
+  };
+
+  const createActive = isActive("/plans");
+
   return (
     <nav className="bottomnav">
-      {ITEMS.map((it) => {
-        const active = path === it.href || path.startsWith(it.href + "/");
-        const showBadge = it.href === "/messages" && unread > 0;
-        return (
-          <Link key={it.href} href={it.href} className={active ? "active" : ""}>
-            <span className="nav-label">
-              {it.label}
-              {showBadge && (
-                <span className="nav-badge" aria-label={`${unread} unread`}>
-                  {unread > 9 ? "9+" : unread}
-                </span>
-              )}
-            </span>
-          </Link>
-        );
-      })}
+      {renderTab(TABS[0])}
+      {renderTab(TABS[1])}
+      <Link
+        href="/plans"
+        className={createActive ? "bn-tab bn-create active" : "bn-tab bn-create"}
+        aria-label="Create a plan"
+      >
+        <span className="bn-plus">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </span>
+      </Link>
+      {renderTab(TABS[2])}
+      {renderTab(TABS[3])}
     </nav>
   );
 }
