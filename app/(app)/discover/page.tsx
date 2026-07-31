@@ -64,7 +64,7 @@ export default async function DiscoverPage({
   const { data: boostedData } = await supabase
     .from("profiles")
     .select(
-      "id, display_name, avatar_url, county, area, birthdate, is_online, is_verified"
+      "id, display_name, avatar_url, county, area, birthdate, is_online, is_verified, show_verification"
     )
     .in("id", boostedCandidateIds.length ? boostedCandidateIds : [NO_MATCH])
     .eq("onboarding_done", true)
@@ -76,7 +76,7 @@ export default async function DiscoverPage({
   let query = supabase
     .from("profiles")
     .select(
-      "id, display_name, avatar_url, county, area, birthdate, is_online, is_verified"
+      "id, display_name, avatar_url, county, area, birthdate, is_online, is_verified, show_verification"
     )
     .eq("onboarding_done", true)
     .eq("is_private", false)
@@ -156,15 +156,21 @@ export default async function DiscoverPage({
         </p>
       ) : (
         <div className="grid">
-          {profiles.map((p) => (
-            <ProfileCard
-              key={p.id}
-              p={p}
-              intents={intentMap[p.id] ?? []}
-              boosted={boostedIdSet.has(p.id)}
-              vip={vipSet.has(p.id)}
-            />
-          ))}
+          {profiles.map((p) => {
+            const card = {
+              ...p,
+              is_verified: p.is_verified && p.show_verification,
+            };
+            return (
+              <ProfileCard
+                key={p.id}
+                p={card}
+                intents={intentMap[p.id] ?? []}
+                boosted={boostedIdSet.has(p.id)}
+                vip={vipSet.has(p.id)}
+              />
+            );
+          })}
         </div>
       )}
 

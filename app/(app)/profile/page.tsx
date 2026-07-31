@@ -5,6 +5,7 @@ import BottomNav from "@/components/BottomNav";
 import SignOutButton from "@/components/SignOutButton";
 import AvatarUpload from "@/components/AvatarUpload";
 import PushSetup from "@/components/PushSetup";
+import PrivacyToggles from "@/components/PrivacyToggles";
 import GalleryUpload from "@/components/GalleryUpload";
 import VerificationSetup from "@/components/VerificationSetup";
 import BoostButton from "@/components/BoostButton";
@@ -141,6 +142,11 @@ export default async function ProfilePage() {
           </Link>
         )}
         <PushSetup />
+        <PrivacyToggles
+          userId={user.id}
+          showLocation={profile.show_location}
+          showVerification={profile.show_verification}
+        />
         <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>
           <Link href="/upgrade" className="btn-ghost">
             Upgrade

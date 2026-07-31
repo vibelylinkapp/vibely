@@ -42,6 +42,8 @@ export type Database = {
           onboarding_done: boolean;
           religion: string | null;
           safety_score: number;
+          show_location: boolean;
+          show_verification: boolean;
           updated_at: string;
           verification: Database["public"]["Enums"]["verification_t"];
         };
@@ -74,6 +76,8 @@ export type Database = {
           onboarding_done?: boolean;
           religion?: string | null;
           safety_score?: number;
+          show_location?: boolean;
+          show_verification?: boolean;
           updated_at?: string;
           verification?: Database["public"]["Enums"]["verification_t"];
         };
@@ -106,6 +110,8 @@ export type Database = {
           onboarding_done?: boolean;
           religion?: string | null;
           safety_score?: number;
+          show_location?: boolean;
+          show_verification?: boolean;
           updated_at?: string;
           verification?: Database["public"]["Enums"]["verification_t"];
         };
