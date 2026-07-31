@@ -106,6 +106,7 @@ export default async function PostDetailPage({
           likeCount={likeCount}
           liked={liked}
           commentCount={comments.length}
+          canDelete={post.author_id === user.id}
         />
         <PostComments postId={post.id} me={me} initial={comments} />
       </div>

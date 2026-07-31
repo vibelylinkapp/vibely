@@ -202,6 +202,7 @@ export default async function HomePage() {
                 likeCount={likeCount[p.id] ?? 0}
                 liked={myLiked.has(p.id)}
                 commentCount={commentCount[p.id] ?? 0}
+                canDelete={p.author_id === user.id}
               />
             );
           })}

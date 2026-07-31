@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PostLike from "@/components/PostLike";
+import DeletePost from "@/components/DeletePost";
 
 type Author = { id: string; display_name: string; avatar_url: string | null };
 
@@ -27,6 +28,7 @@ export default function PostCard({
   likeCount,
   liked,
   commentCount,
+  canDelete,
 }: {
   postId: string;
   author: Author;
@@ -36,6 +38,7 @@ export default function PostCard({
   likeCount: number;
   liked: boolean;
   commentCount: number;
+  canDelete?: boolean;
 }) {
   return (
     <article className="post">
@@ -54,6 +57,7 @@ export default function PostCard({
           </Link>
           <span className="post-time">{timeAgo(createdAt)}</span>
         </div>
+        {canDelete && <DeletePost postId={postId} mediaUrl={mediaUrl} />}
       </header>
       {mediaUrl && (
         // eslint-disable-next-line @next/next/no-img-element

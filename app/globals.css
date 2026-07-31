@@ -2442,3 +2442,42 @@ body {
   cursor: pointer;
 }
 .comment-send:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- Delete own post ---- */
+.post-del {
+  margin-left: auto;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-3);
+  padding: 4px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.post-del svg { width: 18px; height: 18px; }
+.post-del:hover { color: var(--rose); background: rgba(245, 48, 126, 0.08); }
+.post-del-confirm { margin-left: auto; display: inline-flex; gap: 6px; flex-shrink: 0; }
+.post-del-yes {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  background: var(--rose);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.post-del-no {
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 5px 12px;
+  background: var(--card);
+  color: var(--ink-2);
+  font-weight: 700;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.post-del-yes:disabled,
+.post-del-no:disabled { opacity: 0.6; cursor: default; }
