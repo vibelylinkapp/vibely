@@ -790,6 +790,17 @@ body {
   border-radius: 13px;
   object-fit: cover;
 }
+.bubble-media.loading {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(100deg, #1A1E29 30%, #262b3b 50%, #1A1E29 70%);
+  background-size: 200% 100%;
+  animation: media-shimmer 1.3s ease infinite;
+}
+@keyframes media-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
 .chat-err {
   color: var(--rose);
   font-size: 12px;

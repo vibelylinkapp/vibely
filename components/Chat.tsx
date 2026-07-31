@@ -11,12 +11,17 @@ type Msg = Pick<
 >;
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const CHAT_BUCKET = "chat-media";
 
 function extFor(type: string): string {
   if (type === "image/png") return "png";
   if (type === "image/webp") return "webp";
   if (type === "image/gif") return "gif";
   return "jpg";
+}
+
+function isHttp(u: string): boolean {
+  return /^https?:\/\//.test(u);
 }
 
 export default function Chat({
@@ -39,6 +44,8 @@ export default function Chat({
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // path -> short-lived signed URL for private chat-media objects.
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const supabase = useRef(createClient()).current;
   const endRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -48,6 +55,43 @@ export default function Chat({
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, otherTyping]);
+
+  // Sign any private media paths we don't yet have a URL for.
+  useEffect(() => {
+    const pending = Array.from(
+      new Set(
+        messages
+          .map((m) => m.media_url)
+          .filter(
+            (u): u is string => !!u && !isHttp(u) && !(u in signedUrls)
+          )
+      )
+    );
+    if (pending.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.storage
+        .from(CHAT_BUCKET)
+        .createSignedUrls(pending, 3600);
+      if (cancelled || !data) return;
+      setSignedUrls((prev) => {
+        const next = { ...prev };
+        for (const row of data) {
+          if (row.path && row.signedUrl) next[row.path] = row.signedUrl;
+        }
+        return next;
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [messages, signedUrls, supabase]);
+
+  function mediaSrc(u: string | null): string | null {
+    if (!u) return null;
+    if (isHttp(u)) return u; // legacy public-bucket URLs
+    return signedUrls[u] ?? null;
+  }
 
   // Mark my membership read (so the OTHER member sees "Seen" on their message).
   function markRead() {
@@ -187,24 +231,24 @@ export default function Chat({
     }
     setUploading(true);
     try {
-      const path = `${currentUserId}/chat/${crypto.randomUUID()}.${extFor(
+      // Private bucket, member-scoped path: <conversationId>/<uid>/<uuid>.<ext>
+      const path = `${conversationId}/${currentUserId}/${crypto.randomUUID()}.${extFor(
         file.type
       )}`;
       const { error: upErr } = await supabase.storage
-        .from("avatars")
+        .from(CHAT_BUCKET)
         .upload(path, file, { contentType: file.type, cacheControl: "3600" });
       if (upErr) {
         setErr("Upload failed. Please try again.");
         return;
       }
-      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
       const { data, error } = await supabase
         .from("messages")
         .insert({
           conversation_id: conversationId,
           sender_id: currentUserId,
           kind: "image",
-          media_url: pub.publicUrl,
+          media_url: path,
           body: null,
         })
         .select("id, sender_id, body, created_at, media_url, kind")
@@ -240,31 +284,39 @@ export default function Chat({
         {messages.length === 0 ? (
           <p className="chat-empty">Say hello and start the conversation.</p>
         ) : (
-          messages.map((m) => (
-            <div key={m.id} className="bubble-group">
-              <div
-                className={
-                  "bubble " +
-                  (m.sender_id === currentUserId ? "mine" : "theirs") +
-                  (m.media_url ? " has-media" : "")
-                }
-              >
-                {m.media_url ? (
-                  <a href={m.media_url} target="_blank" rel="noreferrer">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="bubble-media" src={m.media_url} alt="Shared photo" />
-                  </a>
-                ) : (
-                  m.body
+          messages.map((m) => {
+            const src = m.media_url ? mediaSrc(m.media_url) : null;
+            const mine = m.sender_id === currentUserId;
+            return (
+              <div key={m.id} className="bubble-group">
+                <div
+                  className={
+                    "bubble " +
+                    (mine ? "mine" : "theirs") +
+                    (m.media_url ? " has-media" : "")
+                  }
+                >
+                  {m.media_url ? (
+                    src ? (
+                      <a href={src} target="_blank" rel="noreferrer">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className="bubble-media" src={src} alt="Shared photo" />
+                      </a>
+                    ) : (
+                      <span className="bubble-media loading" aria-label="Loading photo" />
+                    )
+                  ) : (
+                    m.body
+                  )}
+                </div>
+                {lastMine && m.id === lastMine.id && (
+                  <div className={"receipt" + (seen ? " seen" : "")}>
+                    {seen ? "Seen" : "Sent"}
+                  </div>
                 )}
               </div>
-              {lastMine && m.id === lastMine.id && (
-                <div className={"receipt" + (seen ? " seen" : "")}>
-                  {seen ? "Seen" : "Sent"}
-                </div>
-              )}
-            </div>
-          ))
+            );
+          })
         )}
         {otherTyping && (
           <div className="bubble theirs typing-bubble" aria-label="typing">
