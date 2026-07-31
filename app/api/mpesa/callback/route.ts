@@ -10,6 +10,19 @@ export const dynamic = "force-dynamic";
 type CallbackItem = { Name: string; Value?: string | number };
 
 export async function POST(req: Request) {
+  // Optional shared-secret gate. When MPESA_CALLBACK_SECRET is set, the STK
+  // push registers a callback URL carrying ?t=<secret>; reject anything that
+  // doesn't present it, so a stranger who happens to know a pending checkout
+  // id can't POST a fake "success" and self-activate a subscription. Skipped
+  // entirely when unset, so it never breaks an existing deployment.
+  const expected = process.env.MPESA_CALLBACK_SECRET;
+  if (expected) {
+    const token = new URL(req.url).searchParams.get("t");
+    if (token !== expected) {
+      return NextResponse.json({ ok: false }, { status: 401 });
+    }
+  }
+
   let raw: unknown;
   try {
     raw = await req.json();

@@ -38,9 +38,17 @@ export async function POST(req: Request) {
   }
 
   const amount = TIER_PRICES[tier];
-  const callbackUrl =
+  const baseCallback =
     process.env.MPESA_CALLBACK_URL ||
     `${new URL(req.url).origin}/api/mpesa/callback`;
+  // Carry the shared secret (when configured) so the callback can verify the
+  // caller is our own STK push and not a spoofed request.
+  const callbackSecret = process.env.MPESA_CALLBACK_SECRET;
+  const callbackUrl = callbackSecret
+    ? `${baseCallback}${
+        baseCallback.includes("?") ? "&" : "?"
+      }t=${encodeURIComponent(callbackSecret)}`
+    : baseCallback;
 
   try {
     const res = await stkPush({

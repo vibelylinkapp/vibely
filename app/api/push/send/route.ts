@@ -108,7 +108,12 @@ export async function POST(req: Request) {
             tag: `post-comment-${postId}`,
           };
   } else {
-    const target = body.toUserId;
+    // Validate the target is a plausible uuid before it ever reaches a
+    // PostgREST filter string below — never interpolate raw client input.
+    const target =
+      typeof body.toUserId === "string" && UUIDISH.test(body.toUserId)
+        ? body.toUserId
+        : null;
     if (!target || target === user.id) {
       return NextResponse.json({ ok: false, reason: "no_target" });
     }

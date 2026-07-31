@@ -6,6 +6,8 @@
 //   MPESA_SHORTCODE      Paybill business shortcode
 //   MPESA_PASSKEY        Lipa na M-Pesa Online passkey
 //   MPESA_CALLBACK_URL   (optional) public https URL to /api/mpesa/callback
+//   MPESA_CALLBACK_SECRET (optional) shared secret appended to the callback URL
+//                        as ?t=... and verified by /api/mpesa/callback
 
 const BASE =
   process.env.MPESA_ENV === "production"
