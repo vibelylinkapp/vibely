@@ -16,9 +16,11 @@ const REASONS: { id: string; label: string }[] = [
 export default function ReportPost({
   postId,
   authorId,
+  authorName,
 }: {
   postId: string;
   authorId: string;
+  authorName?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -40,6 +42,41 @@ export default function ReportPost({
       setBusy(false);
       return;
     }
+    await supabase
+      .from("post_hides")
+      .upsert(
+        { post_id: postId, profile_id: me },
+        { onConflict: "post_id,profile_id" }
+      );
+    setBusy(false);
+    close();
+    router.refresh();
+  }
+
+  async function block() {
+    if (busy) return;
+    const who = authorName ? authorName : "this member";
+    if (
+      !window.confirm(
+        `Block ${who}? You won't see each other's profiles, posts or messages.`
+      )
+    )
+      return;
+    setBusy(true);
+    const supabase = createClient();
+    const { data: auth } = await supabase.auth.getUser();
+    const me = auth.user?.id;
+    if (!me) {
+      setBusy(false);
+      return;
+    }
+    await supabase
+      .from("blocks")
+      .upsert(
+        { blocker_id: me, blocked_id: authorId },
+        { onConflict: "blocker_id,blocked_id", ignoreDuplicates: true }
+      );
+    // Drop this post from view immediately; the block hides the rest on refresh.
     await supabase
       .from("post_hides")
       .upsert(
@@ -122,6 +159,15 @@ export default function ReportPost({
                   role="menuitem"
                 >
                   Report post
+                </button>
+                <button
+                  type="button"
+                  className="post-menu-item danger"
+                  onClick={block}
+                  disabled={busy}
+                  role="menuitem"
+                >
+                  {authorName ? `Block ${authorName}` : "Block user"}
                 </button>
               </>
             ) : (

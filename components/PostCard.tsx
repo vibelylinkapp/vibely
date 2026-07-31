@@ -62,7 +62,13 @@ export default function PostCard({
           <span className="post-time">{timeAgo(createdAt)}</span>
         </div>
         {canDelete && <DeletePost postId={postId} mediaUrl={mediaUrl} />}
-        {canReport && <ReportPost postId={postId} authorId={author.id} />}
+        {canReport && (
+          <ReportPost
+            postId={postId}
+            authorId={author.id}
+            authorName={author.display_name}
+          />
+        )}
       </header>
       {mediaUrl && (
         // eslint-disable-next-line @next/next/no-img-element
