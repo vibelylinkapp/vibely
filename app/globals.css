@@ -3107,3 +3107,229 @@ body {
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(122, 47, 242, 0.15), rgba(245, 48, 126, 0.6), rgba(255, 122, 89, 0.95));
 }
+
+/* --- Section headers + horizontal rails ------------------------- */
+.sec {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  max-width: 560px;
+  margin: 18px auto 10px;
+}
+.sec h3 { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0; }
+.sec a { font-size: 13px; font-weight: 700; color: #7a2ff2; text-decoration: none; }
+.hscroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  max-width: 560px;
+  margin: 0 auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.hscroll::-webkit-scrollbar { display: none; }
+
+/* --- Trending rail place card ----------------------------------- */
+.placecard {
+  flex: 0 0 auto;
+  width: 190px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+.placecard .ph {
+  position: relative;
+  height: 120px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-soft);
+}
+.placecard .body { padding: 9px 11px 11px; }
+.placecard .body b { display: block; font-size: 14px; color: var(--ink); }
+.placecard .body small { display: block; margin-top: 2px; font-size: 11.5px; color: var(--ink-3); }
+
+/* --- shared card badges ----------------------------------------- */
+.badge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+.live {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: var(--grad);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+/* --- Events list card ------------------------------------------- */
+.events-list { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.eventcard {
+  display: block;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+.eventcard .ph {
+  position: relative;
+  height: 168px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-soft);
+}
+.eventcard .price,
+.ev-hero-cap .price {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--grad);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 12px;
+  border-radius: 999px;
+}
+.eventcard .b { padding: 12px 14px 14px; }
+.eventcard .b > b { font-size: 16px; color: var(--ink); }
+.eventcard .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
+.eventcard .meta span { font-size: 12.5px; color: var(--ink-3); }
+.eventcard .going { margin-top: 8px; }
+.eventcard .going small { font-size: 12px; font-weight: 700; color: var(--rose); }
+
+/* --- feed head host button -------------------------------------- */
+.feed-head-btn {
+  margin-left: auto;
+  border: none;
+  background: var(--grad);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* --- Event detail ----------------------------------------------- */
+.ev-detail { display: flex; flex-direction: column; min-height: 100dvh; background: var(--bg, #fff); }
+.ev-hero {
+  position: relative;
+  height: 300px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-soft);
+}
+.ev-hero-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 35%, transparent 55%, rgba(0, 0, 0, 0.75));
+}
+.ev-hero-nav {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+}
+.ev-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ev-iconbtn.ev-edit { font-size: 14px; font-weight: 800; }
+.ev-hero-cap {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 16px;
+  z-index: 2;
+  color: #fff;
+}
+.ev-hero-cap h1 { margin: 8px 0 0; font-size: 26px; font-weight: 800; line-height: 1.15; }
+.ev-body { flex: 1; padding: 18px; max-width: 560px; width: 100%; margin: 0 auto; }
+.metabox { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.metabox .ic {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  background: var(--bg-soft);
+  flex: none;
+}
+.metabox b { display: block; font-size: 14.5px; color: var(--ink); }
+.metabox small { display: block; font-size: 12.5px; color: var(--ink-3); margin-top: 1px; }
+.ev-going { margin: 14px 0 4px; font-size: 13.5px; color: var(--ink-2); }
+.ev-going b { color: var(--ink); font-weight: 800; }
+.ev-body h4 { margin: 18px 0 6px; font-size: 15px; font-weight: 800; color: var(--ink); }
+.ev-about { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.ev-map {
+  height: 130px;
+  border-radius: 16px;
+  margin-top: 6px;
+  position: relative;
+  background:
+    linear-gradient(rgba(122, 47, 242, 0.06), rgba(245, 48, 126, 0.06)),
+    repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 30px),
+    var(--bg-soft);
+}
+.ev-map span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -100%);
+  font-size: 30px;
+}
+.ev-bookbar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--card);
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+.ev-bookprice small { display: block; font-size: 11px; color: var(--ink-3); }
+.ev-bookprice b { font-size: 18px; color: var(--ink); }
+.book-btn.booked { filter: saturate(0.6); }
+
+/* --- modal two-column row --------------------------------------- */
+.modal-row { display: flex; gap: 10px; }
+.modal-row .modal-input { flex: 1; min-width: 0; }

@@ -40,6 +40,23 @@ export default async function CreatePage() {
         </span>
       </Link>
 
+      <Link href="/events" className="create-alt">
+        <span className="create-alt-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 7.5l5.4-.8z" />
+          </svg>
+        </span>
+        <span className="create-alt-body">
+          <span className="create-alt-t">Create an event</span>
+          <span className="create-alt-s">Ticketed or free, with a map pin</span>
+        </span>
+        <span className="create-alt-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </span>
+      </Link>
+
       <BottomNav />
     </main>
   );

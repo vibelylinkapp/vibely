@@ -12,6 +12,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      events: {
+        Row: {
+          id: string;
+          created_by: string | null;
+          title: string;
+          description: string | null;
+          category: string | null;
+          venue: string | null;
+          area: string | null;
+          city: string;
+          country: string;
+          geo: unknown | null;
+          image_url: string | null;
+          starts_at: string | null;
+          ends_at: string | null;
+          price_kes: number;
+          capacity: number | null;
+          host_name: string | null;
+          going_base: number;
+          is_trending: boolean;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          created_by?: string | null;
+          title: string;
+          description?: string | null;
+          category?: string | null;
+          venue?: string | null;
+          area?: string | null;
+          city?: string;
+          country?: string;
+          geo?: unknown | null;
+          image_url?: string | null;
+          starts_at?: string | null;
+          ends_at?: string | null;
+          price_kes?: number;
+          capacity?: number | null;
+          host_name?: string | null;
+          going_base?: number;
+          is_trending?: boolean;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          created_by?: string | null;
+          title?: string;
+          description?: string | null;
+          category?: string | null;
+          venue?: string | null;
+          area?: string | null;
+          city?: string;
+          country?: string;
+          geo?: unknown | null;
+          image_url?: string | null;
+          starts_at?: string | null;
+          ends_at?: string | null;
+          price_kes?: number;
+          capacity?: number | null;
+          host_name?: string | null;
+          going_base?: number;
+          is_trending?: boolean;
+          status?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      event_bookings: {
+        Row: { created_at: string; event_id: string; profile_id: string };
+        Insert: { created_at?: string; event_id: string; profile_id: string };
+        Update: { created_at?: string; event_id?: string; profile_id?: string };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           area: string | null;

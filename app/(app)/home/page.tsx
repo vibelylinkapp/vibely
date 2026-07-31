@@ -5,6 +5,7 @@ import BottomNav from "@/components/BottomNav";
 import Stories from "@/components/Stories";
 import WinbackBanner from "@/components/WinbackBanner";
 import PostCard from "@/components/PostCard";
+import EventCard, { EventCardData } from "@/components/EventCard";
 
 export const dynamic = "force-dynamic";
 
@@ -155,6 +156,46 @@ export default async function HomePage() {
     });
   }
 
+  // ---- Trending events rail ----
+  const trendNow = new Date().toISOString();
+  const { data: trendRows } = await supabase
+    .from("events")
+    .select(
+      "id, title, image_url, category, venue, area, city, country, price_kes, starts_at, going_base"
+    )
+    .eq("status", "published")
+    .eq("is_trending", true)
+    .gte("starts_at", trendNow)
+    .order("starts_at", { ascending: true })
+    .limit(8);
+  const trendList = trendRows ?? [];
+  const trendGoing: Record<string, number> = {};
+  if (trendList.length) {
+    const { data: eb } = await supabase
+      .from("event_bookings")
+      .select("event_id")
+      .in(
+        "event_id",
+        trendList.map((e) => e.id)
+      );
+    (eb ?? []).forEach((b) => {
+      trendGoing[b.event_id] = (trendGoing[b.event_id] ?? 0) + 1;
+    });
+  }
+  const trending: EventCardData[] = trendList.map((e) => ({
+    id: e.id,
+    title: e.title,
+    image_url: e.image_url,
+    category: e.category,
+    venue: e.venue,
+    area: e.area,
+    city: e.city,
+    country: e.country,
+    price_kes: e.price_kes,
+    starts_at: e.starts_at,
+    going: (trendGoing[e.id] ?? 0) + e.going_base,
+  }));
+
   return (
     <main className="home-wrap">
       <div className="glow" />
@@ -194,6 +235,20 @@ export default async function HomePage() {
           groups={groups}
         />
       </section>
+
+      {trending.length > 0 && (
+        <section className="home-trending">
+          <div className="sec">
+            <h3>Trending near you</h3>
+            <Link href="/events">See all</Link>
+          </div>
+          <div className="hscroll">
+            {trending.map((e) => (
+              <EventCard key={e.id} e={e} variant="rail" />
+            ))}
+          </div>
+        </section>
+      )}
 
       {winback && (
         <WinbackBanner
