@@ -1596,6 +1596,19 @@ body {
   justify-content: center;
   gap: 8px;
 }
+.pcard-reason {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFB020;
+  margin-top: 2px;
+}
+.vip-link {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 12px auto 0;
+  text-align: center;
+}
 
 /* ======================= WIN-BACK / RENEWAL BANNER ======================= */
 .winback {

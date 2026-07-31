@@ -27,11 +27,13 @@ export default function ProfileCard({
   intents,
   boosted,
   vip,
+  reason,
 }: {
   p: P;
   intents: string[];
   boosted?: boolean;
   vip?: boolean;
+  reason?: string;
 }) {
   const age = p.birthdate ? ageFrom(p.birthdate) : null;
   const meta = [age ? String(age) : null, p.county].filter(Boolean).join(" · ");
@@ -74,6 +76,7 @@ export default function ProfileCard({
           )}
           {vip && <span className="vip-badge">VIP</span>}
         </div>
+        {reason && <div className="pcard-reason">{reason}</div>}
         {meta && <div className="pcard-meta">{meta}</div>}
         {intents.length > 0 && (
           <div className="pcard-intents">

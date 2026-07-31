@@ -135,6 +135,11 @@ export default async function ProfilePage() {
           activeUntil={activeBoost?.expires_at ?? null}
           remaining={boostRemaining}
         />
+        {ent.tier === "vip" && (
+          <Link href="/top-matches" className="btn vip-link">
+            See your VIP top matches
+          </Link>
+        )}
         <PushSetup />
         <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>
           <Link href="/upgrade" className="btn-ghost">
