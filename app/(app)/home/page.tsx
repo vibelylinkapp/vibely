@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import Stories from "@/components/Stories";
 import WinbackBanner from "@/components/WinbackBanner";
+import PostCard from "@/components/PostCard";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +33,6 @@ export default async function HomePage() {
 
   if (!profile || !profile.onboarding_done) redirect("/onboarding");
 
-  const { data: intents } = await supabase
-    .from("profile_intents")
-    .select("intent")
-    .eq("profile_id", user.id);
-
-  // Subscription state drives the win-back / renewal nudge.
   const now = Date.now();
   const { data: sub } = await supabase
     .from("subscriptions")
@@ -67,7 +62,6 @@ export default async function HomePage() {
     }
   }
 
-  // Active (non-expired) stories, grouped by author.
   const nowISO = new Date().toISOString();
   const [{ data: storyRows }, { data: myBlocks }] = await Promise.all([
     supabase
@@ -95,7 +89,7 @@ export default async function HomePage() {
 
   const grouped: Record<string, Story[]> = {};
   (storyRows ?? []).forEach((s) => {
-    if (!authorMap[s.profile_id]) return; // blocked or hidden author
+    if (!authorMap[s.profile_id]) return;
     (grouped[s.profile_id] ??= []).push({
       id: s.id,
       media_url: s.media_url,
@@ -109,9 +103,60 @@ export default async function HomePage() {
       a.author.id === user.id ? -1 : b.author.id === user.id ? 1 : 0
     );
 
+  // ---- Feed: recent posts (blocked authors filtered out) ----
+  const { data: postRows } = await supabase
+    .from("posts")
+    .select("id, author_id, media_url, caption, created_at")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const posts = (postRows ?? []).filter((p) => !blocked.has(p.author_id));
+
+  const postAuthorMap: Record<string, Author> = { ...authorMap };
+  const missingAuthorIds = Array.from(
+    new Set(posts.map((p) => p.author_id))
+  ).filter((id) => !postAuthorMap[id]);
+  if (missingAuthorIds.length) {
+    const { data: pa } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .in("id", missingAuthorIds);
+    (pa ?? []).forEach((a) => {
+      postAuthorMap[a.id] = a;
+    });
+  }
+
+  const postIds = posts.map((p) => p.id);
+  const likeCount: Record<string, number> = {};
+  const myLiked = new Set<string>();
+  if (postIds.length) {
+    const { data: likeRows } = await supabase
+      .from("post_likes")
+      .select("post_id, profile_id")
+      .in("post_id", postIds);
+    (likeRows ?? []).forEach((r) => {
+      likeCount[r.post_id] = (likeCount[r.post_id] ?? 0) + 1;
+      if (r.profile_id === user.id) myLiked.add(r.post_id);
+    });
+  }
+
   return (
     <main className="home-wrap">
       <div className="glow" />
+
+      <header className="appbar">
+        <div className="appbar-brand">
+          <span className="wordmark">Vibely</span>
+        </div>
+        <Link
+          href="/liked-you"
+          className="appbar-btn likes"
+          aria-label="See who likes you"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 20.7 4.3 13a5 5 0 0 1 7.1-7l.6.6.6-.6a5 5 0 0 1 7.1 7z" />
+          </svg>
+        </Link>
+      </header>
 
       <section className="home-stories">
         <Stories
@@ -130,61 +175,45 @@ export default async function HomePage() {
         />
       )}
 
-      <section className="hero">
-        <div className="logo">
-          <svg width="48" height="48" viewBox="0 0 512 512" aria-hidden="true">
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#FF7A59" />
-                <stop offset="0.45" stopColor="#F5307E" />
-                <stop offset="1" stopColor="#7A2FF2" />
-              </linearGradient>
-            </defs>
-            <rect width="512" height="512" rx="112" fill="url(#g)" />
-            <path
-              d="M256 96 C181 96 120 157 120 232 C120 316 200 360 256 424 C312 360 392 316 392 232 C392 157 331 96 256 96 Z"
-              fill="#fff"
-            />
-            <path
-              d="M168 216 L210 216 L232 172 L262 268 L292 184 L314 216 L356 216"
-              fill="none"
-              stroke="#7A2FF2"
-              strokeWidth="22"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span className="wordmark">Vibely</span>
-        </div>
-
-        <h1 className="headline">Karibu, {profile.display_name}.</h1>
-        <p className="sub">
-          Your profile is live in {profile.county ?? "Kenya"}. Start meeting
-          your people.
-        </p>
-
-        {intents && intents.length > 0 && (
-          <div className="tags">
-            {intents.map((i) => (
-              <span className="tag" key={i.intent}>
-                {i.intent}
-              </span>
-            ))}
+      {posts.length > 0 ? (
+        <section className="feed-list">
+          {posts.map((p) => {
+            const a = postAuthorMap[p.author_id];
+            if (!a) return null;
+            return (
+              <PostCard
+                key={p.id}
+                postId={p.id}
+                author={a}
+                mediaUrl={p.media_url}
+                caption={p.caption}
+                createdAt={p.created_at}
+                likeCount={likeCount[p.id] ?? 0}
+                liked={myLiked.has(p.id)}
+              />
+            );
+          })}
+        </section>
+      ) : (
+        <div className="feed-empty">
+          <p className="feed-empty-t">Your feed is quiet for now</p>
+          <p className="sub">
+            Share the first moment, or discover people and follow their
+            stories.
+          </p>
+          <div
+            className="cta-row"
+            style={{ maxWidth: 320, margin: "16px auto 0" }}
+          >
+            <Link href="/create" className="btn">
+              Share a post
+            </Link>
+            <Link href="/discover" className="btn-ghost">
+              Discover people
+            </Link>
           </div>
-        )}
-
-        <div className="cta-row">
-          <Link href="/discover" className="btn">
-            Discover people nearby
-          </Link>
-          <Link href="/plans" className="btn-ghost">
-            Plans &amp; meetups
-          </Link>
-          <Link href="/liked-you" className="btn-ghost">
-            See who likes you
-          </Link>
         </div>
-      </section>
+      )}
 
       <BottomNav />
     </main>

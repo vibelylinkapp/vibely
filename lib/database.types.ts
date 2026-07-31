@@ -213,6 +213,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      posts: {
+        Row: {
+          author_id: string;
+          caption: string | null;
+          created_at: string;
+          id: string;
+          media_url: string | null;
+        };
+        Insert: {
+          author_id: string;
+          caption?: string | null;
+          created_at?: string;
+          id?: string;
+          media_url?: string | null;
+        };
+        Update: {
+          author_id?: string;
+          caption?: string | null;
+          created_at?: string;
+          id?: string;
+          media_url?: string | null;
+        };
+        Relationships: [];
+      };
+      post_likes: {
+        Row: {
+          created_at: string;
+          post_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          post_id: string;
+          profile_id: string;
+        };
+        Update: {
+          created_at?: string;
+          post_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [];
+      };
       plan_participants: {
         Row: { joined_at: string; plan_id: string; profile_id: string };
         Insert: { joined_at?: string; plan_id: string; profile_id: string };

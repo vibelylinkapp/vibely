@@ -111,16 +111,16 @@ export default function BottomNav() {
     );
   };
 
-  const createActive = isActive("/plans");
+  const createActive = isActive("/create");
 
   return (
     <nav className="bottomnav">
       {renderTab(TABS[0])}
       {renderTab(TABS[1])}
       <Link
-        href="/plans"
+        href="/create"
         className={createActive ? "bn-tab bn-create active" : "bn-tab bn-create"}
-        aria-label="Create a plan"
+        aria-label="Create"
       >
         <span className="bn-plus">
           <svg
