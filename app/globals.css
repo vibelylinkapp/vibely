@@ -169,6 +169,168 @@ body {
 
 .soon { font-size: 13px; color: #8a8397; margin-top: 4px; }
 
+/* ===================== Landing (marketing) ===================== */
+.lp {
+  position: relative;
+  min-height: 100dvh;
+  background: #ffffff;
+  overflow-x: hidden;
+}
+.lp .hero {
+  margin: 0 auto;
+  padding: 56px 24px 44px;
+  align-items: center;
+}
+.lp-section {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  text-align: center;
+}
+.lp-h2 {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: clamp(24px, 4.6vw, 36px);
+  letter-spacing: -1px;
+  color: #14101f;
+  margin: 0 0 10px;
+}
+.lp-h2 .grad,
+.lp-final h2 .grad {
+  background: linear-gradient(90deg, #F5307E, #7A2FF2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.lp-lead {
+  color: #4a4458;
+  font-size: clamp(15px, 2.4vw, 17px);
+  line-height: 1.55;
+  max-width: 560px;
+  margin: 0 auto 28px;
+}
+.lp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+.lp-card {
+  background: #fff;
+  border: 1px solid #ece7f6;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(20, 16, 31, 0.04);
+}
+.lp-ic {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.lp-ic svg { width: 24px; height: 24px; }
+.lp-card b {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 16.5px;
+  font-weight: 800;
+  color: #14101f;
+  margin-bottom: 6px;
+}
+.lp-card p { margin: 0; font-size: 14px; line-height: 1.55; color: #4a4458; }
+
+.lp-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+.lp-step {
+  background: #faf8ff;
+  border: 1px solid #ece7f6;
+  border-radius: 20px;
+  padding: 22px;
+}
+.lp-step-n {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #7A2FF2, #F5307E);
+  margin-bottom: 12px;
+}
+.lp-step b {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #14101f;
+  margin-bottom: 4px;
+}
+.lp-step p { margin: 0; font-size: 14px; color: #4a4458; line-height: 1.5; }
+
+.lp-cities { text-align: center; padding: 22px 24px 8px; }
+.lp-cities-label {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8397;
+  margin-bottom: 14px;
+}
+.lp-city-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.lp-city {
+  font-size: 14px;
+  font-weight: 700;
+  color: #14101f;
+  background: #fff;
+  border: 1px solid #ece7f6;
+  border-radius: 999px;
+  padding: 8px 16px;
+}
+
+.lp-final {
+  position: relative;
+  max-width: 640px;
+  margin: 8px auto 0;
+  padding: 34px 24px 60px;
+  text-align: center;
+}
+.lp-final-panel {
+  background: linear-gradient(135deg, rgba(122, 47, 242, 0.07), rgba(245, 48, 126, 0.07));
+  border: 1px solid #ece7f6;
+  border-radius: 28px;
+  padding: 34px 24px;
+}
+.lp-final h2 {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: clamp(24px, 5vw, 34px);
+  letter-spacing: -1px;
+  color: #14101f;
+  margin: 0 0 8px;
+}
+.lp-final p { color: #4a4458; font-size: 16px; margin: 0 0 22px; }
+.lp-final .cta-row { margin: 0 auto; }
+.lp-foot { margin-top: 22px; font-size: 12.5px; color: #8a8397; }
+
 /* --- Auth + onboarding cards --- */
 .auth-card,
 .onboard-card {
