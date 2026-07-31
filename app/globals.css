@@ -2586,3 +2586,93 @@ body {
   opacity: 0.6;
   cursor: default;
 }
+
+/* --- Post options menu (report / hide) --------------------------- */
+.post-more-wrap {
+  position: relative;
+  margin-left: auto;
+}
+.post-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.post-more:hover {
+  background: var(--raised);
+  color: var(--ink);
+}
+.post-more svg {
+  width: 20px;
+  height: 20px;
+}
+.post-more-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+.post-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  min-width: 224px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+.post-menu-head {
+  padding: 8px 10px 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+.post-menu-item {
+  text-align: left;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.post-menu-item:hover {
+  background: var(--bg-soft);
+}
+.post-menu-item.danger {
+  color: var(--rose);
+}
+.post-menu-item:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.report-post-link {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--violet);
+  text-decoration: none;
+}
+.report-post-link:hover {
+  text-decoration: underline;
+}

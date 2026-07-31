@@ -105,3 +105,45 @@ export async function rejectVerification(
   revalidatePath("/admin/verifications");
   revalidatePath("/admin");
 }
+
+export async function deletePost(postId: string, reportId: string) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+
+  // Best-effort: remove the media object from the public post-media bucket.
+  const { data: post } = await admin
+    .from("posts")
+    .select("media_url")
+    .eq("id", postId)
+    .maybeSingle();
+  if (post?.media_url) {
+    const marker = "/post-media/";
+    const at = post.media_url.indexOf(marker);
+    if (at >= 0) {
+      const path = post.media_url.slice(at + marker.length);
+      await admin.storage.from("post-media").remove([path]);
+    }
+  }
+
+  // Deleting the post cascades its likes and comments.
+  await admin.from("posts").delete().eq("id", postId);
+
+  // Resolve any open reports pointing at this post, plus the acted-on report.
+  const resolvedAt = new Date().toISOString();
+  await admin
+    .from("reports")
+    .update({ status: "actioned", resolved_at: resolvedAt })
+    .eq("post_id", postId)
+    .eq("status", "open");
+  await admin
+    .from("reports")
+    .update({ status: "actioned", resolved_at: resolvedAt })
+    .eq("id", reportId);
+
+  await admin
+    .from("admin_actions")
+    .insert({ admin_id: adminId, action: "delete_post", detail: postId });
+
+  revalidatePath("/admin/reports");
+  revalidatePath("/admin");
+}

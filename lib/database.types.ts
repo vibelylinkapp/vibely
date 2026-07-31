@@ -518,6 +518,7 @@ export type Database = {
           created_at: string;
           detail: string | null;
           id: string;
+          post_id: string | null;
           reason: string;
           reported_id: string | null;
           reporter_id: string | null;
@@ -528,6 +529,7 @@ export type Database = {
           created_at?: string;
           detail?: string | null;
           id?: string;
+          post_id?: string | null;
           reason: string;
           reported_id?: string | null;
           reporter_id?: string | null;
@@ -538,11 +540,30 @@ export type Database = {
           created_at?: string;
           detail?: string | null;
           id?: string;
+          post_id?: string | null;
           reason?: string;
           reported_id?: string | null;
           reporter_id?: string | null;
           resolved_at?: string | null;
           status?: Database["public"]["Enums"]["report_status_t"];
+        };
+        Relationships: [];
+      };
+      post_hides: {
+        Row: {
+          created_at: string;
+          post_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          post_id: string;
+          profile_id: string;
+        };
+        Update: {
+          created_at?: string;
+          post_id?: string;
+          profile_id?: string;
         };
         Relationships: [];
       };

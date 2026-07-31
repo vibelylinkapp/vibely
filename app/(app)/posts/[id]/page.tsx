@@ -107,6 +107,7 @@ export default async function PostDetailPage({
           liked={liked}
           commentCount={comments.length}
           canDelete={post.author_id === user.id}
+          canReport={post.author_id !== user.id}
         />
         <PostComments
           postId={post.id}

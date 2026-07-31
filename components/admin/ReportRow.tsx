@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { banUser, dismissReport } from "@/app/admin/actions";
+import { banUser, dismissReport, deletePost } from "@/app/admin/actions";
 import type { Tables } from "@/lib/database.types";
 
 export default function ReportRow({
@@ -36,11 +36,30 @@ export default function ReportRow({
     });
   }
 
+  function onDeletePost() {
+    if (!report.post_id) return;
+    const pid = report.post_id;
+    start(async () => {
+      await deletePost(pid, report.id);
+      setStatus("actioned");
+    });
+  }
+
   return (
     <tr>
       <td>
         {reportedName}
         {banned && <span className="pill-banned">Banned</span>}
+        {report.post_id && (
+          <a
+            className="report-post-link"
+            href={`/posts/${report.post_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View post
+          </a>
+        )}
       </td>
       <td>{report.reason}</td>
       <td className="muted">{report.detail ?? "-"}</td>
@@ -54,6 +73,11 @@ export default function ReportRow({
             <button disabled={pending} onClick={onBan}>
               Ban user
             </button>
+            {report.post_id && (
+              <button disabled={pending} onClick={onDeletePost}>
+                Delete post
+              </button>
+            )}
             <button disabled={pending} onClick={onDismiss}>
               Dismiss
             </button>

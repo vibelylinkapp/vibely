@@ -63,15 +63,18 @@ export default async function HomePage() {
   }
 
   const nowISO = new Date().toISOString();
-  const [{ data: storyRows }, { data: myBlocks }] = await Promise.all([
-    supabase
-      .from("stories")
-      .select("id, profile_id, media_url, caption, created_at")
-      .gt("expires_at", nowISO)
-      .order("created_at", { ascending: true }),
-    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
-  ]);
+  const [{ data: storyRows }, { data: myBlocks }, { data: myHides }] =
+    await Promise.all([
+      supabase
+        .from("stories")
+        .select("id, profile_id, media_url, caption, created_at")
+        .gt("expires_at", nowISO)
+        .order("created_at", { ascending: true }),
+      supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+      supabase.from("post_hides").select("post_id").eq("profile_id", user.id),
+    ]);
   const blocked = new Set((myBlocks ?? []).map((b) => b.blocked_id));
+  const hidden = new Set((myHides ?? []).map((h) => h.post_id));
   const authorIds = Array.from(
     new Set((storyRows ?? []).map((s) => s.profile_id))
   ).filter((id) => !blocked.has(id));
@@ -103,13 +106,15 @@ export default async function HomePage() {
       a.author.id === user.id ? -1 : b.author.id === user.id ? 1 : 0
     );
 
-  // ---- Feed: recent posts (blocked authors filtered out) ----
+  // ---- Feed: recent posts (blocked authors and hidden posts filtered out) ----
   const { data: postRows } = await supabase
     .from("posts")
     .select("id, author_id, media_url, caption, created_at")
     .order("created_at", { ascending: false })
     .limit(50);
-  const posts = (postRows ?? []).filter((p) => !blocked.has(p.author_id));
+  const posts = (postRows ?? []).filter(
+    (p) => !blocked.has(p.author_id) && !hidden.has(p.id)
+  );
 
   const postAuthorMap: Record<string, Author> = { ...authorMap };
   const missingAuthorIds = Array.from(
@@ -203,6 +208,7 @@ export default async function HomePage() {
                 liked={myLiked.has(p.id)}
                 commentCount={commentCount[p.id] ?? 0}
                 canDelete={p.author_id === user.id}
+                canReport={p.author_id !== user.id}
               />
             );
           })}
