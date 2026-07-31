@@ -3,8 +3,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import Stories from "@/components/Stories";
+import WinbackBanner from "@/components/WinbackBanner";
 
 export const dynamic = "force-dynamic";
+
+const DAY_MS = 86400000;
 
 type Author = { id: string; display_name: string; avatar_url: string | null };
 type Story = {
@@ -33,6 +36,36 @@ export default async function HomePage() {
     .from("profile_intents")
     .select("intent")
     .eq("profile_id", user.id);
+
+  // Subscription state drives the win-back / renewal nudge.
+  const now = Date.now();
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("tier, status, expires_at")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+
+  let winback: {
+    state: "expiring" | "lapsed";
+    tier: string;
+    days: number;
+  } | null = null;
+  if (sub && sub.tier && sub.tier !== "free" && sub.expires_at) {
+    const exp = new Date(sub.expires_at).getTime();
+    if (sub.status === "active" && exp > now && exp <= now + 3 * DAY_MS) {
+      winback = {
+        state: "expiring",
+        tier: sub.tier,
+        days: Math.ceil((exp - now) / DAY_MS),
+      };
+    } else if (exp < now && exp >= now - 30 * DAY_MS) {
+      winback = {
+        state: "lapsed",
+        tier: sub.tier,
+        days: Math.ceil((now - exp) / DAY_MS),
+      };
+    }
+  }
 
   // Active (non-expired) stories, grouped by author.
   const nowISO = new Date().toISOString();
@@ -88,6 +121,14 @@ export default async function HomePage() {
           groups={groups}
         />
       </section>
+
+      {winback && (
+        <WinbackBanner
+          state={winback.state}
+          tier={winback.tier}
+          days={winback.days}
+        />
+      )}
 
       <section className="hero">
         <div className="logo">
