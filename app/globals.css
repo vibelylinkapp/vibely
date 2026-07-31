@@ -2481,3 +2481,108 @@ body {
 }
 .post-del-yes:disabled,
 .post-del-no:disabled { opacity: 0.6; cursor: default; }
+
+/* --- Edit caption ------------------------------------------------- */
+.caption-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-left: 6px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.caption-edit:hover {
+  background: var(--raised);
+  color: var(--violet);
+}
+.caption-edit svg {
+  width: 14px;
+  height: 14px;
+}
+.caption-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 6px 12px;
+  border: 1px dashed var(--line-2);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.caption-add svg {
+  width: 15px;
+  height: 15px;
+}
+.caption-add:hover {
+  border-color: var(--violet);
+  color: var(--violet);
+}
+.caption-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.caption-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.caption-textarea:focus {
+  outline: none;
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px rgba(122, 47, 242, 0.12);
+}
+.caption-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.caption-save {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 16px;
+  background: var(--grad);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.caption-cancel {
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 7px 16px;
+  background: var(--card);
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.caption-save:disabled,
+.caption-cancel:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

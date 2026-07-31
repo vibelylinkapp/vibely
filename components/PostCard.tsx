@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PostLike from "@/components/PostLike";
 import DeletePost from "@/components/DeletePost";
+import EditCaption from "@/components/EditCaption";
 
 type Author = { id: string; display_name: string; avatar_url: string | null };
 
@@ -78,14 +79,12 @@ export default function PostCard({
             <span className="post-comment-n">{commentCount}</span>
           </Link>
         </div>
-        {caption && (
-          <p className="post-caption">
-            <span className="post-caption-name">
-              {author.display_name.split(" ")[0]}
-            </span>{" "}
-            {caption}
-          </p>
-        )}
+        <EditCaption
+          postId={postId}
+          firstName={author.display_name.split(" ")[0]}
+          initialCaption={caption}
+          canEdit={canDelete ?? false}
+        />
       </div>
     </article>
   );
