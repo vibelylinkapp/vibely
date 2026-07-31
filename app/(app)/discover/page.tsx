@@ -18,6 +18,8 @@ const FILTERS: { id: Intent | "all"; label: string }[] = [
   { id: "travel", label: "Travel" },
 ];
 
+const NO_MATCH = "00000000-0000-0000-0000-000000000000";
+
 export default async function DiscoverPage({
   searchParams,
 }: {
@@ -31,24 +33,46 @@ export default async function DiscoverPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const [{ data: blockedRows }, { data: likedRows }] = await Promise.all([
-    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
-    supabase.from("likes").select("liked_id").eq("liker_id", user.id),
-  ]);
+  const nowIso = new Date().toISOString();
+
+  const [{ data: blockedRows }, { data: likedRows }, { data: boostRows }] =
+    await Promise.all([
+      supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+      supabase.from("likes").select("liked_id").eq("liker_id", user.id),
+      supabase.from("boosts").select("profile_id").gt("expires_at", nowIso),
+    ]);
   const excludeIds = new Set<string>([
     ...(blockedRows ?? []).map((b) => b.blocked_id),
     ...(likedRows ?? []).map((l) => l.liked_id),
   ]);
+  const boostedSet = new Set<string>((boostRows ?? []).map((b) => b.profile_id));
+  boostedSet.delete(user.id);
 
-  let matchIds: string[] | null = null;
+  let matchSet: Set<string> | null = null;
   if (active !== "all") {
     const { data: pi } = await supabase
       .from("profile_intents")
       .select("profile_id")
       .eq("intent", active as Intent);
-    matchIds = (pi ?? []).map((r) => r.profile_id);
+    matchSet = new Set((pi ?? []).map((r) => r.profile_id));
   }
 
+  // Boosted profiles that pass the current filter — pinned to the top.
+  const boostedCandidateIds = [...boostedSet].filter(
+    (id) => !excludeIds.has(id) && (!matchSet || matchSet.has(id))
+  );
+  const { data: boostedData } = await supabase
+    .from("profiles")
+    .select(
+      "id, display_name, avatar_url, county, area, birthdate, is_online, is_verified"
+    )
+    .in("id", boostedCandidateIds.length ? boostedCandidateIds : [NO_MATCH])
+    .eq("onboarding_done", true)
+    .eq("is_private", false)
+    .eq("invisible_mode", false);
+  const boostedProfiles = boostedData ?? [];
+
+  // Normal feed, most-recently-active first.
   let query = supabase
     .from("profiles")
     .select(
@@ -60,18 +84,17 @@ export default async function DiscoverPage({
     .neq("id", user.id)
     .order("last_active_at", { ascending: false, nullsFirst: false })
     .limit(80);
-
-  if (matchIds) {
-    query = query.in(
-      "id",
-      matchIds.length ? matchIds : ["00000000-0000-0000-0000-000000000000"]
-    );
+  if (matchSet) {
+    query = query.in("id", matchSet.size ? [...matchSet] : [NO_MATCH]);
   }
+  const { data: feedData } = await query;
+  const feedProfiles = (feedData ?? []).filter((p) => !excludeIds.has(p.id));
 
-  const { data: profilesData } = await query;
-  const profiles = (profilesData ?? [])
-    .filter((p) => !excludeIds.has(p.id))
-    .slice(0, 60);
+  const boostedIdSet = new Set(boostedProfiles.map((p) => p.id));
+  const profiles = [
+    ...boostedProfiles,
+    ...feedProfiles.filter((p) => !boostedIdSet.has(p.id)),
+  ].slice(0, 60);
 
   const ids = profiles.map((p) => p.id);
   const intentMap: Record<string, string[]> = {};
@@ -115,7 +138,12 @@ export default async function DiscoverPage({
       ) : (
         <div className="grid">
           {profiles.map((p) => (
-            <ProfileCard key={p.id} p={p} intents={intentMap[p.id] ?? []} />
+            <ProfileCard
+              key={p.id}
+              p={p}
+              intents={intentMap[p.id] ?? []}
+              boosted={boostedIdSet.has(p.id)}
+            />
           ))}
         </div>
       )}

@@ -7,6 +7,8 @@ import AvatarUpload from "@/components/AvatarUpload";
 import PushSetup from "@/components/PushSetup";
 import GalleryUpload from "@/components/GalleryUpload";
 import VerificationSetup from "@/components/VerificationSetup";
+import BoostButton from "@/components/BoostButton";
+import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
@@ -51,6 +53,36 @@ export default async function ProfilePage() {
     .limit(1)
     .maybeSingle();
 
+  const { data: subRow } = await supabase
+    .from("subscriptions")
+    .select("tier, status, expires_at")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  const ent = effectiveTier(subRow);
+  const boostQuota = BOOST_QUOTA[ent.tier] ?? 0;
+  const boostEligible = boostQuota === null || boostQuota > 0;
+
+  const nowIso = new Date().toISOString();
+  const { data: activeBoost } = await supabase
+    .from("boosts")
+    .select("expires_at")
+    .eq("profile_id", user.id)
+    .gt("expires_at", nowIso)
+    .order("expires_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let boostRemaining: number | null = null;
+  if (boostQuota !== null && boostQuota > 0) {
+    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    const { count } = await supabase
+      .from("boosts")
+      .select("id", { count: "exact", head: true })
+      .eq("profile_id", user.id)
+      .gte("created_at", since);
+    boostRemaining = Math.max(0, boostQuota - (count ?? 0));
+  }
+
   const age = profile.birthdate ? ageFrom(profile.birthdate) : null;
   const place = [profile.area, profile.county].filter(Boolean).join(", ");
   const meta = [age ? String(age) : null, place].filter(Boolean).join(" · ");
@@ -94,6 +126,11 @@ export default async function ProfilePage() {
           rejectedNote={
             verifReq?.status === "rejected" ? verifReq.note : null
           }
+        />
+        <BoostButton
+          eligible={boostEligible}
+          activeUntil={activeBoost?.expires_at ?? null}
+          remaining={boostRemaining}
         />
         <PushSetup />
         <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>

@@ -246,6 +246,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      boosts: {
+        Row: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          profile_id: string;
+          started_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          expires_at: string;
+          id?: string;
+          profile_id: string;
+          started_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          profile_id?: string;
+          started_at?: string;
+        };
+        Relationships: [];
+      };
       profile_views: {
         Row: {
           viewed_at: string;

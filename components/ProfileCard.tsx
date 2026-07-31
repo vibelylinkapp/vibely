@@ -25,9 +25,11 @@ function ageFrom(dateStr: string): number {
 export default function ProfileCard({
   p,
   intents,
+  boosted,
 }: {
   p: P;
   intents: string[];
+  boosted?: boolean;
 }) {
   const age = p.birthdate ? ageFrom(p.birthdate) : null;
   const meta = [age ? String(age) : null, p.county].filter(Boolean).join(" · ");
@@ -48,6 +50,7 @@ export default function ProfileCard({
           </span>
         )}
         {p.is_online && <span className="pcard-dot" />}
+        {boosted && <span className="pcard-boost">Boosted</span>}
       </Link>
       <div className="pcard-body">
         <div className="pcard-name">
