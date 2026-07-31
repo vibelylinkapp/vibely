@@ -5167,3 +5167,78 @@ button.create-alt {
 @media (max-width: 400px) {
   .home-share-btn span { display: none; }
 }
+
+
+/* ============================================================
+   VIBELY POLISH LAYER — additive, appended by design pass.
+   Non-destructive: only refines token elevation/radius and
+   layers glassmorphism, hover lift, gradient-CTA depth, and
+   pulsing green presence dots on top of existing rules.
+   Every color token is left untouched. Honors reduced-motion.
+   ============================================================ */
+:root{
+  --shadow: 0 12px 40px -8px rgba(28,10,55,.16), 0 2px 8px rgba(28,10,55,.06);
+  --shadow-sm: 0 6px 20px -6px rgba(28,10,55,.12), 0 1px 4px rgba(28,10,55,.05);
+  --shadow-key: 0 18px 48px -12px rgba(122,47,242,.42);
+  --radius: 24px;
+  --radius-sm: 16px;
+}
+
+/* Card surfaces: smoother transitions + a gentle hover lift */
+.eventcard,.pcard,.nb-card,.placecard{
+  transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s cubic-bezier(.2,.7,.2,1);
+}
+.eventcard:hover,.pcard:hover,.nb-card:hover,.placecard:hover{
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* Primary buttons: keep the aurora gradient, add depth + tactile lift */
+.btn{ box-shadow: var(--shadow-key); transition: transform .16s ease, box-shadow .16s ease, opacity .15s ease; }
+.btn:hover{ transform: translateY(-2px); box-shadow: 0 22px 54px -14px rgba(122,47,242,.5); }
+.btn:active{ transform: translateY(0); }
+.bn-plus{ transition: transform .14s ease, box-shadow .14s ease; }
+.bn-plus:hover{ transform: translateY(-2px) scale(1.03); }
+.appbar-btn:hover{ transform: translateY(-1px); }
+
+/* Interest chips: accent border + text on hover */
+.chip:hover{ border-color: var(--violet); color: var(--violet); }
+
+/* Floating bottom nav + modal backdrop: frosted glass */
+.bottomnav{
+  background: rgba(255,255,255,.82);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  backdrop-filter: blur(18px) saturate(1.35);
+}
+.modal-overlay{
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* Pulsing presence dots — GREEN "online" indicators only.
+   Rendered via ::after so each dot keeps its own white ring. */
+.pcard-dot,.nb-dot,.near-dot,.pnear-dot,.convo-dot,.home-hi-dot,.ci-live-dot{ position:absolute; }
+.pcard-dot::after,.nb-dot::after,.near-dot::after,.pnear-dot::after,
+.convo-dot::after,.home-hi-dot::after,.ci-live-dot::after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  box-shadow: 0 0 0 0 rgba(34,197,94,.5);
+  animation: vb-presence 2.1s ease-out infinite; pointer-events:none;
+}
+@keyframes vb-presence{
+  0%{ box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+  70%{ box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* Accessible keyboard focus — specificity 0 so it never fights existing styles */
+:where(a,button,input,textarea,select):focus-visible{
+  outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .eventcard,.pcard,.nb-card,.placecard,.btn,.bn-plus,.appbar-btn{ transition:none; }
+  .eventcard:hover,.pcard:hover,.nb-card:hover,.placecard:hover,
+  .btn:hover,.bn-plus:hover,.appbar-btn:hover{ transform:none; }
+  .pcard-dot::after,.nb-dot::after,.near-dot::after,.pnear-dot::after,
+  .convo-dot::after,.home-hi-dot::after,.ci-live-dot::after{ animation:none; }
+}
