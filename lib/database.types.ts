@@ -96,6 +96,51 @@ export type Database = {
         Update: { created_at?: string; event_id?: string; profile_id?: string };
         Relationships: [];
       };
+      member_contacts: {
+        Row: {
+          profile_id: string;
+          whatsapp: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          whatsapp?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          whatsapp?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      contact_requests: {
+        Row: {
+          id: string;
+          requester_id: string;
+          target_id: string;
+          status: string;
+          created_at: string;
+          responded_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          requester_id: string;
+          target_id: string;
+          status?: string;
+          created_at?: string;
+          responded_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          requester_id?: string;
+          target_id?: string;
+          status?: string;
+          created_at?: string;
+          responded_at?: string | null;
+        };
+        Relationships: [];
+      };
       feedback: {
         Row: {
           id: string;
@@ -929,6 +974,18 @@ export type Database = {
           is_online: boolean;
           is_verified: boolean;
         }[];
+      };
+      request_whatsapp: {
+        Args: { other_id: string };
+        Returns: string;
+      };
+      respond_whatsapp: {
+        Args: { from_id: string; approve: boolean };
+        Returns: string;
+      };
+      get_shared_whatsapp: {
+        Args: { other_id: string };
+        Returns: string | null;
       };
       start_conversation: {
         Args: { other_id: string };

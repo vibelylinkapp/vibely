@@ -8,6 +8,7 @@ import PushSetup from "@/components/PushSetup";
 import PrivacyToggles from "@/components/PrivacyToggles";
 import GalleryUpload from "@/components/GalleryUpload";
 import VerificationSetup from "@/components/VerificationSetup";
+import WhatsAppSetup from "@/components/WhatsAppSetup";
 import BoostButton from "@/components/BoostButton";
 import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
 
@@ -52,6 +53,12 @@ export default async function ProfilePage() {
     .eq("profile_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
+    .maybeSingle();
+
+  const { data: myContact } = await supabase
+    .from("member_contacts")
+    .select("whatsapp")
+    .eq("profile_id", user.id)
     .maybeSingle();
 
   const { data: subRow } = await supabase

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import ProfileActions from "@/components/ProfileActions";
 import LikeButton from "@/components/LikeButton";
@@ -30,6 +31,7 @@ export default function ProfileCard({
   reason,
   liked,
   matched,
+  contactShare,
 }: {
   p: P;
   intents: string[];
@@ -38,6 +40,7 @@ export default function ProfileCard({
   reason?: string;
   liked?: boolean;
   matched?: boolean;
+  contactShare?: ReactNode;
 }) {
   const age = p.birthdate ? ageFrom(p.birthdate) : null;
   const meta = [age ? String(age) : null, p.county].filter(Boolean).join(" · ");
@@ -98,6 +101,7 @@ export default function ProfileCard({
           initialMatched={matched}
         />
         <ProfileActions targetId={p.id} targetName={p.display_name} />
+        {contactShare}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import ProfileCard from "@/components/ProfileCard";
+import WhatsAppShare from "@/components/WhatsAppShare";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,25 @@ export default async function MatchesPage() {
     (vipRows ?? []).forEach((r) => vipSet.add(r.profile_id));
   }
 
+  // WhatsApp-sharing state per match, in both request directions.
+  type ReqStatus = "none" | "pending" | "approved" | "declined";
+  const [{ data: outReq }, { data: inReq }] = await Promise.all([
+    supabase
+      .from("contact_requests")
+      .select("target_id, status")
+      .eq("requester_id", user.id),
+    supabase
+      .from("contact_requests")
+      .select("requester_id, status")
+      .eq("target_id", user.id),
+  ]);
+  const outMap = new Map<string, ReqStatus>(
+    (outReq ?? []).map((r) => [r.target_id, r.status as ReqStatus])
+  );
+  const inMap = new Map<string, ReqStatus>(
+    (inReq ?? []).map((r) => [r.requester_id, r.status as ReqStatus])
+  );
+
   return (
     <main className="feed-wrap">
       <div className="feed-head">
@@ -97,6 +117,14 @@ export default async function MatchesPage() {
                 intents={intentMap[p.id] ?? []}
                 vip={vipSet.has(p.id)}
                 matched
+                contactShare={
+                  <WhatsAppShare
+                    otherId={p.id}
+                    otherName={p.display_name}
+                    outgoing={outMap.get(p.id) ?? "none"}
+                    incoming={inMap.get(p.id) ?? "none"}
+                  />
+                }
               />
             ))}
           </div>
