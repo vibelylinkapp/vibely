@@ -228,20 +228,24 @@ body {
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .chip {
-  border: 1px solid #e7e2f0;
-  background: #ffffff;
-  color: #4a4458;
+  border: 1.5px solid var(--line-2);
+  background: var(--card);
+  color: var(--ink-2);
   border-radius: 999px;
-  padding: 8px 14px;
+  padding: 9px 15px;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s ease;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+.chip:hover { border-color: var(--violet); color: var(--violet); }
 
-.chip-on { background: var(--aurora); color: #fff; border-color: transparent; }
+.chip-on, .chip-on:hover { background: var(--aurora); color: #fff; border-color: transparent; box-shadow: 0 6px 16px rgba(245, 48, 126, 0.28); }
 
 .auth-msg { font-size: 13px; color: #FFB020; text-align: center; }
 
@@ -266,11 +270,33 @@ body {
 }
 
 .feed-head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin: -20px -16px 8px;
+  padding: 16px 18px 12px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: saturate(140%) blur(14px);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
 }
+
+.feed-action {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 48, 126, 0.1);
+  color: var(--rose);
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+.feed-action svg { width: 22px; height: 22px; }
+.feed-action:hover { background: rgba(245, 48, 126, 0.16); }
+.feed-action:active { transform: scale(0.94); }
 
 .feed-title { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 22px; }
 
@@ -295,17 +321,20 @@ body {
 }
 
 .pcard {
-  background: #ffffff;
-  border: 1px solid #ece9f2;
-  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
+.pcard:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 
 .pcard-photo {
   aspect-ratio: 1 / 1;
-  background: #f2eefb;
+  background: linear-gradient(135deg, #f3edff, #ffe9f2);
   position: relative;
   display: grid;
   place-items: center;

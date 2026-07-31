@@ -125,8 +125,14 @@ export default async function DiscoverPage({
     <main className="feed-wrap">
       <div className="feed-head">
         <span className="feed-title">Discover</span>
-        <Link href="/home" className="pcard-meta" style={{ textDecoration: "none" }}>
-          Home
+        <Link
+          href="/liked-you"
+          className="feed-action"
+          aria-label="See who likes you"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 20.7 4.3 13a5 5 0 0 1 7.1-7l.6.6.6-.6a5 5 0 0 1 7.1 7z" />
+          </svg>
         </Link>
       </div>
 
