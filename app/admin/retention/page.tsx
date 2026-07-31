@@ -107,6 +107,34 @@ export default async function AdminRetention() {
     });
   }
 
+  // Win-back performance: how many lapsed members we nudged, and how many are
+  // active subscribers again. A nudged member counts as reactivated if they
+  // now hold an active, unexpired paid subscription (they had lapsed when
+  // nudged, so being active now means they came back).
+  const { data: nudgeRows } = await admin
+    .from("nudges")
+    .select("profile_id, created_at")
+    .eq("kind", "winback");
+  const nudgedSet = new Set((nudgeRows ?? []).map((n) => n.profile_id));
+  const nudgedMembers = nudgedSet.size;
+  const nudges30 = (nudgeRows ?? []).filter(
+    (n) => n.created_at >= minus30Iso
+  ).length;
+
+  let reactivated = 0;
+  if (nudgedMembers > 0) {
+    const { data: reRows } = await admin
+      .from("subscriptions")
+      .select("profile_id")
+      .in("profile_id", Array.from(nudgedSet))
+      .neq("tier", "free")
+      .eq("status", "active")
+      .gt("expires_at", nowIso);
+    reactivated = new Set((reRows ?? []).map((r) => r.profile_id)).size;
+  }
+  const reactivationRate =
+    nudgedMembers > 0 ? Math.round((reactivated / nudgedMembers) * 100) : 0;
+
   return (
     <div>
       <h1 className="admin-h1">Renewal health</h1>
@@ -197,6 +225,21 @@ export default async function AdminRetention() {
             </div>
           )}
         </div>
+      </div>
+
+      <h2 className="admin-h2" style={{ marginTop: 24 }}>
+        Win-back performance
+      </h2>
+      <div className="stat-grid">
+        <Stat label="Members nudged" value={nudgedMembers} />
+        <Stat label="Reactivated" value={reactivated} accent="gold" />
+        <Stat
+          label="Reactivation rate"
+          value={`${reactivationRate}%`}
+          hint="of nudged members now active"
+          accent="gold"
+        />
+        <Stat label="Nudges sent (30d)" value={nudges30} />
       </div>
 
       <p className="stat-hint" style={{ marginTop: 16 }}>
