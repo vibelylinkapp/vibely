@@ -110,6 +110,20 @@ export default async function HomePage() {
       a.author.id === user.id ? -1 : b.author.id === user.id ? 1 : 0
     );
 
+  // ---- People near you rail (welcoming faces right under the stories) ----
+  const { data: nearbyRows } = await supabase
+    .from("profiles")
+    .select("id, display_name, avatar_url, area, county, is_online, birthdate")
+    .eq("onboarding_done", true)
+    .eq("is_private", false)
+    .eq("invisible_mode", false)
+    .neq("id", user.id)
+    .order("last_active_at", { ascending: false, nullsFirst: false })
+    .limit(18);
+  const nearbyPeople = (nearbyRows ?? [])
+    .filter((p) => !blocked.has(p.id))
+    .slice(0, 14);
+
   // ---- Feed: first page (blocked authors + hidden posts filtered out) ----
   const { items: feedItems, nextCursor: feedNextCursor } = await getFeedPage(
     supabase,
@@ -239,6 +253,36 @@ export default async function HomePage() {
           groups={groups}
         />
       </section>
+
+      {nearbyPeople.length > 0 && (
+        <section className="home-nearby">
+          <div className="sec">
+            <h3>People near you</h3>
+            <Link href="/nearby">See all</Link>
+          </div>
+          <div className="hscroll">
+            {nearbyPeople.map((p) => (
+              <Link key={p.id} href={`/u/${p.id}`} className="near-chip">
+                <span className="near-av">
+                  {p.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.avatar_url} alt={p.display_name} />
+                  ) : (
+                    <span className="near-initial">
+                      {p.display_name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  {p.is_online && <span className="near-dot" />}
+                </span>
+                <span className="near-nm">{p.display_name.split(" ")[0]}</span>
+                {(p.area || p.county) && (
+                  <span className="near-meta">{p.area || p.county}</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {checkins.length > 0 && (
         <section className="home-checkins">
