@@ -704,15 +704,16 @@ body {
 }
 
 /* ============================ MESSAGING ============================ */
-.convo-list { display: flex; flex-direction: column; }
+.convo-list { display: flex; flex-direction: column; gap: 2px; }
 .convo-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 6px;
-  border-bottom: 1px solid var(--line);
+  padding: 12px;
+  border-radius: 16px;
   text-decoration: none;
   color: inherit;
+  transition: background 0.15s ease;
 }
 .convo-row:hover { background: var(--bg-soft); }
 .convo-avatar {
@@ -729,6 +730,7 @@ body {
   color: #fff;
   flex-shrink: 0;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 .convo-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .convo-dot {
@@ -1197,7 +1199,7 @@ body {
   font-size: 22px;
   color: #fff;
   overflow: hidden;
-  box-shadow: 0 0 0 2px #f6f4fc, 0 0 0 4px #F5307E;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #F5307E, 0 6px 14px rgba(245, 48, 126, 0.28);
 }
 .match-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .match-chip-name {
