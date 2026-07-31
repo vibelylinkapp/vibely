@@ -2651,7 +2651,8 @@ button.create-alt {
 }
 .composer-drop {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
+  max-height: 200px;
   border-radius: var(--radius);
   border: 1.5px dashed var(--line-2);
   background: var(--bg-soft);
@@ -2719,6 +2720,14 @@ button.create-alt {
 .create-alt-s { font-size: 13px; color: var(--ink-3); }
 .create-alt-arrow { color: var(--ink-3); flex-shrink: 0; }
 .create-alt-arrow svg { width: 20px; height: 20px; }
+
+/* Create hub: header + scroll cue so the actions below the composer are discoverable */
+.create-more-head { max-width: 520px; margin: 24px auto 0; }
+.create-more-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
+.create-more-sub { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-3); margin-top: 4px; }
+.create-more-chevron { display: inline-grid; place-items: center; color: var(--violet); animation: create-bob 1.5s ease-in-out infinite; }
+.create-more-chevron svg { width: 16px; height: 16px; }
+@keyframes create-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 
 /* ======================= POST ACTIONS + COMMENTS ======================= */
 .post-actions { display: flex; align-items: center; gap: 18px; }

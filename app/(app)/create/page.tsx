@@ -64,6 +64,12 @@ const checkinIcon = (
   </svg>
 );
 
+const chevronDown = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
+
 export default async function CreatePage() {
   const supabase = await createClient();
   const {
@@ -88,6 +94,14 @@ export default async function CreatePage() {
         Share a moment, host something, or let people know you&apos;re out.
       </p>
       <CreatePost userId={user.id} />
+
+      <div className="create-more-head">
+        <h2 className="create-more-title">More ways to share</h2>
+        <p className="create-more-sub">
+          <span className="create-more-chevron">{chevronDown}</span>
+          Scroll down for stories, plans, events and live check-ins.
+        </p>
+      </div>
 
       <div className="create-actions">
         <AddStory
