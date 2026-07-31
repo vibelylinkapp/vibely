@@ -904,6 +904,57 @@ body {
   min-width: 30px;
   text-align: right;
 }
+.bubble-group.mine { align-items: flex-end; }
+.bubble-group.theirs { align-items: flex-start; }
+.react-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.react-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #171B26;
+  border: 1px solid #262b3b;
+  color: #EDEEF3;
+  font-size: 12px;
+  line-height: 1.6;
+  cursor: pointer;
+}
+.react-pill.on { background: rgba(122, 47, 242, 0.22); border-color: var(--violet); }
+.react-pill .rx-n { font-weight: 700; font-size: 11px; opacity: 0.85; }
+.react-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #7C8598;
+  cursor: pointer;
+  opacity: 0.55;
+}
+.react-add:hover { opacity: 1; color: var(--violet); }
+.react-picker {
+  display: inline-flex;
+  gap: 2px;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: #171B26;
+  border: 1px solid #262b3b;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+.react-picker button {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  padding: 3px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.react-picker button:hover { background: rgba(255, 255, 255, 0.08); }
 
 /* ======================= GOOGLE / OAUTH SIGN-IN ======================= */
 .btn-google {

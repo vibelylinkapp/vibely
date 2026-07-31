@@ -10,10 +10,12 @@ type Msg = Pick<
   Tables<"messages">,
   "id" | "sender_id" | "body" | "created_at" | "media_url" | "kind"
 >;
+type Reaction = { message_id: string; emoji: string; profile_id: string };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_REC_SECONDS = 120;
 const CHAT_BUCKET = "chat-media";
+const REACTION_EMOJI = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 
 function extFor(type: string): string {
   if (type === "image/png") return "png";
@@ -46,14 +48,18 @@ export default function Chat({
   otherUserId,
   otherLastReadAt,
   initialMessages,
+  initialReactions,
 }: {
   conversationId: string;
   currentUserId: string;
   otherUserId: string | null;
   otherLastReadAt: string | null;
   initialMessages: Msg[];
+  initialReactions: Reaction[];
 }) {
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
+  const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
+  const [pickerFor, setPickerFor] = useState<string | null>(null);
   const [otherRead, setOtherRead] = useState<string | null>(otherLastReadAt);
   const [otherTyping, setOtherTyping] = useState(false);
   const [text, setText] = useState("");
@@ -179,6 +185,41 @@ export default function Chat({
                 : prev
             );
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "message_reactions" },
+        (payload) => {
+          const r = payload.new as Reaction;
+          setReactions((prev) =>
+            prev.some(
+              (x) =>
+                x.message_id === r.message_id &&
+                x.profile_id === r.profile_id &&
+                x.emoji === r.emoji
+            )
+              ? prev
+              : [...prev, { message_id: r.message_id, profile_id: r.profile_id, emoji: r.emoji }]
+          );
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "message_reactions" },
+        (payload) => {
+          const r = payload.old as Partial<Reaction>;
+          if (!r.message_id || !r.profile_id || !r.emoji) return;
+          setReactions((prev) =>
+            prev.filter(
+              (x) =>
+                !(
+                  x.message_id === r.message_id &&
+                  x.profile_id === r.profile_id &&
+                  x.emoji === r.emoji
+                )
+            )
+          );
         }
       )
       .on("broadcast", { event: "typing" }, ({ payload }) => {
@@ -388,6 +429,72 @@ export default function Chat({
     else cleanupRec();
   }
 
+  // ---- Reactions ----
+  async function toggleReaction(messageId: string, emoji: string) {
+    setPickerFor(null);
+    const mine = reactions.some(
+      (r) =>
+        r.message_id === messageId &&
+        r.profile_id === currentUserId &&
+        r.emoji === emoji
+    );
+    if (mine) {
+      setReactions((prev) =>
+        prev.filter(
+          (r) =>
+            !(
+              r.message_id === messageId &&
+              r.profile_id === currentUserId &&
+              r.emoji === emoji
+            )
+        )
+      );
+      await supabase
+        .from("message_reactions")
+        .delete()
+        .eq("message_id", messageId)
+        .eq("profile_id", currentUserId)
+        .eq("emoji", emoji);
+    } else {
+      setReactions((prev) =>
+        prev.some(
+          (r) =>
+            r.message_id === messageId &&
+            r.profile_id === currentUserId &&
+            r.emoji === emoji
+        )
+          ? prev
+          : [...prev, { message_id: messageId, profile_id: currentUserId, emoji }]
+      );
+      await supabase.from("message_reactions").insert({
+        message_id: messageId,
+        profile_id: currentUserId,
+        emoji,
+      });
+    }
+  }
+
+  const reactionsByMsg = useMemo(() => {
+    const map: Record<string, { emoji: string; count: number; mine: boolean }[]> = {};
+    const acc: Record<string, Map<string, { count: number; mine: boolean }>> = {};
+    for (const r of reactions) {
+      if (!acc[r.message_id]) acc[r.message_id] = new Map();
+      const m = acc[r.message_id];
+      const cur = m.get(r.emoji) ?? { count: 0, mine: false };
+      cur.count += 1;
+      if (r.profile_id === currentUserId) cur.mine = true;
+      m.set(r.emoji, cur);
+    }
+    for (const [mid, m] of Object.entries(acc)) {
+      map[mid] = Array.from(m.entries()).map(([emoji, v]) => ({
+        emoji,
+        count: v.count,
+        mine: v.mine,
+      }));
+    }
+    return map;
+  }, [reactions, currentUserId]);
+
   // Read receipt shows only under MY most recent message.
   const lastMine = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -411,8 +518,12 @@ export default function Chat({
             const mine = m.sender_id === currentUserId;
             const isVoice = m.kind === "voice" && !!m.media_url;
             const isImage = !isVoice && !!m.media_url;
+            const pills = reactionsByMsg[m.id] ?? [];
             return (
-              <div key={m.id} className="bubble-group">
+              <div
+                key={m.id}
+                className={"bubble-group" + (mine ? " mine" : " theirs")}
+              >
                 <div
                   className={
                     "bubble " +
@@ -435,6 +546,50 @@ export default function Chat({
                     m.body
                   )}
                 </div>
+
+                {pickerFor === m.id && (
+                  <div className="react-picker">
+                    {REACTION_EMOJI.map((e) => (
+                      <button
+                        key={e}
+                        type="button"
+                        onClick={() => toggleReaction(m.id, e)}
+                        aria-label={`React ${e}`}
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="react-row">
+                  {pills.map((p) => (
+                    <button
+                      key={p.emoji}
+                      type="button"
+                      className={"react-pill" + (p.mine ? " on" : "")}
+                      onClick={() => toggleReaction(m.id, p.emoji)}
+                    >
+                      <span className="rx-emoji">{p.emoji}</span>
+                      <span className="rx-n">{p.count}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="react-add"
+                    onClick={() =>
+                      setPickerFor((cur) => (cur === m.id ? null : m.id))
+                    }
+                    aria-label="Add reaction"
+                  >
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                      <path d="M9 9h.01M15 9h.01" />
+                    </svg>
+                  </button>
+                </div>
+
                 {lastMine && m.id === lastMine.id && (
                   <div className={"receipt" + (seen ? " seen" : "")}>
                     {seen ? "Seen" : "Sent"}

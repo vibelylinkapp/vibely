@@ -531,6 +531,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      message_reactions: {
+        Row: {
+          created_at: string;
+          emoji: string;
+          message_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          emoji: string;
+          message_id: string;
+          profile_id: string;
+        };
+        Update: {
+          created_at?: string;
+          emoji?: string;
+          message_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [];
+      };
       messages: {
         Row: {
           body: string | null;

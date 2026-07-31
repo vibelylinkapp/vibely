@@ -56,6 +56,21 @@ export default async function ThreadPage({
     .order("created_at", { ascending: true })
     .limit(200);
 
+  // Existing reactions for the loaded messages.
+  const msgIds = (messages ?? []).map((m) => m.id);
+  let initialReactions: {
+    message_id: string;
+    emoji: string;
+    profile_id: string;
+  }[] = [];
+  if (msgIds.length) {
+    const { data: rx } = await supabase
+      .from("message_reactions")
+      .select("message_id, emoji, profile_id")
+      .in("message_id", msgIds);
+    initialReactions = rx ?? [];
+  }
+
   await supabase
     .from("conversation_members")
     .update({ last_read_at: new Date().toISOString() })
@@ -94,6 +109,7 @@ export default async function ThreadPage({
         otherUserId={otherId}
         otherLastReadAt={otherLastReadAt}
         initialMessages={messages ?? []}
+        initialReactions={initialReactions}
       />
     </main>
   );
