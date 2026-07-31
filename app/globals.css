@@ -3012,6 +3012,9 @@ button.create-alt {
 .admin-fb-date { font-size: 12px; color: var(--ink-3); margin-left: auto; }
 .admin-fb-msg { font-size: 14px; color: var(--ink-2); line-height: 1.5; white-space: pre-wrap; }
 
+/* Matches page */
+.matches-sub { text-align: center; color: var(--ink-3); font-size: 13px; margin: 0 0 14px; }
+
 /* ======================= POST ACTIONS + COMMENTS ======================= */
 .post-actions { display: flex; align-items: center; gap: 18px; }
 .post-comment {

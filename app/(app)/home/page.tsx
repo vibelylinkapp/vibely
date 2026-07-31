@@ -262,6 +262,16 @@ export default async function HomePage() {
             </svg>
           </Link>
           <Link
+            href="/matches"
+            className="appbar-btn matches"
+            aria-label="Your matches"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8.5 4A3.5 3.5 0 0 0 5 7.5C5 10.5 10 13.5 10 13.5s5-3 5-6A3.5 3.5 0 0 0 8.5 4z" opacity="0.55" />
+              <path d="M15 8a3.5 3.5 0 0 0-3.5 3.5c0 3 5 6 5 6s5-3 5-6A3.5 3.5 0 0 0 15 8z" />
+            </svg>
+          </Link>
+          <Link
             href="/liked-you"
             className="appbar-btn likes"
             aria-label="See who likes you"
