@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
-import NearbyExplorer from "@/components/NearbyExplorer";
+import Heatmap from "@/components/Heatmap";
 
 export const dynamic = "force-dynamic";
 
-export default async function NearbyPage() {
+export default async function HeatmapPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -23,17 +23,17 @@ export default async function NearbyPage() {
   return (
     <main className="feed-wrap">
       <div className="feed-head">
-        <span className="feed-title">Nearby</span>
+        <span className="feed-title">Heatmap</span>
       </div>
       <div className="disc-tabs">
-        <Link href="/nearby" className="disc-tab on">
+        <Link href="/nearby" className="disc-tab">
           People nearby
         </Link>
-        <Link href="/heatmap" className="disc-tab">
+        <Link href="/heatmap" className="disc-tab on">
           Live heatmap
         </Link>
       </div>
-      <NearbyExplorer meId={user.id} />
+      <Heatmap />
       <BottomNav />
     </main>
   );

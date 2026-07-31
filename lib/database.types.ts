@@ -695,6 +695,17 @@ export type Database = {
       };
     };
     Functions: {
+      heatmap_cells: {
+        Args: {
+          cell?: number;
+          online_only?: boolean;
+        };
+        Returns: {
+          lat: number;
+          lng: number;
+          weight: number;
+        }[];
+      };
       nearby_profiles: {
         Args: {
           in_lat: number;
