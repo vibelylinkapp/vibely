@@ -9,6 +9,7 @@ import EventCard, { EventCardData } from "@/components/EventCard";
 import NotifBell from "@/components/NotifBell";
 import FeedLoadMore from "@/components/FeedLoadMore";
 import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
+import AdminNotice from "@/components/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,15 @@ export default async function HomePage() {
     .from("subscriptions")
     .select("tier, status, expires_at")
     .eq("profile_id", user.id)
+    .maybeSingle();
+
+  // Latest active admin notice -> dismissible banner at the top of Home.
+  const { data: notice } = await supabase
+    .from("announcements")
+    .select("id, body, link")
+    .eq("active", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   let winback: {
@@ -244,6 +254,10 @@ export default async function HomePage() {
           </Link>
         </div>
       </header>
+
+      {notice && (
+        <AdminNotice id={notice.id} body={notice.body} link={notice.link} />
+      )}
 
       <section className="home-stories">
         <Stories

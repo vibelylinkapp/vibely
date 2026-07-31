@@ -214,3 +214,54 @@ export async function toggleFeatureEvent(eventId: string, on: boolean) {
   revalidatePath("/events");
   revalidatePath(`/events/${eventId}`);
 }
+
+export async function createAnnouncement(formData: FormData) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  const body = String(formData.get("body") ?? "").trim();
+  const link = String(formData.get("link") ?? "").trim();
+  if (!body) return;
+  const { data } = await admin
+    .from("announcements")
+    .insert({ body, link: link || null, active: true, created_by: adminId })
+    .select("id")
+    .single();
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    action: "create_announcement",
+    detail: data?.id ?? null,
+  });
+  revalidatePath("/admin/announcements");
+  revalidatePath("/home");
+}
+
+export async function setAnnouncementActive(formData: FormData) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  const id = String(formData.get("id") ?? "");
+  const active = String(formData.get("active") ?? "") === "true";
+  if (!id) return;
+  await admin.from("announcements").update({ active }).eq("id", id);
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    action: active ? "activate_announcement" : "deactivate_announcement",
+    detail: id,
+  });
+  revalidatePath("/admin/announcements");
+  revalidatePath("/home");
+}
+
+export async function deleteAnnouncement(formData: FormData) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await admin.from("announcements").delete().eq("id", id);
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    action: "delete_announcement",
+    detail: id,
+  });
+  revalidatePath("/admin/announcements");
+  revalidatePath("/home");
+}

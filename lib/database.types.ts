@@ -96,6 +96,33 @@ export type Database = {
         Update: { created_at?: string; event_id?: string; profile_id?: string };
         Relationships: [];
       };
+      announcements: {
+        Row: {
+          id: string;
+          body: string;
+          link: string | null;
+          active: boolean;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          body: string;
+          link?: string | null;
+          active?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          body?: string;
+          link?: string | null;
+          active?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       checkins: {
         Row: {
           id: string;
