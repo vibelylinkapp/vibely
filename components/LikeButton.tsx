@@ -8,13 +8,19 @@ import { createClient } from "@/lib/supabase/client";
 export default function LikeButton({
   targetId,
   targetName,
+  initialLiked = false,
+  initialMatched = false,
 }: {
   targetId: string;
   targetName: string;
+  // Server-known state so a like already in the database survives a reload
+  // instead of the button resetting to "Like".
+  initialLiked?: boolean;
+  initialMatched?: boolean;
 }) {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "liked" | "matched" | "limit">(
-    "idle"
+    initialMatched ? "matched" : initialLiked ? "liked" : "idle"
   );
   const [busy, setBusy] = useState(false);
 

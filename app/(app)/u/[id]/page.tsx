@@ -42,20 +42,42 @@ export default async function UserDetailPage({
   // Never expose banned or hidden members to others.
   if (profile.is_banned || profile.is_private) notFound();
 
-  const [{ data: intents }, { data: photos }, { data: sub }] =
-    await Promise.all([
-      supabase.from("profile_intents").select("intent").eq("profile_id", id),
-      supabase
-        .from("photos")
-        .select("id, url")
-        .eq("profile_id", id)
-        .order("position", { ascending: true }),
-      supabase
-        .from("subscriptions")
-        .select("tier, status, expires_at")
-        .eq("profile_id", id)
-        .maybeSingle(),
-    ]);
+  const [
+    { data: intents },
+    { data: photos },
+    { data: sub },
+    { data: myLike },
+    { data: theirLike },
+  ] = await Promise.all([
+    supabase.from("profile_intents").select("intent").eq("profile_id", id),
+    supabase
+      .from("photos")
+      .select("id, url")
+      .eq("profile_id", id)
+      .order("position", { ascending: true }),
+    supabase
+      .from("subscriptions")
+      .select("tier, status, expires_at")
+      .eq("profile_id", id)
+      .maybeSingle(),
+    // Did I already like them? Keeps the Like button in its true state on reload.
+    supabase
+      .from("likes")
+      .select("liker_id")
+      .eq("liker_id", user.id)
+      .eq("liked_id", id)
+      .maybeSingle(),
+    // Did they like me? Both directions true => it's a match.
+    supabase
+      .from("likes")
+      .select("liker_id")
+      .eq("liker_id", id)
+      .eq("liked_id", user.id)
+      .maybeSingle(),
+  ]);
+
+  const iLiked = !!myLike;
+  const matched = iLiked && !!theirLike;
 
   const isVip = effectiveTier(sub).tier === "vip";
 
@@ -156,7 +178,12 @@ export default async function UserDetailPage({
         )}
 
         <div className="detail-actions">
-          <LikeButton targetId={profile.id} targetName={profile.display_name} />
+          <LikeButton
+            targetId={profile.id}
+            targetName={profile.display_name}
+            initialLiked={iLiked}
+            initialMatched={matched}
+          />
           <ProfileActions
             targetId={profile.id}
             targetName={profile.display_name}

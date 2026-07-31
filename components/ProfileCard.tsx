@@ -28,12 +28,16 @@ export default function ProfileCard({
   boosted,
   vip,
   reason,
+  liked,
+  matched,
 }: {
   p: P;
   intents: string[];
   boosted?: boolean;
   vip?: boolean;
   reason?: string;
+  liked?: boolean;
+  matched?: boolean;
 }) {
   const age = p.birthdate ? ageFrom(p.birthdate) : null;
   const meta = [age ? String(age) : null, p.county].filter(Boolean).join(" · ");
@@ -87,7 +91,12 @@ export default function ProfileCard({
             ))}
           </div>
         )}
-        <LikeButton targetId={p.id} targetName={p.display_name} />
+        <LikeButton
+          targetId={p.id}
+          targetName={p.display_name}
+          initialLiked={liked}
+          initialMatched={matched}
+        />
         <ProfileActions targetId={p.id} targetName={p.display_name} />
       </div>
     </div>
