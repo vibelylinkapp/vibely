@@ -125,15 +125,27 @@ export default async function DiscoverPage({
     <main className="feed-wrap">
       <div className="feed-head">
         <span className="feed-title">Discover</span>
-        <Link
-          href="/liked-you"
-          className="feed-action"
-          aria-label="See who likes you"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 20.7 4.3 13a5 5 0 0 1 7.1-7l.6.6.6-.6a5 5 0 0 1 7.1 7z" />
-          </svg>
-        </Link>
+        <div className="feed-actions">
+          <Link
+            href="/nearby"
+            className="feed-action nearby"
+            aria-label="People nearby"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+          </Link>
+          <Link
+            href="/liked-you"
+            className="feed-action"
+            aria-label="See who likes you"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 20.7 4.3 13a5 5 0 0 1 7.1-7l.6.6.6-.6a5 5 0 0 1 7.1 7z" />
+            </svg>
+          </Link>
+        </div>
       </div>
 
       <div className="filter-row">
