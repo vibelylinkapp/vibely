@@ -154,6 +154,9 @@ export default async function ProfilePage() {
           <Link href="/onboarding" className="btn-ghost">
             Edit profile
           </Link>
+          <Link href="/feedback" className="btn-ghost">
+            Send feedback
+          </Link>
           {profile.is_admin && (
             <Link href="/admin" className="btn-ghost">
               Admin panel
