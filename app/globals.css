@@ -3860,3 +3860,12 @@ button.create-alt {
   background: #7c3aed;
   flex-shrink: 0;
 }
+
+/* --- feed infinite scroll --------------------------------------- */
+.feed-sentinel { height: 1px; width: 100%; }
+.feed-loading {
+  text-align: center;
+  color: #8a8a94;
+  font-size: 13px;
+  padding: 14px 0 4px;
+}

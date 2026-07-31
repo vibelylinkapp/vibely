@@ -7,6 +7,8 @@ import WinbackBanner from "@/components/WinbackBanner";
 import PostCard from "@/components/PostCard";
 import EventCard, { EventCardData } from "@/components/EventCard";
 import NotifBell from "@/components/NotifBell";
+import FeedLoadMore from "@/components/FeedLoadMore";
+import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 
 export const dynamic = "force-dynamic";
 
@@ -108,54 +110,15 @@ export default async function HomePage() {
       a.author.id === user.id ? -1 : b.author.id === user.id ? 1 : 0
     );
 
-  // ---- Feed: recent posts (blocked authors and hidden posts filtered out) ----
-  const { data: postRows } = await supabase
-    .from("posts")
-    .select("id, author_id, media_url, caption, created_at")
-    .order("created_at", { ascending: false })
-    .limit(50);
-  const posts = (postRows ?? []).filter(
-    (p) => !blocked.has(p.author_id) && !hidden.has(p.id)
+  // ---- Feed: first page (blocked authors + hidden posts filtered out) ----
+  const { items: feedItems, nextCursor: feedNextCursor } = await getFeedPage(
+    supabase,
+    user.id,
+    { limit: FEED_PAGE_SIZE }
   );
 
+  // Author cache for the check-ins rail (seeded from story authors).
   const postAuthorMap: Record<string, Author> = { ...authorMap };
-  const missingAuthorIds = Array.from(
-    new Set(posts.map((p) => p.author_id))
-  ).filter((id) => !postAuthorMap[id]);
-  if (missingAuthorIds.length) {
-    const { data: pa } = await supabase
-      .from("profiles")
-      .select("id, display_name, avatar_url")
-      .in("id", missingAuthorIds);
-    (pa ?? []).forEach((a) => {
-      postAuthorMap[a.id] = a;
-    });
-  }
-
-  const postIds = posts.map((p) => p.id);
-  const likeCount: Record<string, number> = {};
-  const myLiked = new Set<string>();
-  if (postIds.length) {
-    const { data: likeRows } = await supabase
-      .from("post_likes")
-      .select("post_id, profile_id")
-      .in("post_id", postIds);
-    (likeRows ?? []).forEach((r) => {
-      likeCount[r.post_id] = (likeCount[r.post_id] ?? 0) + 1;
-      if (r.profile_id === user.id) myLiked.add(r.post_id);
-    });
-  }
-
-  const commentCount: Record<string, number> = {};
-  if (postIds.length) {
-    const { data: commentRows } = await supabase
-      .from("post_comments")
-      .select("post_id")
-      .in("post_id", postIds);
-    (commentRows ?? []).forEach((r) => {
-      commentCount[r.post_id] = (commentCount[r.post_id] ?? 0) + 1;
-    });
-  }
 
   // ---- Trending events rail ----
   const trendNow = new Date().toISOString();
@@ -330,27 +293,27 @@ export default async function HomePage() {
         />
       )}
 
-      {posts.length > 0 ? (
+      {feedItems.length > 0 ? (
         <section className="feed-list">
-          {posts.map((p) => {
-            const a = postAuthorMap[p.author_id];
-            if (!a) return null;
-            return (
-              <PostCard
-                key={p.id}
-                postId={p.id}
-                author={a}
-                mediaUrl={p.media_url}
-                caption={p.caption}
-                createdAt={p.created_at}
-                likeCount={likeCount[p.id] ?? 0}
-                liked={myLiked.has(p.id)}
-                commentCount={commentCount[p.id] ?? 0}
-                canDelete={p.author_id === user.id}
-                canReport={p.author_id !== user.id}
-              />
-            );
-          })}
+          {feedItems.map((it) => (
+            <PostCard
+              key={it.postId}
+              postId={it.postId}
+              author={it.author}
+              mediaUrl={it.mediaUrl}
+              caption={it.caption}
+              createdAt={it.createdAt}
+              likeCount={it.likeCount}
+              liked={it.liked}
+              commentCount={it.commentCount}
+              canDelete={it.canDelete}
+              canReport={it.canReport}
+            />
+          ))}
+          <FeedLoadMore
+            initialCursor={feedNextCursor}
+            seenIds={feedItems.map((it) => it.postId)}
+          />
         </section>
       ) : (
         <div className="feed-empty">
