@@ -19,7 +19,7 @@ export const TIERS: {
     id: "plus",
     name: "Vibely Plus",
     price: TIER_PRICES.plus,
-    perks: ["Unlimited likes", "See who liked you", "Ad-free experience"],
+    perks: ["See who liked you", "Unlimited likes"],
   },
   {
     id: "gold",
@@ -27,8 +27,8 @@ export const TIERS: {
     price: TIER_PRICES.gold,
     perks: [
       "Everything in Plus",
-      "Priority in Discover",
       "5 profile boosts / month",
+      "Priority placement when boosted",
     ],
   },
   {

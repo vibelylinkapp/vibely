@@ -1471,3 +1471,31 @@ body {
   margin: 18px 2px 0;
   line-height: 1.5;
 }
+
+/* ======================= PAYWALL / WHO-LIKES-YOU ======================= */
+.paywall {
+  text-align: center;
+  padding: 44px 24px 90px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.paywall-count {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  background: var(--aurora);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.paywall-title {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  margin: 6px 0 8px;
+}
+.paywall-cta {
+  margin-top: 18px;
+  display: inline-block;
+}
