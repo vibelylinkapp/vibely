@@ -69,9 +69,6 @@ export default async function PlansPage() {
     <main className="feed-wrap">
       <div className="feed-head">
         <span className="feed-title">Plans & meetups</span>
-        <Link href="/home" className="pcard-meta" style={{ textDecoration: "none" }}>
-          Home
-        </Link>
       </div>
 
       <div style={{ marginBottom: 16 }}>
@@ -95,7 +92,9 @@ export default async function PlansPage() {
                     {count} going{p.max_people ? ` / ${p.max_people}` : ""}
                   </span>
                 </div>
-                <div className="plan-title">{p.title}</div>
+                <Link href={`/plans/${p.id}`} className="plan-title">
+                  {p.title}
+                </Link>
                 <div className="plan-meta">
                   {fmt(p.starts_at)}
                   {p.county ? ` · ${p.county}` : ""}
