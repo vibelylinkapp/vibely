@@ -131,7 +131,7 @@ export default function Chat({
     fetch("/api/push/send", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ toUserId: otherUserId, kind: "message" }),
+      body: JSON.stringify({ toUserId: otherUserId, kind: "message", conversationId }),
     }).catch(() => {});
   }
 

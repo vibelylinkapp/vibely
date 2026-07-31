@@ -7,7 +7,11 @@ import { createClient as createAdmin } from "@supabase/supabase-js";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Body = { toUserId?: string; kind?: "message" | "match" };
+type Body = {
+  toUserId?: string;
+  kind?: "message" | "match";
+  conversationId?: string;
+};
 
 function admin() {
   return createAdmin(
@@ -41,6 +45,12 @@ export async function POST(req: Request) {
   }
   const toUserId = body.toUserId;
   const kind = body.kind === "match" ? "match" : "message";
+  // Only accept a plausible conversation id (uuid-ish) for the deep link.
+  const conversationId =
+    typeof body.conversationId === "string" &&
+    /^[0-9a-f-]{16,}$/i.test(body.conversationId)
+      ? body.conversationId
+      : null;
   if (!toUserId || toUserId === user.id) {
     return NextResponse.json({ ok: false, reason: "no_target" });
   }
@@ -82,7 +92,8 @@ export async function POST(req: Request) {
       : {
           title: `New message from ${name}`,
           body: "Tap to open the conversation.",
-          url: "/messages",
+          // Deep-link straight into the thread when we know it.
+          url: conversationId ? `/messages/${conversationId}` : "/messages",
           tag: `msg-${user.id}`,
         };
 
