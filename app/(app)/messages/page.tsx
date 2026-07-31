@@ -46,7 +46,12 @@ export default async function MessagesPage() {
   > = {};
   const lastMsgMap: Record<
     string,
-    { body: string | null; created_at: string; sender_id: string }
+    {
+      body: string | null;
+      created_at: string;
+      sender_id: string;
+      media_url: string | null;
+    }
   > = {};
 
   if (convoIds.length) {
@@ -83,7 +88,7 @@ export default async function MessagesPage() {
 
     const { data: recentMsgs } = await supabase
       .from("messages")
-      .select("conversation_id, body, created_at, sender_id")
+      .select("conversation_id, body, created_at, sender_id, media_url")
       .in("conversation_id", convoIds)
       .order("created_at", { ascending: false })
       .limit(300);
@@ -93,6 +98,7 @@ export default async function MessagesPage() {
           body: m.body,
           created_at: m.created_at,
           sender_id: m.sender_id,
+          media_url: m.media_url,
         };
       }
     });
@@ -134,6 +140,10 @@ export default async function MessagesPage() {
               last.sender_id !== user.id &&
               (!lastRead || new Date(last.created_at) > new Date(lastRead));
             const name = other?.display_name ?? "Vibely member";
+            const previewText = last
+              ? (last.body && last.body.trim()) ||
+                (last.media_url ? "Photo" : "")
+              : "";
             return (
               <Link key={c.id} href={`/messages/${c.id}`} className="convo-row">
                 <div className="convo-avatar">
@@ -150,8 +160,8 @@ export default async function MessagesPage() {
                   <div className={"convo-preview" + (unread ? " unread" : "")}>
                     {last
                       ? last.sender_id === user.id
-                        ? `You: ${last.body ?? ""}`
-                        : last.body ?? ""
+                        ? `You: ${previewText}`
+                        : previewText
                       : "No messages yet"}
                   </div>
                 </div>

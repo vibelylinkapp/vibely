@@ -50,7 +50,7 @@ export default async function ThreadPage({
 
   const { data: messages } = await supabase
     .from("messages")
-    .select("id, sender_id, body, created_at")
+    .select("id, sender_id, body, created_at, media_url, kind")
     .eq("conversation_id", id)
     .is("deleted_at", null)
     .order("created_at", { ascending: true })

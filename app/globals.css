@@ -780,6 +780,37 @@ body {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
   30% { transform: translateY(-4px); opacity: 1; }
 }
+.bubble.has-media { padding: 3px; background: #1A1E29; }
+.bubble.mine.has-media { background: rgba(122, 47, 242, 0.22); }
+.bubble-media {
+  display: block;
+  max-width: 220px;
+  max-height: 300px;
+  width: 100%;
+  border-radius: 13px;
+  object-fit: cover;
+}
+.chat-err {
+  color: var(--rose);
+  font-size: 12px;
+  padding: 6px 16px 0;
+  text-align: center;
+}
+.chat-attach {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  color: #7C8598;
+  cursor: pointer;
+  border: 1px solid #2A2F3D;
+  background: #12151D;
+}
+.chat-attach:hover { color: #fff; border-color: var(--violet); }
+.chat-attach.busy { opacity: 0.5; pointer-events: none; }
 
 /* ======================= GOOGLE / OAUTH SIGN-IN ======================= */
 .btn-google {
