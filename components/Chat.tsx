@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { Tables } from "@/lib/database.types";
+import VoiceNote from "@/components/VoiceNote";
 
 type Msg = Pick<
   Tables<"messages">,
@@ -11,6 +12,7 @@ type Msg = Pick<
 >;
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_REC_SECONDS = 120;
 const CHAT_BUCKET = "chat-media";
 
 function extFor(type: string): string {
@@ -22,6 +24,20 @@ function extFor(type: string): string {
 
 function isHttp(u: string): boolean {
   return /^https?:\/\//.test(u);
+}
+
+function fmtSecs(n: number): string {
+  const m = Math.floor(n / 60);
+  const s = n % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function pickRecMime(): string {
+  if (typeof MediaRecorder !== "undefined") {
+    if (MediaRecorder.isTypeSupported("audio/webm")) return "audio/webm";
+    if (MediaRecorder.isTypeSupported("audio/mp4")) return "audio/mp4";
+  }
+  return "";
 }
 
 export default function Chat({
@@ -44,6 +60,8 @@ export default function Chat({
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recSecs, setRecSecs] = useState(0);
   // path -> short-lived signed URL for private chat-media objects.
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const supabase = useRef(createClient()).current;
@@ -51,10 +69,23 @@ export default function Chat({
   const channelRef = useRef<RealtimeChannel | null>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingSent = useRef(0);
+  const mediaRec = useRef<MediaRecorder | null>(null);
+  const recChunks = useRef<Blob[]>([]);
+  const recStream = useRef<MediaStream | null>(null);
+  const recTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recCancelled = useRef(false);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, otherTyping]);
+
+  // Stop the mic if we unmount mid-recording.
+  useEffect(() => {
+    return () => {
+      if (recTimer.current) clearInterval(recTimer.current);
+      recStream.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
 
   // Sign any private media paths we don't yet have a URL for.
   useEffect(() => {
@@ -62,9 +93,7 @@ export default function Chat({
       new Set(
         messages
           .map((m) => m.media_url)
-          .filter(
-            (u): u is string => !!u && !isHttp(u) && !(u in signedUrls)
-          )
+          .filter((u): u is string => !!u && !isHttp(u) && !(u in signedUrls))
       )
     );
     if (pending.length === 0) return;
@@ -216,30 +245,25 @@ export default function Chat({
     setSending(false);
   }
 
-  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-picking the same file
-    if (!file || uploading || sending) return;
-    setErr(null);
-    if (!file.type.startsWith("image/")) {
-      setErr("That file isn't an image.");
-      return;
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      setErr("Image is too large (max 5 MB).");
-      return;
-    }
+  async function uploadAndSend(
+    blob: Blob,
+    ext: string,
+    kind: "image" | "voice",
+    contentType: string
+  ) {
     setUploading(true);
     try {
       // Private bucket, member-scoped path: <conversationId>/<uid>/<uuid>.<ext>
-      const path = `${conversationId}/${currentUserId}/${crypto.randomUUID()}.${extFor(
-        file.type
-      )}`;
+      const path = `${conversationId}/${currentUserId}/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from(CHAT_BUCKET)
-        .upload(path, file, { contentType: file.type, cacheControl: "3600" });
+        .upload(path, blob, { contentType, cacheControl: "3600" });
       if (upErr) {
-        setErr("Upload failed. Please try again.");
+        setErr(
+          kind === "voice"
+            ? "Couldn't send the voice note."
+            : "Upload failed. Please try again."
+        );
         return;
       }
       const { data, error } = await supabase
@@ -247,14 +271,18 @@ export default function Chat({
         .insert({
           conversation_id: conversationId,
           sender_id: currentUserId,
-          kind: "image",
+          kind,
           media_url: path,
           body: null,
         })
         .select("id, sender_id, body, created_at, media_url, kind")
         .single();
       if (error) {
-        setErr("Couldn't send the photo. Please try again.");
+        setErr(
+          kind === "voice"
+            ? "Couldn't send the voice note."
+            : "Couldn't send the photo. Please try again."
+        );
       } else if (data) {
         setMessages((prev) =>
           prev.some((x) => x.id === data.id) ? prev : [...prev, data]
@@ -264,6 +292,100 @@ export default function Chat({
     } finally {
       setUploading(false);
     }
+  }
+
+  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!file || uploading || sending || recording) return;
+    setErr(null);
+    if (!file.type.startsWith("image/")) {
+      setErr("That file isn't an image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setErr("Image is too large (max 5 MB).");
+      return;
+    }
+    await uploadAndSend(file, extFor(file.type), "image", file.type);
+  }
+
+  // ---- Voice notes ----
+  function cleanupRec() {
+    if (recTimer.current) {
+      clearInterval(recTimer.current);
+      recTimer.current = null;
+    }
+    recStream.current?.getTracks().forEach((t) => t.stop());
+    recStream.current = null;
+    setRecording(false);
+    setRecSecs(0);
+  }
+
+  async function finishRecording(mime: string) {
+    const chunks = recChunks.current;
+    const cancelled = recCancelled.current;
+    cleanupRec();
+    mediaRec.current = null;
+    recChunks.current = [];
+    if (cancelled || chunks.length === 0) return;
+    const type = mime || "audio/webm";
+    const blob = new Blob(chunks, { type });
+    if (blob.size === 0) return;
+    const ext = type.includes("mp4")
+      ? "mp4"
+      : type.includes("ogg")
+      ? "ogg"
+      : "webm";
+    await uploadAndSend(blob, ext, "voice", type);
+  }
+
+  async function startRecording() {
+    if (recording || uploading || sending) return;
+    setErr(null);
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      setErr("Microphone permission is needed to record a voice note.");
+      return;
+    }
+    recStream.current = stream;
+    recChunks.current = [];
+    recCancelled.current = false;
+    const mime = pickRecMime();
+    const rec = mime
+      ? new MediaRecorder(stream, { mimeType: mime })
+      : new MediaRecorder(stream);
+    mediaRec.current = rec;
+    rec.ondataavailable = (ev) => {
+      if (ev.data && ev.data.size > 0) recChunks.current.push(ev.data);
+    };
+    rec.onstop = () => {
+      void finishRecording(rec.mimeType || mime);
+    };
+    rec.start();
+    setRecording(true);
+    setRecSecs(0);
+    recTimer.current = setInterval(() => {
+      setRecSecs((s) => {
+        const next = s + 1;
+        if (next >= MAX_REC_SECONDS) stopRecording();
+        return next;
+      });
+    }, 1000);
+  }
+
+  function stopRecording() {
+    const rec = mediaRec.current;
+    if (rec && rec.state !== "inactive") rec.stop();
+  }
+
+  function cancelRecording() {
+    recCancelled.current = true;
+    const rec = mediaRec.current;
+    if (rec && rec.state !== "inactive") rec.stop();
+    else cleanupRec();
   }
 
   // Read receipt shows only under MY most recent message.
@@ -287,16 +409,20 @@ export default function Chat({
           messages.map((m) => {
             const src = m.media_url ? mediaSrc(m.media_url) : null;
             const mine = m.sender_id === currentUserId;
+            const isVoice = m.kind === "voice" && !!m.media_url;
+            const isImage = !isVoice && !!m.media_url;
             return (
               <div key={m.id} className="bubble-group">
                 <div
                   className={
                     "bubble " +
                     (mine ? "mine" : "theirs") +
-                    (m.media_url ? " has-media" : "")
+                    (isVoice ? " has-voice" : isImage ? " has-media" : "")
                   }
                 >
-                  {m.media_url ? (
+                  {isVoice ? (
+                    <VoiceNote src={src} mine={mine} />
+                  ) : isImage ? (
                     src ? (
                       <a href={src} target="_blank" rel="noreferrer">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -328,49 +454,79 @@ export default function Chat({
         <div ref={endRef} />
       </div>
       {err && <div className="chat-err">{err}</div>}
-      <form className="chat-input" onSubmit={send}>
-        <label
-          className={"chat-attach" + (uploading ? " busy" : "")}
-          aria-label="Send a photo"
-        >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={onPickImage}
-            disabled={uploading || sending}
-            hidden
-          />
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+      {recording ? (
+        <div className="chat-recording">
+          <button
+            type="button"
+            className="rec-cancel"
+            onClick={cancelRecording}
+            aria-label="Cancel recording"
           >
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" />
-          </svg>
-        </label>
-        <input
-          value={text}
-          onChange={onType}
-          placeholder={uploading ? "Sending photo..." : "Message..."}
-          maxLength={2000}
-          autoComplete="off"
-          disabled={uploading}
-        />
-        <button
-          type="submit"
-          className="btn"
-          disabled={sending || uploading || !text.trim()}
-        >
-          Send
-        </button>
-      </form>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <span className="rec-dot" />
+          <span className="rec-time">{fmtSecs(recSecs)}</span>
+          <span className="rec-label">Recording voice note...</span>
+          <button
+            type="button"
+            className="rec-send"
+            onClick={stopRecording}
+            aria-label="Send voice note"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M22 2 11 13M22 2l-7 20-4-9-9-4z" />
+            </svg>
+          </button>
+        </div>
+      ) : (
+        <form className="chat-input" onSubmit={send}>
+          <label
+            className={"chat-attach" + (uploading ? " busy" : "")}
+            aria-label="Send a photo"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={onPickImage}
+              disabled={uploading || sending}
+              hidden
+            />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </label>
+          <input
+            value={text}
+            onChange={onType}
+            placeholder={uploading ? "Sending..." : "Message..."}
+            maxLength={2000}
+            autoComplete="off"
+            disabled={uploading}
+          />
+          {text.trim() ? (
+            <button type="submit" className="btn" disabled={sending || uploading}>
+              Send
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="chat-mic"
+              onClick={startRecording}
+              disabled={uploading || sending}
+              aria-label="Record a voice note"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="9" y="2" width="6" height="12" rx="3" />
+                <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
+                <path d="M12 19v3" />
+              </svg>
+            </button>
+          )}
+        </form>
+      )}
     </div>
   );
 }

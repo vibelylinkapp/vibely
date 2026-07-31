@@ -822,6 +822,88 @@ body {
 }
 .chat-attach:hover { color: #fff; border-color: var(--violet); }
 .chat-attach.busy { opacity: 0.5; pointer-events: none; }
+.chat-mic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  background: var(--violet);
+}
+.chat-mic:disabled { opacity: 0.5; }
+.chat-recording {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid #1E2330;
+  background: #0E1116;
+}
+.rec-cancel,
+.rec-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+.rec-cancel { background: #12151D; color: #7C8598; border: 1px solid #2A2F3D; }
+.rec-send { background: var(--rose); color: #fff; }
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--rose);
+  flex: 0 0 auto;
+  animation: rec-pulse 1s ease infinite;
+}
+@keyframes rec-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.rec-time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; color: #fff; }
+.rec-label { flex: 1; color: #7C8598; font-size: 13px; }
+.bubble.has-voice { padding: 8px 10px; min-width: 200px; }
+.voicenote { display: flex; align-items: center; gap: 10px; }
+.vn-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.9);
+  color: #14101F;
+}
+.voicenote.mine .vn-play { background: #fff; color: var(--violet); }
+.vn-play:disabled { opacity: 0.6; }
+.vn-track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  min-width: 90px;
+}
+.voicenote:not(.mine) .vn-track { background: rgba(255, 255, 255, 0.14); }
+.vn-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; border-radius: 999px; }
+.vn-time {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  opacity: 0.85;
+  min-width: 30px;
+  text-align: right;
+}
 
 /* ======================= GOOGLE / OAUTH SIGN-IN ======================= */
 .btn-google {

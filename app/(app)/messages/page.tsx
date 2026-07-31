@@ -51,6 +51,7 @@ export default async function MessagesPage() {
       created_at: string;
       sender_id: string;
       media_url: string | null;
+      kind: string;
     }
   > = {};
 
@@ -88,7 +89,7 @@ export default async function MessagesPage() {
 
     const { data: recentMsgs } = await supabase
       .from("messages")
-      .select("conversation_id, body, created_at, sender_id, media_url")
+      .select("conversation_id, body, created_at, sender_id, media_url, kind")
       .in("conversation_id", convoIds)
       .order("created_at", { ascending: false })
       .limit(300);
@@ -99,6 +100,7 @@ export default async function MessagesPage() {
           created_at: m.created_at,
           sender_id: m.sender_id,
           media_url: m.media_url,
+          kind: m.kind,
         };
       }
     });
@@ -142,7 +144,11 @@ export default async function MessagesPage() {
             const name = other?.display_name ?? "Vibely member";
             const previewText = last
               ? (last.body && last.body.trim()) ||
-                (last.media_url ? "Photo" : "")
+                (last.kind === "voice"
+                  ? "Voice message"
+                  : last.media_url
+                  ? "Photo"
+                  : "")
               : "";
             return (
               <Link key={c.id} href={`/messages/${c.id}`} className="convo-row">
