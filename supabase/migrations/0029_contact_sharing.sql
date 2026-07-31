@@ -27,9 +27,14 @@ create policy member_contacts_own on public.member_contacts
   using (profile_id = auth.uid())
   with check (profile_id = auth.uid());
 
--- Seed from the phone people registered with (if any).
+-- Seed from the phone people registered with, if any. Vibely does not store a
+-- phone on profiles; Supabase keeps the sign-up phone on auth.users, so read it
+-- from there. No-op for members who signed up by email.
 insert into public.member_contacts (profile_id, whatsapp)
-select id, phone from public.profiles where phone is not null
+select p.id, u.phone
+from public.profiles p
+join auth.users u on u.id = p.id
+where u.phone is not null and u.phone <> ''
 on conflict (profile_id) do nothing;
 
 -- A request from one member to another to share WhatsApp.
