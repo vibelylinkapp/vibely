@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { Tables } from "@/lib/database.types";
 
 type Msg = Pick<Tables<"messages">, "id" | "sender_id" | "body" | "created_at">;
@@ -21,14 +22,18 @@ export default function Chat({
 }) {
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [otherRead, setOtherRead] = useState<string | null>(otherLastReadAt);
+  const [otherTyping, setOtherTyping] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const supabase = useRef(createClient()).current;
   const endRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingSent = useRef(0);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, otherTyping]);
 
   // Mark my membership read (so the OTHER member sees "Seen" on their message).
   function markRead() {
@@ -45,7 +50,9 @@ export default function Chat({
 
   useEffect(() => {
     const channel = supabase
-      .channel(`messages:${conversationId}`)
+      .channel(`messages:${conversationId}`, {
+        config: { broadcast: { self: false } },
+      })
       .on(
         "postgres_changes",
         {
@@ -60,8 +67,11 @@ export default function Chat({
             prev.some((x) => x.id === m.id) ? prev : [...prev, m]
           );
           // A message arrived from the other member while I'm viewing the
-          // thread — mark it read so their receipt flips to "Seen" live.
-          if (m.sender_id !== currentUserId) markRead();
+          // thread — they've stopped typing, and I've now read it.
+          if (m.sender_id !== currentUserId) {
+            setOtherTyping(false);
+            markRead();
+          }
         }
       )
       .on(
@@ -87,12 +97,37 @@ export default function Chat({
           }
         }
       )
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        const from = (payload as { from?: string } | undefined)?.from;
+        if (from && from === otherUserId) {
+          setOtherTyping(true);
+          if (typingTimeout.current) clearTimeout(typingTimeout.current);
+          typingTimeout.current = setTimeout(() => setOtherTyping(false), 3500);
+        }
+      })
       .subscribe();
+    channelRef.current = channel;
     return () => {
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
       supabase.removeChannel(channel);
+      channelRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, currentUserId, otherUserId, supabase]);
+
+  // Throttle typing broadcasts to at most one every ~1.5s.
+  function onType(e: React.ChangeEvent<HTMLInputElement>) {
+    setText(e.target.value);
+    const now = Date.now();
+    if (now - lastTypingSent.current > 1500 && channelRef.current) {
+      lastTypingSent.current = now;
+      channelRef.current.send({
+        type: "broadcast",
+        event: "typing",
+        payload: { from: currentUserId },
+      });
+    }
+  }
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -100,6 +135,7 @@ export default function Chat({
     if (!body || sending) return;
     setSending(true);
     setText("");
+    lastTypingSent.current = 0;
     const { data, error } = await supabase
       .from("messages")
       .insert({
@@ -163,12 +199,19 @@ export default function Chat({
             </div>
           ))
         )}
+        {otherTyping && (
+          <div className="bubble theirs typing-bubble" aria-label="typing">
+            <span />
+            <span />
+            <span />
+          </div>
+        )}
         <div ref={endRef} />
       </div>
       <form className="chat-input" onSubmit={send}>
         <input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={onType}
           placeholder="Message..."
           maxLength={2000}
           autoComplete="off"
