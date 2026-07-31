@@ -129,6 +129,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      notifications: {
+        Row: {
+          id: string;
+          recipient_id: string;
+          actor_id: string | null;
+          type: string;
+          entity_type: string | null;
+          entity_id: string | null;
+          link: string | null;
+          body: string | null;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          recipient_id: string;
+          actor_id?: string | null;
+          type: string;
+          entity_type?: string | null;
+          entity_id?: string | null;
+          link?: string | null;
+          body?: string | null;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          recipient_id?: string;
+          actor_id?: string | null;
+          type?: string;
+          entity_type?: string | null;
+          entity_id?: string | null;
+          link?: string | null;
+          body?: string | null;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           area: string | null;

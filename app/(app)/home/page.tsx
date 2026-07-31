@@ -6,6 +6,7 @@ import Stories from "@/components/Stories";
 import WinbackBanner from "@/components/WinbackBanner";
 import PostCard from "@/components/PostCard";
 import EventCard, { EventCardData } from "@/components/EventCard";
+import NotifBell from "@/components/NotifBell";
 
 export const dynamic = "force-dynamic";
 

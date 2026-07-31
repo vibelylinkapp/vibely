@@ -3798,3 +3798,65 @@ button.create-alt {
 }
 .subm-row b { display: block; font-size: 14px; }
 .subm-row small { color: #6a6a76; font-size: 12px; }
+
+/* --- notifications ---------------------------------------------- */
+.appbar-btn.notifs { position: relative; }
+.appbar-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #e11d48;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+.notif-list { display: flex; flex-direction: column; }
+.notif-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f4;
+  text-decoration: none;
+  color: inherit;
+}
+.notif-row.unread { background: #fbf7ff; }
+.notif-av {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #ececf1;
+}
+.notif-av-fallback,
+.notif-av-sys {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #6b34c9;
+}
+.notif-av-sys { background: #efe6ff; }
+.notif-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.notif-text { font-size: 14px; line-height: 1.35; color: #1a1a24; }
+.notif-time { font-size: 12px; color: #8a8a94; }
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7c3aed;
+  flex-shrink: 0;
+}
