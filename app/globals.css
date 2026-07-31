@@ -420,6 +420,92 @@ body {
 .plan-goer-av img { width: 100%; height: 100%; object-fit: cover; }
 .plan-going-n { margin-left: 10px; font-size: 12.5px; font-weight: 700; color: var(--rose); }
 
+/* --- Create hub action rows ------------------------------------- */
+.create-actions { display: flex; flex-direction: column; gap: 12px; max-width: 560px; margin: 16px auto 0; }
+button.create-alt {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.create-actions .create-alt { margin: 0; }
+.create-alt-ic svg { width: 22px; height: 22px; color: #fff; }
+
+/* --- Modal extras (story + check-in) ---------------------------- */
+.modal-sub { margin: -4px 0 10px; font-size: 13px; color: var(--ink-3); line-height: 1.45; }
+.modal-drop {
+  width: 100%;
+  padding: 34px 16px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+  color: var(--ink-3);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.story-preview {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+
+/* --- Out right now (home check-ins rail) ------------------------ */
+.home-checkins { margin-bottom: 4px; }
+.ci-chip {
+  flex: 0 0 auto;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+.ci-av {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--grad);
+  color: #fff;
+  font-weight: 800;
+  font-size: 17px;
+  overflow: hidden;
+}
+.ci-av img { width: 100%; height: 100%; object-fit: cover; }
+.ci-live-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--card);
+}
+.ci-nm { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+.ci-place { font-size: 12px; font-weight: 600; color: var(--ink-2); line-height: 1.3; }
+.ci-note {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 /* --- Auth + onboarding cards --- */
 .auth-card,
 .onboard-card {

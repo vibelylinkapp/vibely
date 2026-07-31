@@ -17,7 +17,13 @@ const CATEGORIES = [
   "Other",
 ];
 
-export default function CreatePlan() {
+export default function CreatePlan({
+  triggerClass,
+  triggerContent,
+}: {
+  triggerClass?: string;
+  triggerContent?: React.ReactNode;
+} = {}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -79,8 +85,12 @@ export default function CreatePlan() {
 
   return (
     <>
-      <button type="button" className="btn" onClick={() => setOpen(true)}>
-        Create a plan
+      <button
+        type="button"
+        className={triggerClass ?? "btn"}
+        onClick={() => setOpen(true)}
+      >
+        {triggerContent ?? "Create a plan"}
       </button>
 
       {open && (

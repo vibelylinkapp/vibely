@@ -44,10 +44,12 @@ export default function EventForm({
   existing,
   triggerLabel,
   triggerClass,
+  triggerContent,
 }: {
   existing?: ExistingEvent;
   triggerLabel?: string;
   triggerClass?: string;
+  triggerContent?: React.ReactNode;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -138,7 +140,7 @@ export default function EventForm({
         className={triggerClass ?? "btn"}
         onClick={() => setOpen(true)}
       >
-        {triggerLabel ?? "Create an event"}
+        {triggerContent ?? triggerLabel ?? "Create an event"}
       </button>
 
       {open && (

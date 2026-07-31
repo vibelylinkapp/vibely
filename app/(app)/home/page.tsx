@@ -196,6 +196,46 @@ export default async function HomePage() {
     going: (trendGoing[e.id] ?? 0) + e.going_base,
   }));
 
+  // ---- Out right now (active check-ins) ----
+  const { data: ciRows } = await supabase
+    .from("checkins")
+    .select("id, profile_id, place, area, note, created_at")
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(15);
+  const ciFiltered = (ciRows ?? []).filter((c) => !blocked.has(c.profile_id));
+  const ciMissing = Array.from(
+    new Set(ciFiltered.map((c) => c.profile_id))
+  ).filter((id) => !postAuthorMap[id]);
+  if (ciMissing.length) {
+    const { data: ca } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .in("id", ciMissing);
+    (ca ?? []).forEach((a) => {
+      postAuthorMap[a.id] = a;
+    });
+  }
+  const checkins = ciFiltered
+    .map((c) => ({
+      id: c.id,
+      author: postAuthorMap[c.profile_id],
+      place: c.place,
+      area: c.area,
+      note: c.note,
+    }))
+    .filter(
+      (
+        c
+      ): c is {
+        id: string;
+        author: Author;
+        place: string;
+        area: string | null;
+        note: string | null;
+      } => Boolean(c.author)
+    );
+
   return (
     <main className="home-wrap">
       <div className="glow" />
@@ -235,6 +275,37 @@ export default async function HomePage() {
           groups={groups}
         />
       </section>
+
+      {checkins.length > 0 && (
+        <section className="home-checkins">
+          <div className="sec">
+            <h3>Out right now</h3>
+          </div>
+          <div className="hscroll">
+            {checkins.map((c) => (
+              <Link key={c.id} href={`/u/${c.author.id}`} className="ci-chip">
+                <span className="ci-av">
+                  {c.author.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.author.avatar_url} alt={c.author.display_name} />
+                  ) : (
+                    c.author.display_name.charAt(0).toUpperCase()
+                  )}
+                  <span className="ci-live-dot" />
+                </span>
+                <span className="ci-nm">
+                  {c.author.display_name.split(" ")[0]}
+                </span>
+                <span className="ci-place">
+                  {c.place}
+                  {c.area ? ` \u00b7 ${c.area}` : ""}
+                </span>
+                {c.note && <span className="ci-note">{c.note}</span>}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {trending.length > 0 && (
         <section className="home-trending">

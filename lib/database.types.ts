@@ -87,6 +87,39 @@ export type Database = {
         Update: { created_at?: string; event_id?: string; profile_id?: string };
         Relationships: [];
       };
+      checkins: {
+        Row: {
+          id: string;
+          profile_id: string;
+          place: string;
+          area: string | null;
+          county: string | null;
+          note: string | null;
+          created_at: string;
+          expires_at: string;
+        };
+        Insert: {
+          id?: string;
+          profile_id: string;
+          place: string;
+          area?: string | null;
+          county?: string | null;
+          note?: string | null;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string;
+          place?: string;
+          area?: string | null;
+          county?: string | null;
+          note?: string | null;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           area: string | null;
