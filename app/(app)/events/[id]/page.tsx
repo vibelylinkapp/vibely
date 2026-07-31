@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import EventBookButton from "@/components/EventBookButton";
 import EventForm, { ExistingEvent } from "@/components/EventForm";
+import EventModerationBar from "@/components/EventModerationBar";
 
 export const dynamic = "force-dynamic";
 

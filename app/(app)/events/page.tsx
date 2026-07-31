@@ -23,6 +23,14 @@ export default async function EventsPage() {
     .order("starts_at", { ascending: true })
     .limit(60);
 
+  const { data: mineRows } = await supabase
+    .from("events")
+    .select("id, title, status, area, city, starts_at")
+    .eq("created_by", user.id)
+    .in("status", ["pending", "rejected"])
+    .order("created_at", { ascending: false });
+  const submissions = mineRows ?? [];
+
   const now = Date.now();
   const events = (rows ?? []).filter(
     (e) => !e.starts_at || new Date(e.starts_at).getTime() >= now - 3600000

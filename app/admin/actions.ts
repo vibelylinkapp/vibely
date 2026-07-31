@@ -147,3 +147,70 @@ export async function deletePost(postId: string, reportId: string) {
   revalidatePath("/admin/reports");
   revalidatePath("/admin");
 }
+
+export async function approveEvent(eventId: string) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  const now = new Date().toISOString();
+  await admin
+    .from("events")
+    .update({
+      status: "published",
+      rejected_reason: null,
+      reviewed_at: now,
+      reviewed_by: adminId,
+    })
+    .eq("id", eventId);
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    target_id: eventId,
+    action: "approve_event",
+    detail: eventId,
+  });
+  revalidatePath("/admin/events");
+  revalidatePath("/admin");
+  revalidatePath("/events");
+  revalidatePath(`/events/${eventId}`);
+}
+
+export async function rejectEvent(eventId: string, reason: string) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  const now = new Date().toISOString();
+  await admin
+    .from("events")
+    .update({
+      status: "rejected",
+      is_trending: false,
+      rejected_reason: reason || null,
+      reviewed_at: now,
+      reviewed_by: adminId,
+    })
+    .eq("id", eventId);
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    target_id: eventId,
+    action: "reject_event",
+    detail: reason,
+  });
+  revalidatePath("/admin/events");
+  revalidatePath("/admin");
+  revalidatePath("/events");
+  revalidatePath(`/events/${eventId}`);
+}
+
+export async function toggleFeatureEvent(eventId: string, on: boolean) {
+  const adminId = await assertAdmin();
+  const admin = createAdminClient();
+  await admin.from("events").update({ is_trending: on }).eq("id", eventId);
+  await admin.from("admin_actions").insert({
+    admin_id: adminId,
+    target_id: eventId,
+    action: on ? "feature_event" : "unfeature_event",
+    detail: eventId,
+  });
+  revalidatePath("/admin/events");
+  revalidatePath("/admin");
+  revalidatePath("/events");
+  revalidatePath(`/events/${eventId}`);
+}

@@ -3719,3 +3719,82 @@ button.create-alt {
 /* --- modal two-column row --------------------------------------- */
 .modal-row { display: flex; gap: 10px; }
 .modal-row .modal-input { flex: 1; min-width: 0; }
+
+/* --- event moderation ------------------------------------------- */
+.ev-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  line-height: 1.6;
+  vertical-align: middle;
+}
+.ev-badge.is-pending { background: #fff4d6; color: #8a5a00; }
+.ev-badge.is-published { background: #e2f6e9; color: #1c7a43; }
+.ev-badge.is-rejected { background: #fde3e3; color: #b02525; }
+.ev-badge.is-feat { background: #efe6ff; color: #6b34c9; }
+
+.ev-status {
+  margin: 14px 0 4px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.ev-status.is-pending { background: #fff4d6; color: #7a5000; }
+.ev-status.is-rejected { background: #fde3e3; color: #9c2020; }
+
+.modbar { margin: 12px 0 2px; }
+.modbar-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.mod-btn {
+  border: 1px solid #d9d9e3;
+  background: #fff;
+  color: #1a1a24;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mod-btn:disabled { opacity: 0.5; cursor: default; }
+.mod-approve { background: #1c7a43; border-color: #1c7a43; color: #fff; }
+.mod-reject { background: #fff; border-color: #e0a3a3; color: #b02525; }
+.mod-on { background: #efe6ff; border-color: #c9adf5; color: #6b34c9; }
+.modbar-reject { display: flex; gap: 8px; margin-top: 8px; }
+.modbar-reject .modal-input { flex: 1; min-width: 0; margin: 0; }
+
+.modq-list { display: flex; flex-direction: column; gap: 12px; }
+.modq-card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #ececf1;
+  border-radius: 14px;
+  background: #fff;
+}
+.modq-main { min-width: 220px; flex: 1; }
+.modq-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.modq-title a { font-weight: 700; color: #1a1a24; text-decoration: none; }
+.modq-meta { font-size: 12px; color: #6a6a76; margin-top: 3px; }
+.modq-reason { font-size: 12px; color: #b02525; margin-top: 4px; }
+
+.subm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #ececf1;
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 8px;
+}
+.subm-row b { display: block; font-size: 14px; }
+.subm-row small { color: #6a6a76; font-size: 12px; }

@@ -24,6 +24,7 @@ export default async function AdminLayout({
           <Link href="/admin/alerts">Alerts</Link>
           <Link href="/admin/reports">Reports</Link>
           <Link href="/admin/verifications">Verifications</Link>
+          <Link href="/admin/events">Events</Link>
           <Link href="/home">Back to app</Link>
         </nav>
       </aside>

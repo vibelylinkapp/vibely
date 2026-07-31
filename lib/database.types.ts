@@ -33,6 +33,9 @@ export type Database = {
           going_base: number;
           is_trending: boolean;
           status: string;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          rejected_reason: string | null;
           created_at: string;
         };
         Insert: {
@@ -55,6 +58,9 @@ export type Database = {
           going_base?: number;
           is_trending?: boolean;
           status?: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          rejected_reason?: string | null;
           created_at?: string;
         };
         Update: {
@@ -77,6 +83,9 @@ export type Database = {
           going_base?: number;
           is_trending?: boolean;
           status?: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          rejected_reason?: string | null;
           created_at?: string;
         };
         Relationships: [];
