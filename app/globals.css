@@ -1568,3 +1568,11 @@ body {
 .like-limit .sub {
   font-size: 13px;
 }
+
+/* ======================= ADMIN ALERTS ======================= */
+.alerts-send {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
