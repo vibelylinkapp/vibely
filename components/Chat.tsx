@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/database.types";
 
@@ -10,14 +10,17 @@ export default function Chat({
   conversationId,
   currentUserId,
   otherUserId,
+  otherLastReadAt,
   initialMessages,
 }: {
   conversationId: string;
   currentUserId: string;
   otherUserId: string | null;
+  otherLastReadAt: string | null;
   initialMessages: Msg[];
 }) {
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
+  const [otherRead, setOtherRead] = useState<string | null>(otherLastReadAt);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const supabase = useRef(createClient()).current;
@@ -26,6 +29,19 @@ export default function Chat({
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Mark my membership read (so the OTHER member sees "Seen" on their message).
+  function markRead() {
+    supabase
+      .from("conversation_members")
+      .update({ last_read_at: new Date().toISOString() })
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", currentUserId)
+      .then(
+        () => {},
+        () => {}
+      );
+  }
 
   useEffect(() => {
     const channel = supabase
@@ -43,13 +59,40 @@ export default function Chat({
           setMessages((prev) =>
             prev.some((x) => x.id === m.id) ? prev : [...prev, m]
           );
+          // A message arrived from the other member while I'm viewing the
+          // thread — mark it read so their receipt flips to "Seen" live.
+          if (m.sender_id !== currentUserId) markRead();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "conversation_members",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const row = payload.new as {
+            profile_id: string;
+            last_read_at: string | null;
+          };
+          // The other member just read the thread — advance their read marker.
+          if (row.profile_id === otherUserId && row.last_read_at) {
+            setOtherRead((prev) =>
+              !prev || new Date(row.last_read_at!) > new Date(prev)
+                ? row.last_read_at
+                : prev
+            );
+          }
         }
       )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, supabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, currentUserId, otherUserId, supabase]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -84,6 +127,18 @@ export default function Chat({
     setSending(false);
   }
 
+  // Read receipt shows only under MY most recent message.
+  const lastMine = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].sender_id === currentUserId) return messages[i];
+    }
+    return null;
+  }, [messages, currentUserId]);
+  const seen =
+    !!lastMine &&
+    !!otherRead &&
+    new Date(otherRead) >= new Date(lastMine.created_at);
+
   return (
     <div className="chat">
       <div className="chat-scroll">
@@ -91,13 +146,20 @@ export default function Chat({
           <p className="chat-empty">Say hello and start the conversation.</p>
         ) : (
           messages.map((m) => (
-            <div
-              key={m.id}
-              className={
-                "bubble " + (m.sender_id === currentUserId ? "mine" : "theirs")
-              }
-            >
-              {m.body}
+            <div key={m.id} className="bubble-group">
+              <div
+                className={
+                  "bubble " +
+                  (m.sender_id === currentUserId ? "mine" : "theirs")
+                }
+              >
+                {m.body}
+              </div>
+              {lastMine && m.id === lastMine.id && (
+                <div className={"receipt" + (seen ? " seen" : "")}>
+                  {seen ? "Seen" : "Sent"}
+                </div>
+              )}
             </div>
           ))
         )}

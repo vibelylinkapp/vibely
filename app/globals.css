@@ -735,6 +735,15 @@ body {
 }
 .chat-input input:focus { border-color: var(--violet); }
 .chat-input .btn { padding: 10px 18px; }
+.bubble-group { display: flex; flex-direction: column; gap: 2px; }
+.receipt {
+  align-self: flex-end;
+  font-size: 11px;
+  color: #7C8598;
+  padding: 0 4px;
+  letter-spacing: 0.02em;
+}
+.receipt.seen { color: var(--violet); font-weight: 600; }
 
 /* ======================= GOOGLE / OAUTH SIGN-IN ======================= */
 .btn-google {

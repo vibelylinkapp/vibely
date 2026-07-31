@@ -27,10 +27,12 @@ export default async function ThreadPage({
 
   const { data: others } = await supabase
     .from("conversation_members")
-    .select("profile_id")
+    .select("profile_id, last_read_at")
     .eq("conversation_id", id)
     .neq("profile_id", user.id);
   const otherId = others?.[0]?.profile_id ?? null;
+  // When did the other member last read this thread? Powers the "Seen" receipt.
+  const otherLastReadAt = others?.[0]?.last_read_at ?? null;
 
   let otherName = "Vibely member";
   let otherAvatar: string | null = null;
@@ -90,6 +92,7 @@ export default async function ThreadPage({
         conversationId={id}
         currentUserId={user.id}
         otherUserId={otherId}
+        otherLastReadAt={otherLastReadAt}
         initialMessages={messages ?? []}
       />
     </main>
