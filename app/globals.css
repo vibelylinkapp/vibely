@@ -427,7 +427,10 @@ body {
   align-items: center;
   text-align: center;
   gap: 4px;
-  padding-top: 12px;
+  padding-top: 8px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .profile-avatar {
@@ -442,6 +445,7 @@ body {
   font-size: 40px;
   color: #fff;
   margin-bottom: 6px;
+  box-shadow: 0 0 0 4px #fff, var(--shadow);
 }
 
 .profile-name { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 22px; }
@@ -837,12 +841,15 @@ body {
   background: linear-gradient(135deg, #7A2FF2, #F5307E);
   color: #fff;
   border-bottom-right-radius: 5px;
+  box-shadow: 0 6px 16px rgba(245, 48, 126, 0.22);
 }
 .bubble.theirs {
   align-self: flex-start;
-  background: #f2eefb;
-  color: #14101f;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
   border-bottom-left-radius: 5px;
+  box-shadow: var(--shadow-sm);
 }
 .chat-input {
   display: flex;
@@ -1921,6 +1928,7 @@ body {
   letter-spacing: 0.06em;
   color: #ffffff;
   background: var(--aurora);
+  box-shadow: 0 4px 12px rgba(122, 47, 242, 0.25);
 }
 .profile-name-row {
   display: flex;
