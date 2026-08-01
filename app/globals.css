@@ -5167,3 +5167,251 @@ button.create-alt {
 @media (max-width: 400px) {
   .home-share-btn span { display: none; }
 }
+
+
+/* ============================================================
+   VIBELY POLISH LAYER — additive, appended by design pass.
+   Non-destructive: only refines token elevation/radius and
+   layers glassmorphism, hover lift, gradient-CTA depth, and
+   pulsing green presence dots on top of existing rules.
+   Every color token is left untouched. Honors reduced-motion.
+   ============================================================ */
+:root{
+  --shadow: 0 12px 40px -8px rgba(28,10,55,.16), 0 2px 8px rgba(28,10,55,.06);
+  --shadow-sm: 0 6px 20px -6px rgba(28,10,55,.12), 0 1px 4px rgba(28,10,55,.05);
+  --shadow-key: 0 18px 48px -12px rgba(122,47,242,.42);
+  --radius: 24px;
+  --radius-sm: 16px;
+}
+
+/* Card surfaces: smoother transitions + a gentle hover lift */
+.eventcard,.pcard,.nb-card,.placecard{
+  transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s cubic-bezier(.2,.7,.2,1);
+}
+.eventcard:hover,.pcard:hover,.nb-card:hover,.placecard:hover{
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* Primary buttons: keep the aurora gradient, add depth + tactile lift */
+.btn{ box-shadow: var(--shadow-key); transition: transform .16s ease, box-shadow .16s ease, opacity .15s ease; }
+.btn:hover{ transform: translateY(-2px); box-shadow: 0 22px 54px -14px rgba(122,47,242,.5); }
+.btn:active{ transform: translateY(0); }
+.bn-plus{ transition: transform .14s ease, box-shadow .14s ease; }
+.bn-plus:hover{ transform: translateY(-2px) scale(1.03); }
+.appbar-btn:hover{ transform: translateY(-1px); }
+
+/* Interest chips: accent border + text on hover */
+.chip:hover{ border-color: var(--violet); color: var(--violet); }
+
+/* Floating bottom nav + modal backdrop: frosted glass */
+.bottomnav{
+  background: rgba(255,255,255,.82);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  backdrop-filter: blur(18px) saturate(1.35);
+}
+.modal-overlay{
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* Pulsing presence dots — GREEN "online" indicators only.
+   Rendered via ::after so each dot keeps its own white ring. */
+.pcard-dot,.nb-dot,.near-dot,.pnear-dot,.convo-dot,.home-hi-dot,.ci-live-dot{ position:absolute; }
+.pcard-dot::after,.nb-dot::after,.near-dot::after,.pnear-dot::after,
+.convo-dot::after,.home-hi-dot::after,.ci-live-dot::after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  box-shadow: 0 0 0 0 rgba(34,197,94,.5);
+  animation: vb-presence 2.1s ease-out infinite; pointer-events:none;
+}
+@keyframes vb-presence{
+  0%{ box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+  70%{ box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* Accessible keyboard focus — specificity 0 so it never fights existing styles */
+:where(a,button,input,textarea,select):focus-visible{
+  outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .eventcard,.pcard,.nb-card,.placecard,.btn,.bn-plus,.appbar-btn{ transition:none; }
+  .eventcard:hover,.pcard:hover,.nb-card:hover,.placecard:hover,
+  .btn:hover,.bn-plus:hover,.appbar-btn:hover{ transform:none; }
+  .pcard-dot::after,.nb-dot::after,.near-dot::after,.pnear-dot::after,
+  .convo-dot::after,.home-hi-dot::after,.ci-live-dot::after{ animation:none; }
+}
+
+
+/* ============================================================
+   VIBELY SCREEN REFINEMENTS — Batch 1: Home + Discover
+   Additive, screen-scoped. No data or component logic changed.
+   ============================================================ */
+
+/* Home — greeting "online now" stat becomes a frosted accent chip */
+.home-hi-stat{
+  background: linear-gradient(160deg, rgba(255,255,255,.92), rgba(246,244,252,.92));
+  border-color: rgba(122,47,242,.14);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.home-hi-stat:hover{ transform: translateY(-2px); box-shadow: var(--shadow); }
+
+/* Home — search bar gains a soft hover glow */
+.home-search{ transition: border-color .16s ease, box-shadow .16s ease; }
+.home-search:hover{ border-color: rgba(122,47,242,.28); box-shadow: 0 10px 26px -14px rgba(122,47,242,.4); }
+
+/* Home — section titles get a small gradient accent bar */
+.home-pnear .sec h3, .home-checkins .sec h3, .home-trending .sec h3{
+  position: relative; padding-left: 12px;
+}
+.home-pnear .sec h3::before, .home-checkins .sec h3::before, .home-trending .sec h3::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:4px; height:.95em; border-radius:3px; background: var(--aurora);
+}
+
+/* Home — people-near-you photo lifts on hover */
+.pnear-photo{ transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease; }
+.pnear-card:hover .pnear-photo{ transform: translateY(-3px); box-shadow: var(--shadow); }
+
+/* Discover — subtitle under the sticky title (matches mockup) */
+.feed-head-l{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.feed-sub{ font-size:12.5px; font-weight:600; color: var(--ink-3); }
+
+/* Discover — action buttons lift on hover, matching the Home appbar */
+.feed-action:hover{ transform: translateY(-1px); background: rgba(245,48,126,.16); }
+
+/* Discover — fade the scrollable filter row edges */
+.filter-row{
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+
+/* Discover — a touch more breathing room on larger phones/tablets */
+@media (min-width: 520px){ .grid{ gap: 16px; } }
+
+@media (prefers-reduced-motion: reduce){
+  .home-hi-stat, .home-search, .pnear-photo{ transition:none; }
+  .home-hi-stat:hover, .pnear-card:hover .pnear-photo{ transform:none; }
+}
+
+
+/* ============================================================
+   VIBELY SCREEN REFINEMENTS — Batch 2: Nearby + Profile
+   Additive, screen-scoped. No data or component logic changed.
+   ============================================================ */
+
+/* Nearby — the radar comes alive with a slow circular sweep.
+   ::after is border-radius:50% so the conic sweep stays a clean disc
+   (no square corners) without clipping edge pins. */
+.nb-radar::after{
+  content:""; position:absolute; inset:0; border-radius:50%; pointer-events:none; z-index:1;
+  background: conic-gradient(from 0deg, rgba(122,47,242,.20), rgba(122,47,242,0) 55%);
+  animation: nb-sweep 5s linear infinite;
+}
+@keyframes nb-sweep{ to{ transform: rotate(360deg); } }
+
+/* Nearby — online radar pins pulse (box-shadow on the pin itself,
+   so it isn't clipped by the pin's own overflow:hidden) */
+.nb-pin{ transition: transform .14s ease, box-shadow .14s ease; }
+.nb-pin:hover{ transform: translate(-50%,-50%) scale(1.12); z-index:4; }
+.nb-pin.online{ border-color:#22c55e; animation: nb-pinpulse 2.1s ease-out infinite; }
+@keyframes nb-pinpulse{
+  0%{ box-shadow: var(--shadow-sm), 0 0 0 0 rgba(34,197,94,.55); }
+  70%{ box-shadow: var(--shadow-sm), 0 0 0 8px rgba(34,197,94,0); }
+  100%{ box-shadow: var(--shadow-sm), 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* Nearby — "You are here" gently breathes */
+.nb-me{ animation: nb-mepulse 2.6s ease-in-out infinite; }
+@keyframes nb-mepulse{
+  0%,100%{ box-shadow: var(--shadow); }
+  50%{ box-shadow: var(--shadow), 0 0 0 6px rgba(122,47,242,.14); }
+}
+
+/* Nearby — radius/filter chips + view tabs get an accent hover */
+.nb-radius:hover, .nb-chip:hover, .disc-tab:hover{
+  border-color: rgba(122,47,242,.5); color: var(--violet);
+}
+
+/* Profile — verified shields get a soft brand glow */
+.pnear-ver{ filter: drop-shadow(0 2px 4px rgba(122,47,242,.4)); }
+
+/* Profile — interest chips lift subtly on hover */
+.pcard-intents .mini{ transition: transform .14s ease, border-color .14s ease; }
+.pcard-intents .mini:hover{ transform: translateY(-1px); border-color: rgba(122,47,242,.35); }
+
+@media (prefers-reduced-motion: reduce){
+  .nb-radar::after, .nb-pin.online, .nb-me{ animation:none; }
+  .nb-pin:hover{ transform: translate(-50%,-50%); }
+}
+
+
+/* ============================================================
+   VIBELY SCREEN REFINEMENTS — Batch 3: Chat + Events + Premium
+   Additive, screen-scoped. No data or component logic changed.
+   ============================================================ */
+
+/* Chat — received bubbles get a soft lift; "mine" keeps its gradient + tail */
+.bubble{ box-shadow: 0 1px 2px rgba(20,16,31,.05); }
+.chat-attach{ transition: transform .12s ease, border-color .15s ease, color .15s ease; }
+.chat-attach:hover{ transform: translateY(-1px); border-color: rgba(122,47,242,.4); color: var(--violet); }
+.react-pill{ transition: transform .12s ease, border-color .12s ease; }
+.react-pill:hover{ transform: translateY(-1px); border-color: rgba(122,47,242,.35); }
+
+/* Chat — typing indicator dots bounce (no-op if the dots aren't span/i) */
+.typing-bubble span, .typing-bubble i{ animation: vb-typing 1.2s ease-in-out infinite; }
+.typing-bubble span:nth-child(2), .typing-bubble i:nth-child(2){ animation-delay:.15s; }
+.typing-bubble span:nth-child(3), .typing-bubble i:nth-child(3){ animation-delay:.3s; }
+@keyframes vb-typing{ 0%,60%,100%{ transform: translateY(0); opacity:.55; } 30%{ transform: translateY(-4px); opacity:1; } }
+
+/* Events — gradient summary hero gains a soft top sheen (layered into its own bg) */
+.event-hero{ background: radial-gradient(120% 85% at 12% -25%, rgba(255,255,255,.22), transparent 55%), var(--aurora); }
+
+/* Premium — pricing tier cards lift on hover; the featured tier reads as elevated */
+.tier-card{ transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease; }
+.tier-card:hover{ transform: translateY(-4px); box-shadow: var(--shadow); }
+.tier-plus{ box-shadow: var(--shadow-sm); }
+
+@media (prefers-reduced-motion: reduce){
+  .typing-bubble span, .typing-bubble i{ animation:none; }
+  .tier-card, .chat-attach, .react-pill{ transition:none; }
+  .tier-card:hover{ transform:none; }
+}
+
+
+/* ============================================================
+   VIBELY SCREEN REFINEMENTS — Batch 4: Create + Notifications
+   + Stories + Settings toggles (Settings lives on the Profile page).
+   Additive, screen-scoped. No data or component logic changed.
+   ============================================================ */
+
+/* Create — action cards lift; icon tile lights up with the brand gradient */
+.create-alt:hover{ transform: translateY(-3px); box-shadow: var(--shadow); border-color: rgba(122,47,242,.18); }
+.create-alt-ic{ transition: background .18s ease, color .18s ease; }
+.create-alt:hover .create-alt-ic{ background: var(--aurora); color:#fff; }
+
+/* Notifications — rows respond to hover; the unread dot gently pulses */
+.notif-row{ transition: background .15s ease; }
+.notif-row:hover{ background: var(--bg-soft); }
+.notif-dot{ animation: vb-notif 2s ease-out infinite; }
+@keyframes vb-notif{
+  0%{ box-shadow: 0 0 0 0 rgba(124,58,237,.5); }
+  70%{ box-shadow: 0 0 0 6px rgba(124,58,237,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+}
+
+/* Stories — story-tray tiles lift on hover and give tap feedback */
+.story-item{ transition: transform .14s ease; }
+.story-item:hover{ transform: translateY(-2px); }
+.story-item:active{ transform: scale(.96); }
+
+/* Settings toggles (on the Profile page) — knob gains subtle depth */
+.switch-knob{ box-shadow: 0 2px 6px rgba(20,16,31,.25); }
+
+@media (prefers-reduced-motion: reduce){
+  .notif-dot{ animation:none; }
+  .story-item{ transition:none; }
+  .create-alt:hover, .story-item:hover, .story-item:active{ transform:none; }
+}
