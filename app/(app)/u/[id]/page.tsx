@@ -6,6 +6,7 @@ import LikeButton from "@/components/LikeButton";
 import ProfileActions from "@/components/ProfileActions";
 import HighlightsView from "@/components/HighlightsView";
 import ProfileTabs from "@/components/ProfileTabs";
+import FollowButton from "@/components/FollowButton";
 import { effectiveTier } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
 
@@ -52,6 +53,9 @@ export default async function UserDetailPage({
     { data: myLike },
     { data: theirLike },
     { data: highlights },
+    { data: followerCountRaw },
+    { data: followingCountRaw },
+    { data: myFollow },
   ] = await Promise.all([
     supabase.from("profile_intents").select("intent").eq("profile_id", id),
     supabase
@@ -83,6 +87,14 @@ export default async function UserDetailPage({
       .select("id, title, media_url, caption")
       .eq("profile_id", id)
       .order("position", { ascending: true }),
+    supabase.rpc("follower_count", { uid: id }),
+    supabase.rpc("following_count", { uid: id }),
+    supabase
+      .from("follows")
+      .select("follower_id")
+      .eq("follower_id", user.id)
+      .eq("following_id", id)
+      .maybeSingle(),
   ]);
 
   const iLiked = !!myLike;
@@ -110,8 +122,9 @@ export default async function UserDetailPage({
   const intentLabels = (intents ?? []).map((i) => i.intent as string);
   const photoList = (photos ?? []).map((p) => ({ id: p.id, url: p.url }));
   const photosCount = photoList.length;
-  const highlightsCount = (highlights ?? []).length;
-  const interestsCount = intentLabels.length;
+  const followerCount = Number(followerCountRaw ?? 0);
+  const followingCount = Number(followingCountRaw ?? 0);
+  const iFollow = !!myFollow;
   const joined = profile.created_at
     ? new Date(profile.created_at).getFullYear().toString()
     : null;
@@ -177,18 +190,18 @@ export default async function UserDetailPage({
       </div>
 
       <section className="pf2-body">
-        <div className="pf2-stats">
-          <div className="pf2-stat">
+        <div className="follow-stats">
+          <div className="follow-stat">
+            <b>{followerCount}</b>
+            <span>Followers</span>
+          </div>
+          <div className="follow-stat">
+            <b>{followingCount}</b>
+            <span>Following</span>
+          </div>
+          <div className="follow-stat">
             <b>{photosCount}</b>
             <span>Photos</span>
-          </div>
-          <div className="pf2-stat">
-            <b>{highlightsCount}</b>
-            <span>Highlights</span>
-          </div>
-          <div className="pf2-stat">
-            <b>{interestsCount}</b>
-            <span>Interests</span>
           </div>
         </div>
 
@@ -198,6 +211,11 @@ export default async function UserDetailPage({
             targetName={profile.display_name}
             initialLiked={iLiked}
             initialMatched={matched}
+          />
+          <FollowButton
+            targetId={profile.id}
+            targetName={profile.display_name}
+            initialFollowing={iFollow}
           />
           <ProfileActions
             targetId={profile.id}

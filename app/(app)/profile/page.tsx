@@ -12,6 +12,7 @@ import VerificationSetup from "@/components/VerificationSetup";
 import WhatsAppSetup from "@/components/WhatsAppSetup";
 import BoostButton from "@/components/BoostButton";
 import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
+import "@/app/profile-plus.css";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
@@ -98,6 +99,15 @@ export default async function ProfilePage() {
     boostRemaining = Math.max(0, boostQuota - (count ?? 0));
   }
 
+  const [{ data: followerCountRaw }, { data: followingCountRaw }] =
+    await Promise.all([
+      supabase.rpc("follower_count", { uid: user.id }),
+      supabase.rpc("following_count", { uid: user.id }),
+    ]);
+  const followerCount = Number(followerCountRaw ?? 0);
+  const followingCount = Number(followingCountRaw ?? 0);
+  const photosCount = (myPhotos ?? []).length;
+
   const age = profile.birthdate ? ageFrom(profile.birthdate) : null;
   const place = [profile.area, profile.county].filter(Boolean).join(", ");
   const meta = [age ? String(age) : null, place].filter(Boolean).join(" · ");
@@ -136,6 +146,20 @@ export default async function ProfilePage() {
             ))}
           </div>
         )}
+        <div className="follow-stats" style={{ marginTop: 14 }}>
+          <div className="follow-stat">
+            <b>{followerCount}</b>
+            <span>Followers</span>
+          </div>
+          <div className="follow-stat">
+            <b>{followingCount}</b>
+            <span>Following</span>
+          </div>
+          <div className="follow-stat">
+            <b>{photosCount}</b>
+            <span>Photos</span>
+          </div>
+        </div>
         <HighlightsEditor
           userId={user.id}
           initialHighlights={myHighlights ?? []}
