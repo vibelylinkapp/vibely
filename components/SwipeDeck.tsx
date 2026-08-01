@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -61,10 +61,39 @@ export default function SwipeDeck({
   const [opening, setOpening] = useState(false);
   const [limited, setLimited] = useState(false);
   const startRef = useRef<{ x: number; y: number } | null>(null);
+  // People I've already liked or passed stay hidden across sessions.
+  const [excluded, setExcluded] = useState<Set<string> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const supabase = createClient();
+      const [liked, passed] = await Promise.all([
+        supabase.from("likes").select("liked_id").eq("liker_id", meId),
+        supabase.from("passes").select("passed_id").eq("passer_id", meId),
+      ]);
+      if (cancelled) return;
+      const ids = new Set<string>();
+      for (const r of liked.data ?? []) ids.add(r.liked_id);
+      // The passes table may not exist yet (pre-migration) — that just returns
+      // an error with null data, so passes are simply not excluded until then.
+      for (const r of passed.data ?? []) ids.add(r.passed_id);
+      setExcluded(ids);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [meId]);
 
   const deck = useMemo(
-    () => rows.filter((r) => r.id !== meId && !doneIds.has(r.id)),
-    [rows, meId, doneIds]
+    () =>
+      rows.filter(
+        (r) =>
+          r.id !== meId &&
+          !doneIds.has(r.id) &&
+          !(excluded ? excluded.has(r.id) : false)
+      ),
+    [rows, meId, doneIds, excluded]
   );
   // Render the top three for a layered stack; only the top card is interactive.
   const visible = deck.slice(0, 3);
@@ -113,16 +142,30 @@ export default function SwipeDeck({
     }
   }, []);
 
+  const recordPass = useCallback(async (target: SwipeRow) => {
+    try {
+      // Persist the pass so this person is not shown again in future sessions.
+      await fetch("/api/pass", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ targetId: target.id }),
+      });
+    } catch {
+      // Best-effort: a failed pass just means it isn't remembered next time.
+    }
+  }, []);
+
   const fling = useCallback(
     (dir: "like" | "nope") => {
       if (!top || leaving) return;
       const target = top;
       setLeaving({ id: target.id, dir });
       if (dir === "like") void recordLike(target);
+      else void recordPass(target);
       // Advance once the exit transition has played.
       window.setTimeout(() => settle(target.id), 300);
     },
-    [top, leaving, recordLike, settle]
+    [top, leaving, recordLike, recordPass, settle]
   );
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
@@ -179,6 +222,14 @@ export default function SwipeDeck({
 
   const likeHint = clamp01(drag.x / THRESHOLD);
   const nopeHint = clamp01(-drag.x / THRESHOLD);
+
+  if (excluded === null) {
+    return (
+      <div className="sw-empty">
+        <p className="sw-empty-sub">Finding people near you...</p>
+      </div>
+    );
+  }
 
   if (deck.length === 0) {
     return (
