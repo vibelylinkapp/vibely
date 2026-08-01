@@ -7,8 +7,8 @@ import WinbackBanner from "@/components/WinbackBanner";
 import PostCard from "@/components/PostCard";
 import EventCard, { EventCardData } from "@/components/EventCard";
 import NotifBell from "@/components/NotifBell";
-import LikeButton from "@/components/LikeButton";
 import HomeSearch from "@/components/HomeSearch";
+import CardHeart from "@/components/CardHeart";
 import FeedLoadMore from "@/components/FeedLoadMore";
 import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 import AdminNotice from "@/components/AdminNotice";
@@ -170,7 +170,7 @@ export default async function HomePage() {
     .limit(18);
   const nearbyPeople = (nearbyRows ?? [])
     .filter((p) => !blocked.has(p.id))
-    .slice(0, 14);
+    .slice(0, 4);
 
   // Interest tags + my existing likes for the People-near-you cards.
   const nearIds = nearbyPeople.map((p) => p.id);
@@ -425,7 +425,7 @@ export default async function HomePage() {
             <h3>People near you</h3>
             <Link href="/nearby">See all</Link>
           </div>
-          <div className="pnear-grid">
+          <div className="pnear-grid2">
             {nearbyPeople.map((p, idx) => {
               const age = p.birthdate ? ageFrom(p.birthdate) : null;
               const tags = nearIntents[p.id] ?? [];
@@ -470,19 +470,17 @@ export default async function HomePage() {
                           {p.area || p.county}
                         </small>
                       )}
-                      {tags.length > 0 && (
-                        <span className="pnear-ovtags">
-                          {tags.slice(0, 2).map((t) => (
-                            <span className="pnear-ovtag" key={t}>
-                              {t}
-                            </span>
-                          ))}
-                        </span>
-                      )}
                     </span>
                   </Link>
-                  <div className="pnear-like">
-                    <LikeButton
+                  <div className="pnear-foot">
+                    <div className="pnear-foottags">
+                      {tags.slice(0, 2).map((t) => (
+                        <span className="pnear-foottag" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                    <CardHeart
                       targetId={p.id}
                       targetName={p.display_name}
                       initialLiked={myLikes.has(p.id)}
