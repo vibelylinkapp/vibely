@@ -57,23 +57,34 @@ export default function SignInPage() {
     const supabase = createClient();
 
     if (mode === "up") {
-      const { data, error } = await supabase.auth.signUp({
+      // Create the account (already confirmed) via our server route, then sign
+      // in normally to establish the session. See app/api/auth/signup/route.ts.
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (!res.ok) {
+        setMsg(
+          payload.error ?? "Could not create your account. Please try again."
+        );
+        setLoading(false);
+        return;
+      }
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       if (error) {
         setMsg(error.message);
         setLoading(false);
         return;
       }
-      if (data.session) {
-        router.push("/onboarding");
-        router.refresh();
-      } else {
-        setMsg("Check your email to confirm your account, then sign in.");
-        setLoading(false);
-      }
+      router.push("/onboarding");
+      router.refresh();
     } else {
       const { error } = await supabase.auth.signInWithPassword({
         email,
