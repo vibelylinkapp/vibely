@@ -632,3 +632,49 @@
   font-weight: 700;
   color: #7a2ff2;
 }
+
+/* ---- Per-post like count overlay (Posts grid) ---- */
+.pf3 .pf3-tile {
+  position: relative;
+}
+.pf3 .pf3-tile-likes {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 999px;
+  background: rgba(10, 11, 15, 0.58);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+.pf3 .pf3-tile-likes svg {
+  width: 13px;
+  height: 13px;
+  fill: #ff4d6d;
+}
+
+/* ---- Self profile (/profile): edit button on the cover + manage section ---- */
+.pf3 .pf3-edit {
+  left: 12px;
+}
+.pf3 .pf3-editbtn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+}
+.pf3 .pf3-manage {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid #e7e6ee;
+}
+.pf3 .pf3-manage-h {
+  margin: 0 0 14px;
+  text-align: center;
+}
