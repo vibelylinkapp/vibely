@@ -21,6 +21,13 @@ function timeAgo(iso: string): string {
   });
 }
 
+function compactCount(n: number): string {
+  if (n >= 1_000_000)
+    return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
+  return String(n);
+}
+
 export default function PostCard({
   postId,
   author,
@@ -86,7 +93,7 @@ export default function PostCard({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-6.5A8 8 0 1 1 21 12z" />
             </svg>
-            <span className="post-comment-n">{commentCount}</span>
+            <span className="post-comment-n">{compactCount(commentCount)}</span>
           </Link>
         </div>
         <EditCaption

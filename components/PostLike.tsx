@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+function compactCount(n: number): string {
+  if (n >= 1_000_000)
+    return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
+  return String(n);
+}
+
 export default function PostLike({
   postId,
   authorId,
@@ -78,7 +85,7 @@ export default function PostLike({
       >
         <path d="M12 20.7 4.3 13a5 5 0 0 1 7.1-7l.6.6.6-.6a5 5 0 0 1 7.1 7z" />
       </svg>
-      <span className="post-like-n">{count}</span>
+      <span className="post-like-n">{compactCount(count)}</span>
     </button>
   );
 }
