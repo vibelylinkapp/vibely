@@ -134,10 +134,10 @@ const STEPS = [
 ];
 
 const CITIES = [
-  { c: "Nairobi", n: "487 nearby", top: "34%", left: "50%", big: true },
-  { c: "Mombasa", n: "128 nearby", top: "16%", left: "82%" },
-  { c: "Kampala", n: "94 nearby", top: "58%", left: "80%" },
-  { c: "Kisumu", n: "63 nearby", top: "74%", left: "40%" },
+  { c: "Nairobi", n: "24.8K nearby", top: "34%", left: "50%", big: true },
+  { c: "Mombasa", n: "9.3K nearby", top: "16%", left: "82%" },
+  { c: "Kampala", n: "6.1K nearby", top: "58%", left: "80%" },
+  { c: "Kisumu", n: "3.4K nearby", top: "74%", left: "40%" },
 ];
 
 function AvatarStack({ label }: { label: string }) {
@@ -427,6 +427,31 @@ export default function Landing() {
           <div className="lp2-dhero-r">
             <div className="lp2-map">
               <span className="lp2-map-glow" />
+              <svg
+                className="lp2-map-net"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <defs>
+                  <linearGradient id="lp2net" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="#F5307E" />
+                    <stop offset="1" stopColor="#7A2FF2" />
+                  </linearGradient>
+                </defs>
+                <g className="lp2-net-lines">
+                  <line x1="50" y1="34" x2="82" y2="16" />
+                  <line x1="50" y1="34" x2="80" y2="58" />
+                  <line x1="50" y1="34" x2="40" y2="74" />
+                  <line x1="40" y1="74" x2="80" y2="58" />
+                </g>
+                <g className="lp2-net-flow">
+                  <line x1="50" y1="34" x2="82" y2="16" pathLength={100} />
+                  <line x1="50" y1="34" x2="80" y2="58" pathLength={100} />
+                  <line x1="50" y1="34" x2="40" y2="74" pathLength={100} />
+                  <line x1="40" y1="74" x2="80" y2="58" pathLength={100} />
+                </g>
+              </svg>
               {CITIES.map((c) => (
                 <span
                   key={c.c}

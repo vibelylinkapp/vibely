@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./landing-hero-plus.css";
 
 export const metadata: Metadata = {
   title: "Vibely — Meet real people near you",
