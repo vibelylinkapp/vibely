@@ -1052,6 +1052,10 @@ export type Database = {
         Args: { uid: string };
         Returns: number;
       };
+      follows_edge: {
+        Args: { a: string; b: string };
+        Returns: boolean;
+      };
       request_whatsapp: {
         Args: { other_id: string };
         Returns: string;

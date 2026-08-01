@@ -340,3 +340,295 @@
     transform: none;
   }
 }
+
+/* ==========================================================================
+   Public profile v3 (pf3) — cover hero + avatar + identity + Posts/Events/
+   Stories/About feed. Additive, scoped to .pf3 / .pf3-*. Layers on top of the
+   pf2 tab/grid/facts styles (the page element carries both .pf2 and .pf3).
+   ========================================================================== */
+
+/* ---- Cover ---- */
+.pf3 .pf3-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #23252e;
+}
+.pf3 .pf3-cover-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pf3 .pf3-cover-fallback {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #7a2ff2 0%, #b53ff2 46%, #e93d82 100%);
+}
+.pf3 .pf3-cover-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 11, 15, 0.34) 0%,
+    rgba(10, 11, 15, 0) 44%
+  );
+}
+.pf3 .pf3-round {
+  position: absolute;
+  top: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(20, 22, 28, 0.42);
+  backdrop-filter: blur(4px);
+}
+.pf3 .pf3-back {
+  left: 12px;
+}
+.pf3 .pf3-bell {
+  right: 12px;
+}
+
+/* ---- Identity header ---- */
+.pf3 .pf3-head {
+  position: relative;
+  z-index: 2;
+}
+.pf3 .pf3-id-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: -44px;
+  margin-bottom: 12px;
+}
+.pf3 .pf3-avatar-wrap {
+  flex: 0 0 auto;
+  position: relative;
+  padding: 3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7a2ff2, #e93d82);
+}
+.pf3 .pf3-avatar {
+  display: block;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  background: #e7e6ee;
+}
+.pf3 .pf3-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #7a2ff2, #e93d82);
+}
+.pf3 .pf3-shield {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #7a2ff2;
+  border: 2.5px solid #fff;
+}
+.pf3 .pf3-online-dot {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 3px solid #fff;
+}
+.pf3 .pf3-stats {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  padding-bottom: 6px;
+}
+.pf3 .pf3-stat {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.pf3 .pf3-stat + .pf3-stat {
+  border-left: 1px solid #e7e6ee;
+}
+.pf3 .pf3-stat b {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #14161c;
+  line-height: 1;
+}
+.pf3 .pf3-stat span {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+.pf3 .pf3-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 2px 0 3px;
+}
+.pf3 .pf3-name h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: #14161c;
+}
+.pf3 .pf3-handle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.pf3 .pf3-at {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+.pf3 .pf3-followsyou {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6b7280;
+  background: #f2f1f6;
+  border: 1px solid #e7e6ee;
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+.pf3 .pf3-loc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+.pf3 .pf3-loc svg {
+  width: 15px;
+  height: 15px;
+  color: #7a2ff2;
+  flex: 0 0 auto;
+}
+.pf3 .pf3-actions {
+  margin-top: 2px;
+}
+.pf3 .pf3-bio {
+  margin: 0 0 12px;
+  font-size: 0.93rem;
+  line-height: 1.5;
+  color: #14161c;
+  white-space: pre-line;
+}
+.pf3 .pf3-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.pf3 .pf3-more {
+  opacity: 0.72;
+}
+.pf3 .pf3-hl {
+  margin-bottom: 8px;
+}
+
+/* ---- Feed tiles / events ---- */
+.pf3 .pf3-tile {
+  display: block;
+}
+.pf3 .pf3-text-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #6b7280;
+  background: #f2f1f6;
+}
+.pf3 .pf3-evlist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pf3 .pf3-ev {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: 1px solid #e7e6ee;
+  border-radius: 14px;
+  background: #fff;
+  text-decoration: none;
+}
+.pf3 .pf3-ev-ph {
+  position: relative;
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #e7e6ee;
+  background-size: cover;
+  background-position: center;
+}
+.pf3 .pf3-ev-cat {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #14161c;
+  background: rgba(255, 255, 255, 0.9);
+}
+.pf3 .pf3-ev-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pf3 .pf3-ev-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #14161c;
+}
+.pf3 .pf3-ev-sub {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+.pf3 .pf3-ev-going {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7a2ff2;
+}
