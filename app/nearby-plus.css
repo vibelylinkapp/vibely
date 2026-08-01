@@ -290,6 +290,11 @@
   height: 58px;
   color: #7a2ff2;
 }
+.sw-btn.rewind {
+  width: 46px;
+  height: 46px;
+  color: #f5a623;
+}
 
 .sw-tip {
   font-size: 12.5px;
