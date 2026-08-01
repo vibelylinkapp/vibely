@@ -1,0 +1,276 @@
+/* ==========================================================================
+   Public profile redesign (pf2) — additive, scoped to .pf2 / .pf2-*.
+   Hero + stats + actions + highlights + tabbed content (Photos grid,
+   Interests, About). Reuses existing .mini, .vip-badge, and the
+   LikeButton / ProfileActions / HighlightsView components as-is.
+   ========================================================================== */
+
+.pf2 {
+  --p2-ink: #14161c;
+  --p2-muted: #6b7280;
+  --p2-surface: #f2f1f6;
+  --p2-line: #e7e6ee;
+  --p2-brand: #7a2ff2;
+}
+
+/* ---- Hero ---- */
+.pf2 .pf2-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #23252e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pf2 .pf2-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pf2 .pf2-hero-initial {
+  font-size: 5rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+}
+.pf2 .pf2-back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(20, 22, 28, 0.5);
+  backdrop-filter: blur(4px);
+}
+.pf2 .pf2-online {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(34, 197, 94, 0.92);
+}
+.pf2 .pf2-online::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+}
+.pf2 .pf2-hero-grad {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(10, 11, 15, 0.86) 0%,
+    rgba(10, 11, 15, 0.4) 34%,
+    rgba(10, 11, 15, 0) 62%
+  );
+}
+.pf2 .pf2-hero-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 16px 18px 18px;
+  color: #fff;
+}
+.pf2 .pf2-hero-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pf2 .pf2-hero-name h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.pf2 .pf2-hero-meta {
+  margin: 5px 0 0;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ---- Body ---- */
+.pf2 .pf2-body {
+  margin-top: 16px;
+}
+
+/* ---- Stats ---- */
+.pf2 .pf2-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pf2 .pf2-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 6px;
+  border-radius: 14px;
+  background: var(--p2-surface);
+  border: 1px solid var(--p2-line);
+}
+.pf2 .pf2-stat b {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--p2-ink);
+  line-height: 1;
+}
+.pf2 .pf2-stat span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--p2-muted);
+}
+
+/* ---- Actions (wraps existing LikeButton + ProfileActions) ---- */
+.pf2 .pf2-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* ---- Highlights ---- */
+.pf2 .pf2-hl {
+  margin-bottom: 18px;
+}
+.pf2 .pf2-h {
+  margin: 0 0 10px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--p2-ink);
+}
+
+/* ---- Tabs ---- */
+.pf2 .pf2-tabbar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--p2-line);
+  margin-bottom: 14px;
+}
+.pf2 .pf2-tab {
+  flex: 1 1 0;
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 10px 4px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--p2-muted);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+.pf2 .pf2-tab.on {
+  color: var(--p2-ink);
+}
+.pf2 .pf2-tab.on::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--p2-brand);
+}
+
+.pf2 .pf2-panel {
+  min-height: 60px;
+}
+
+/* Photos grid — the "posts" grid. */
+.pf2 .pf2-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.pf2 .pf2-grid-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--p2-surface);
+}
+
+/* Interests */
+.pf2 .pf2-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* About */
+.pf2 .pf2-bio {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--p2-ink);
+}
+.pf2 .pf2-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--p2-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.pf2 .pf2-facts li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  font-size: 0.88rem;
+}
+.pf2 .pf2-facts li + li {
+  border-top: 1px solid var(--p2-line);
+}
+.pf2 .pf2-facts li span {
+  color: var(--p2-muted);
+  font-weight: 600;
+}
+.pf2 .pf2-facts li b {
+  color: var(--p2-ink);
+  font-weight: 700;
+  text-align: right;
+}
+
+.pf2 .pf2-empty {
+  color: var(--p2-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 22px 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf2 .pf2-tab {
+    transition: none;
+  }
+}
