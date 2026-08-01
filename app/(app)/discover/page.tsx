@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/ProfileCard";
 import BottomNav from "@/components/BottomNav";
+import HomeSearch from "@/components/HomeSearch";
+import EventCard, { type EventCardData } from "@/components/EventCard";
 import type { Database } from "@/lib/database.types";
 
 type Intent = Database["public"]["Enums"]["intent_t"];
@@ -20,6 +22,58 @@ const FILTERS: { id: Intent | "all"; label: string }[] = [
 
 const NO_MATCH = "00000000-0000-0000-0000-000000000000";
 
+function fmtDay(iso: string | null): string {
+  if (!iso) return "Date TBA";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
+function eventPlace(
+  area: string | null,
+  city: string | null,
+  country: string | null
+): string {
+  const base = [area, city].filter(Boolean).join(", ") || city || "";
+  return country && country !== "Kenya"
+    ? `${base}${base ? ", " : ""}${country}`
+    : base;
+}
+
+type EventRow = {
+  id: string;
+  title: string;
+  image_url: string | null;
+  category: string | null;
+  venue: string | null;
+  area: string | null;
+  city: string;
+  country: string;
+  price_kes: number;
+  starts_at: string | null;
+  going_base: number;
+  is_trending: boolean;
+};
+
+function toCard(e: EventRow): EventCardData {
+  return {
+    id: e.id,
+    title: e.title,
+    image_url: e.image_url,
+    category: e.category,
+    venue: e.venue,
+    area: e.area,
+    city: e.city,
+    country: e.country,
+    price_kes: e.price_kes ?? 0,
+    starts_at: e.starts_at,
+    going: e.going_base ?? 0,
+  };
+}
+
 export default async function DiscoverPage({
   searchParams,
 }: {
@@ -28,6 +82,7 @@ export default async function DiscoverPage({
   const sp = await searchParams;
   const active = sp.intent ?? "all";
   const q = (sp.q ?? "").trim();
+  const isDefault = !q && active === "all";
   const supabase = await createClient();
   const {
     data: { user },
@@ -36,12 +91,31 @@ export default async function DiscoverPage({
 
   const nowIso = new Date().toISOString();
 
-  const [{ data: blockedRows }, { data: likedRows }, { data: boostRows }] =
-    await Promise.all([
-      supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
-      supabase.from("likes").select("liked_id").eq("liker_id", user.id),
-      supabase.from("boosts").select("profile_id").gt("expires_at", nowIso),
-    ]);
+  const [
+    { data: blockedRows },
+    { data: likedRows },
+    { data: boostRows },
+    { data: meProfile },
+    { data: eventRows },
+  ] = await Promise.all([
+    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+    supabase.from("likes").select("liked_id").eq("liker_id", user.id),
+    supabase.from("boosts").select("profile_id").gt("expires_at", nowIso),
+    supabase
+      .from("profiles")
+      .select("area, county")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("events")
+      .select(
+        "id, title, image_url, category, venue, area, city, country, price_kes, starts_at, going_base, is_trending"
+      )
+      .eq("status", "published")
+      .gte("starts_at", nowIso)
+      .order("starts_at", { ascending: true })
+      .limit(24),
+  ]);
   const excludeIds = new Set<string>([
     ...(blockedRows ?? []).map((b) => b.blocked_id),
     ...(likedRows ?? []).map((l) => l.liked_id),
@@ -126,31 +200,67 @@ export default async function DiscoverPage({
     (vipRows ?? []).forEach((r) => vipSet.add(r.profile_id));
   }
 
+  const events = (eventRows ?? []) as EventRow[];
+  const featured = isDefault ? events.slice(0, 6) : [];
+  const trending = isDefault
+    ? [...events]
+        .filter((e) => e.is_trending)
+        .sort((a, b) => (b.going_base ?? 0) - (a.going_base ?? 0))
+        .slice(0, 8)
+    : [];
+  const locationLabel =
+    [meProfile?.area, meProfile?.county].filter(Boolean).join(", ") ||
+    "East Africa";
+
+  const peopleHeading = isDefault
+    ? "People to connect with"
+    : q
+      ? `Results for \u201c${q}\u201d`
+      : "People";
+
   return (
-    <main className="feed-wrap">
-      <div className="feed-head">
-        <div className="feed-head-l">
-          <span className="feed-title">Discover</span>
-          <span className="feed-sub">
-            {q
-              ? `Results for \u201c${q}\u201d`
-              : "Find people, places and vibes around you"}
+    <main className="feed-wrap disc2">
+      <div className="disc2-head">
+        <div className="disc2-head-l">
+          <span className="disc2-title">Discover</span>
+          <span className="disc2-loc">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+            {locationLabel}
           </span>
         </div>
-        <div className="feed-actions">
+        <div className="disc2-head-r">
           <Link
             href="/nearby"
-            className="feed-action nearby"
+            className="disc2-ico"
             aria-label="People nearby"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
               <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
               <circle cx="12" cy="10" r="2.5" />
             </svg>
           </Link>
           <Link
             href="/liked-you"
-            className="feed-action"
+            className="disc2-ico"
             aria-label="See who likes you"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -160,7 +270,11 @@ export default async function DiscoverPage({
         </div>
       </div>
 
-      <div className="filter-row">
+      <div className="disc2-search">
+        <HomeSearch />
+      </div>
+
+      <div className="disc2-chips">
         {FILTERS.map((f) => (
           <Link
             key={f.id}
@@ -172,31 +286,102 @@ export default async function DiscoverPage({
         ))}
       </div>
 
-      {profiles.length === 0 ? (
-        <p className="sub" style={{ textAlign: "center", marginTop: 40 }}>
-          {q
-            ? `No people match \u201c${q}\u201d. Try a different name, or clear your search.`
-            : "You\u2019re all caught up. As more people join Vibely \u2014 or once you clear your current likes \u2014 new faces will show up here. Invite a friend to sign up and watch this fill in."}
-        </p>
-      ) : (
-        <div className="grid">
-          {profiles.map((p) => {
-            const card = {
-              ...p,
-              is_verified: p.is_verified && p.show_verification,
-            };
-            return (
-              <ProfileCard
-                key={p.id}
-                p={card}
-                intents={intentMap[p.id] ?? []}
-                boosted={boostedIdSet.has(p.id)}
-                vip={vipSet.has(p.id)}
-              />
-            );
-          })}
-        </div>
+      {isDefault && featured.length > 0 && (
+        <section className="disc2-sec">
+          <div className="disc2-sec-head">
+            <h2>Featured around you</h2>
+            <Link href="/events" className="disc2-seeall">
+              See all
+            </Link>
+          </div>
+          <div className="disc2-rail disc2-rail-feat">
+            {featured.map((e) => (
+              <Link
+                key={e.id}
+                href={`/events/${e.id}`}
+                className="disc2-feat"
+              >
+                <div
+                  className="disc2-feat-ph"
+                  style={
+                    e.image_url
+                      ? { backgroundImage: `url('${e.image_url}')` }
+                      : undefined
+                  }
+                >
+                  {e.category && (
+                    <span className="disc2-feat-badge">{e.category}</span>
+                  )}
+                  <span className="disc2-feat-going">
+                    {e.going_base ?? 0} going
+                  </span>
+                  <div className="disc2-feat-grad" />
+                  <div className="disc2-feat-body">
+                    <b className="disc2-feat-title">{e.title}</b>
+                    <span className="disc2-feat-sub">
+                      {eventPlace(e.area, e.city, e.country)} &middot;{" "}
+                      {fmtDay(e.starts_at)}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
+
+      {isDefault && trending.length > 0 && (
+        <section className="disc2-sec">
+          <div className="disc2-sec-head">
+            <h2>Trending Events</h2>
+            <Link href="/events" className="disc2-seeall">
+              See all
+            </Link>
+          </div>
+          <div className="disc2-rail">
+            {trending.map((e) => (
+              <EventCard key={e.id} e={toCard(e)} variant="rail" />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="disc2-sec">
+        <div className="disc2-sec-head">
+          <h2>{peopleHeading}</h2>
+          {isDefault && (
+            <Link href="/nearby" className="disc2-seeall">
+              See all
+            </Link>
+          )}
+        </div>
+
+        {profiles.length === 0 ? (
+          <p className="sub" style={{ textAlign: "center", marginTop: 24 }}>
+            {q
+              ? `No people match \u201c${q}\u201d. Try a different name, or clear your search.`
+              : "You\u2019re all caught up. As more people join Vibely \u2014 or once you clear your current likes \u2014 new faces will show up here. Invite a friend to sign up and watch this fill in."}
+          </p>
+        ) : (
+          <div className="grid">
+            {profiles.map((p) => {
+              const card = {
+                ...p,
+                is_verified: p.is_verified && p.show_verification,
+              };
+              return (
+                <ProfileCard
+                  key={p.id}
+                  p={card}
+                  intents={intentMap[p.id] ?? []}
+                  boosted={boostedIdSet.has(p.id)}
+                  vip={vipSet.has(p.id)}
+                />
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <BottomNav />
     </main>
