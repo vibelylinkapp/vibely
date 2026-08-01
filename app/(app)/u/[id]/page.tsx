@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import LikeButton from "@/components/LikeButton";
 import ProfileActions from "@/components/ProfileActions";
+import HighlightsView from "@/components/HighlightsView";
 import { effectiveTier } from "@/lib/entitlements";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +49,7 @@ export default async function UserDetailPage({
     { data: sub },
     { data: myLike },
     { data: theirLike },
+    { data: highlights },
   ] = await Promise.all([
     supabase.from("profile_intents").select("intent").eq("profile_id", id),
     supabase
@@ -74,6 +76,11 @@ export default async function UserDetailPage({
       .eq("liker_id", id)
       .eq("liked_id", user.id)
       .maybeSingle(),
+    supabase
+      .from("highlights")
+      .select("id, title, media_url, caption")
+      .eq("profile_id", id)
+      .order("position", { ascending: true }),
   ]);
 
   const iLiked = !!myLike;
@@ -155,6 +162,13 @@ export default async function UserDetailPage({
                 {i.intent}
               </span>
             ))}
+          </div>
+        )}
+
+        {highlights && highlights.length > 0 && (
+          <div className="detail-section">
+            <h3>Highlights</h3>
+            <HighlightsView highlights={highlights} />
           </div>
         )}
 

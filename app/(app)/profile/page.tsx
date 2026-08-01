@@ -7,6 +7,7 @@ import AvatarUpload from "@/components/AvatarUpload";
 import PushSetup from "@/components/PushSetup";
 import PrivacyToggles from "@/components/PrivacyToggles";
 import GalleryUpload from "@/components/GalleryUpload";
+import HighlightsEditor from "@/components/HighlightsEditor";
 import VerificationSetup from "@/components/VerificationSetup";
 import WhatsAppSetup from "@/components/WhatsAppSetup";
 import BoostButton from "@/components/BoostButton";
@@ -44,6 +45,12 @@ export default async function ProfilePage() {
   const { data: myPhotos } = await supabase
     .from("photos")
     .select("id, url")
+    .eq("profile_id", user.id)
+    .order("position", { ascending: true });
+
+  const { data: myHighlights } = await supabase
+    .from("highlights")
+    .select("id, title, media_url, caption")
     .eq("profile_id", user.id)
     .order("position", { ascending: true });
 
@@ -129,6 +136,10 @@ export default async function ProfilePage() {
             ))}
           </div>
         )}
+        <HighlightsEditor
+          userId={user.id}
+          initialHighlights={myHighlights ?? []}
+        />
         <GalleryUpload userId={user.id} initialPhotos={myPhotos ?? []} />
         <VerificationSetup
           userId={user.id}

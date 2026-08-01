@@ -12,6 +12,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      highlights: {
+        Row: {
+          caption: string | null;
+          created_at: string;
+          id: string;
+          is_approved: boolean;
+          media_url: string;
+          position: number;
+          profile_id: string;
+          title: string;
+        };
+        Insert: {
+          caption?: string | null;
+          created_at?: string;
+          id?: string;
+          is_approved?: boolean;
+          media_url: string;
+          position?: number;
+          profile_id: string;
+          title: string;
+        };
+        Update: {
+          caption?: string | null;
+          created_at?: string;
+          id?: string;
+          is_approved?: boolean;
+          media_url?: string;
+          position?: number;
+          profile_id?: string;
+          title?: string;
+        };
+        Relationships: [];
+      };
       events: {
         Row: {
           id: string;
