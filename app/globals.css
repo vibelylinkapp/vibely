@@ -5379,3 +5379,39 @@ button.create-alt {
   .tier-card, .chat-attach, .react-pill{ transition:none; }
   .tier-card:hover{ transform:none; }
 }
+
+
+/* ============================================================
+   VIBELY SCREEN REFINEMENTS — Batch 4: Create + Notifications
+   + Stories + Settings toggles (Settings lives on the Profile page).
+   Additive, screen-scoped. No data or component logic changed.
+   ============================================================ */
+
+/* Create — action cards lift; icon tile lights up with the brand gradient */
+.create-alt:hover{ transform: translateY(-3px); box-shadow: var(--shadow); border-color: rgba(122,47,242,.18); }
+.create-alt-ic{ transition: background .18s ease, color .18s ease; }
+.create-alt:hover .create-alt-ic{ background: var(--aurora); color:#fff; }
+
+/* Notifications — rows respond to hover; the unread dot gently pulses */
+.notif-row{ transition: background .15s ease; }
+.notif-row:hover{ background: var(--bg-soft); }
+.notif-dot{ animation: vb-notif 2s ease-out infinite; }
+@keyframes vb-notif{
+  0%{ box-shadow: 0 0 0 0 rgba(124,58,237,.5); }
+  70%{ box-shadow: 0 0 0 6px rgba(124,58,237,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+}
+
+/* Stories — story-tray tiles lift on hover and give tap feedback */
+.story-item{ transition: transform .14s ease; }
+.story-item:hover{ transform: translateY(-2px); }
+.story-item:active{ transform: scale(.96); }
+
+/* Settings toggles (on the Profile page) — knob gains subtle depth */
+.switch-knob{ box-shadow: 0 2px 6px rgba(20,16,31,.25); }
+
+@media (prefers-reduced-motion: reduce){
+  .notif-dot{ animation:none; }
+  .story-item{ transition:none; }
+  .create-alt:hover, .story-item:hover, .story-item:active{ transform:none; }
+}
