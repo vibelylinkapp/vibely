@@ -1044,6 +1044,14 @@ export type Database = {
           is_verified: boolean;
         }[];
       };
+      follower_count: {
+        Args: { uid: string };
+        Returns: number;
+      };
+      following_count: {
+        Args: { uid: string };
+        Returns: number;
+      };
       request_whatsapp: {
         Args: { other_id: string };
         Returns: string;
