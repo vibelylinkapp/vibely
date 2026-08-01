@@ -38,6 +38,11 @@ function eventDay(iso: string | null): string {
   });
 }
 
+function compactN(n: number): string {
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
+  return String(n);
+}
+
 function MediaTile({ m }: { m: Media }) {
   if (m.url) {
     return (
@@ -57,11 +62,13 @@ export default function ProfileFeed({
   events,
   stories,
   about,
+  likeCounts = {},
 }: {
   posts: Media[];
   events: Ev[];
   stories: Media[];
   about: About;
+  likeCounts?: Record<string, number>;
 }) {
   const tabs: { id: TabId; label: string; count: number }[] = [
     { id: "posts", label: "Posts", count: posts.length },
@@ -95,6 +102,14 @@ export default function ProfileFeed({
               {posts.map((p) => (
                 <Link key={p.id} href={`/posts/${p.id}`} className="pf3-tile">
                   <MediaTile m={p} />
+                  {(likeCounts[p.id] ?? 0) > 0 && (
+                    <span className="pf3-tile-likes" aria-label={`${likeCounts[p.id]} likes`}>
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 20.7 4.3 13a4.6 4.6 0 0 1 6.5-6.5l1.2 1.2 1.2-1.2A4.6 4.6 0 0 1 19.7 13z" />
+                      </svg>
+                      {compactN(likeCounts[p.id] ?? 0)}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>

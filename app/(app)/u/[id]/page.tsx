@@ -190,6 +190,21 @@ export default async function UserDetailPage({
   const showVerified = !!profile.is_verified;
   const initial = profile.display_name.charAt(0).toUpperCase();
 
+  // Per-post like counts for the Posts grid. post_likes is readable by any
+  // authenticated member (post_likes_select_auth = using(true)), so a plain
+  // tally is enough — no aggregate function needed.
+  const postIds = postList.map((p) => p.id);
+  const likeCounts: Record<string, number> = {};
+  if (postIds.length > 0) {
+    const { data: likeRows } = await supabase
+      .from("post_likes")
+      .select("post_id")
+      .in("post_id", postIds);
+    for (const r of likeRows ?? []) {
+      likeCounts[r.post_id] = (likeCounts[r.post_id] ?? 0) + 1;
+    }
+  }
+
   return (
     <main className="detail-wrap pf2 pf3">
       {/* Cover banner */}
@@ -371,6 +386,7 @@ export default async function UserDetailPage({
           posts={postList}
           events={eventList}
           stories={storyList}
+          likeCounts={likeCounts}
           about={{
             name: profile.display_name,
             bio: profile.bio ?? null,
