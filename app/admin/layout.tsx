@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/guard";
+import { ADMIN_PATH } from "@/lib/admin/path";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   await requireAdmin();
+  const base = `/${ADMIN_PATH}`;
 
   return (
     <div className="admin">
@@ -17,16 +19,16 @@ export default async function AdminLayout({
           Vibely <span>Admin</span>
         </div>
         <nav>
-          <Link href="/admin">Dashboard</Link>
-          <Link href="/admin/analytics">Analytics</Link>
-          <Link href="/admin/revenue">Revenue</Link>
-          <Link href="/admin/retention">Retention</Link>
-          <Link href="/admin/alerts">Alerts</Link>
-          <Link href="/admin/reports">Reports</Link>
-          <Link href="/admin/verifications">Verifications</Link>
-          <Link href="/admin/events">Events</Link>
-          <Link href="/admin/announcements">Announcements</Link>
-          <Link href="/admin/feedback">Feedback</Link>
+          <Link href={base}>Dashboard</Link>
+          <Link href={`${base}/analytics`}>Analytics</Link>
+          <Link href={`${base}/revenue`}>Revenue</Link>
+          <Link href={`${base}/retention`}>Retention</Link>
+          <Link href={`${base}/alerts`}>Alerts</Link>
+          <Link href={`${base}/reports`}>Reports</Link>
+          <Link href={`${base}/verifications`}>Verifications</Link>
+          <Link href={`${base}/events`}>Events</Link>
+          <Link href={`${base}/announcements`}>Announcements</Link>
+          <Link href={`${base}/feedback`}>Feedback</Link>
           <Link href="/home">Back to app</Link>
         </nav>
       </aside>
