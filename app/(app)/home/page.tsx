@@ -435,7 +435,7 @@ export default async function HomePage() {
             <h3>People near you</h3>
             <Link href="/nearby">See all</Link>
           </div>
-          <div className="hscroll">
+          <div className="pnear-grid">
             {nearbyPeople.map((p, idx) => {
               const age = p.birthdate ? ageFrom(p.birthdate) : null;
               const tags = nearIntents[p.id] ?? [];
