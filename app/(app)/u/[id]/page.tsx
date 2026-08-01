@@ -5,7 +5,9 @@ import BottomNav from "@/components/BottomNav";
 import LikeButton from "@/components/LikeButton";
 import ProfileActions from "@/components/ProfileActions";
 import HighlightsView from "@/components/HighlightsView";
+import ProfileTabs from "@/components/ProfileTabs";
 import { effectiveTier } from "@/lib/entitlements";
+import "@/app/profile-plus.css";
 
 export const dynamic = "force-dynamic";
 
@@ -97,7 +99,7 @@ export default async function UserDetailPage({
   const place = [profile.area, profile.county].filter(Boolean).join(", ");
   const meta = [age ? String(age) : null, place].filter(Boolean).join(" · ");
 
-  // Gallery falls back to the avatar so the page is never empty.
+  // Gallery falls back to the avatar so the hero is never empty.
   const gallery =
     photos && photos.length > 0
       ? photos
@@ -105,10 +107,33 @@ export default async function UserDetailPage({
         ? [{ id: "avatar", url: profile.avatar_url }]
         : [];
 
+  const intentLabels = (intents ?? []).map((i) => i.intent as string);
+  const photoList = (photos ?? []).map((p) => ({ id: p.id, url: p.url }));
+  const photosCount = photoList.length;
+  const highlightsCount = (highlights ?? []).length;
+  const interestsCount = intentLabels.length;
+  const joined = profile.created_at
+    ? new Date(profile.created_at).getFullYear().toString()
+    : null;
+  const showVerified = !!profile.is_verified;
+
   return (
-    <main className="detail-wrap">
-      <header className="detail-head">
-        <Link href="/discover" className="thread-back" aria-label="Back">
+    <main className="detail-wrap pf2">
+      <div className="pf2-hero">
+        {gallery.length > 0 ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="pf2-hero-img"
+            src={gallery[0].url}
+            alt={profile.display_name}
+          />
+        ) : (
+          <span className="pf2-hero-initial">
+            {profile.display_name.charAt(0).toUpperCase()}
+          </span>
+        )}
+
+        <Link href="/discover" className="pf2-back" aria-label="Back">
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M15 5l-7 7 7 7"
@@ -120,78 +145,54 @@ export default async function UserDetailPage({
             />
           </svg>
         </Link>
-        <span className="detail-head-name">{profile.display_name}</span>
-      </header>
 
-      <div className="detail-hero">
-        {gallery.length > 0 ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={gallery[0].url} alt={profile.display_name} />
-        ) : (
-          <span className="detail-initial">
-            {profile.display_name.charAt(0).toUpperCase()}
-          </span>
-        )}
-        {profile.is_online && <span className="detail-online">Online now</span>}
+        {profile.is_online && <span className="pf2-online">Online now</span>}
+
+        <div className="pf2-hero-grad" />
+        <div className="pf2-hero-info">
+          <div className="pf2-hero-name">
+            <h1>{profile.display_name}</h1>
+            {showVerified && (
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                aria-label="Verified"
+              >
+                <circle cx="12" cy="12" r="12" fill="#FFB020" />
+                <path
+                  d="M7 12.5l3 3 7-7"
+                  fill="none"
+                  stroke="#12151D"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+            {isVip && <span className="vip-badge">VIP</span>}
+          </div>
+          {meta && <p className="pf2-hero-meta">{meta}</p>}
+        </div>
       </div>
 
-      <section className="detail-body">
-        <div className="detail-name-row">
-          <h1>{profile.display_name}</h1>
-          {profile.is_verified && (
-            <svg width="20" height="20" viewBox="0 0 24 24" aria-label="Verified">
-              <circle cx="12" cy="12" r="12" fill="#FFB020" />
-              <path
-                d="M7 12.5l3 3 7-7"
-                fill="none"
-                stroke="#12151D"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-          {isVip && <span className="vip-badge">VIP</span>}
+      <section className="pf2-body">
+        <div className="pf2-stats">
+          <div className="pf2-stat">
+            <b>{photosCount}</b>
+            <span>Photos</span>
+          </div>
+          <div className="pf2-stat">
+            <b>{highlightsCount}</b>
+            <span>Highlights</span>
+          </div>
+          <div className="pf2-stat">
+            <b>{interestsCount}</b>
+            <span>Interests</span>
+          </div>
         </div>
-        {meta && <p className="pcard-meta">{meta}</p>}
 
-        {intents && intents.length > 0 && (
-          <div className="pcard-intents" style={{ marginTop: 12 }}>
-            {intents.map((i) => (
-              <span className="mini" key={i.intent}>
-                {i.intent}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {highlights && highlights.length > 0 && (
-          <div className="detail-section">
-            <h3>Highlights</h3>
-            <HighlightsView highlights={highlights} />
-          </div>
-        )}
-
-        {profile.bio && (
-          <div className="detail-section">
-            <h3>About</h3>
-            <p>{profile.bio}</p>
-          </div>
-        )}
-
-        {gallery.length > 1 && (
-          <div className="detail-section">
-            <h3>Photos</h3>
-            <div className="detail-gallery">
-              {gallery.slice(1).map((ph) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={ph.id} src={ph.url} alt="" />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="detail-actions">
+        <div className="pf2-actions">
           <LikeButton
             targetId={profile.id}
             targetName={profile.display_name}
@@ -203,6 +204,25 @@ export default async function UserDetailPage({
             targetName={profile.display_name}
           />
         </div>
+
+        {highlights && highlights.length > 0 && (
+          <div className="pf2-hl">
+            <h3 className="pf2-h">Highlights</h3>
+            <HighlightsView highlights={highlights} />
+          </div>
+        )}
+
+        <ProfileTabs
+          photos={photoList}
+          intents={intentLabels}
+          bio={profile.bio ?? null}
+          name={profile.display_name}
+          place={place}
+          joined={joined}
+          isVerified={showVerified}
+          isOnline={!!profile.is_online}
+          age={age}
+        />
       </section>
 
       <BottomNav />
