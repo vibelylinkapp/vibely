@@ -3,6 +3,7 @@ import PostLike from "@/components/PostLike";
 import DeletePost from "@/components/DeletePost";
 import EditCaption from "@/components/EditCaption";
 import ReportPost from "@/components/ReportPost";
+import { compactCount } from "@/lib/format";
 
 type Author = { id: string; display_name: string; avatar_url: string | null };
 
@@ -19,13 +20,6 @@ function timeAgo(iso: string): string {
     day: "numeric",
     month: "short",
   });
-}
-
-function compactCount(n: number): string {
-  if (n >= 1_000_000)
-    return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + "M";
-  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
-  return String(n);
 }
 
 export default function PostCard({

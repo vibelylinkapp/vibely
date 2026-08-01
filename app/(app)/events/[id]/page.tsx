@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import EventBookButton from "@/components/EventBookButton";
 import EventForm, { ExistingEvent } from "@/components/EventForm";
 import EventModerationBar from "@/components/EventModerationBar";
+import { compactCount } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -142,7 +143,7 @@ export default async function EventDetail({
         )}
 
         <div className="ev-going">
-          <b>{going}</b> going
+          <b>{compactCount(going)}</b> going
           {e.capacity
             ? ` \u00b7 ${Math.max(0, e.capacity - going)} spots left`
             : ""}
