@@ -1,0 +1,227 @@
+/* Profile Highlights — additive, scoped to .hl-* classes.
+   Imported by the Highlights components (not globally). */
+
+.hl-edit {
+  width: 100%;
+  max-width: 340px;
+  margin: 18px auto 4px;
+}
+.hl-edit-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.hl-edit-head .sub {
+  font-size: 12.5px;
+  color: #8a8499;
+}
+
+.hl-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hl-row::-webkit-scrollbar {
+  display: none;
+}
+
+.hl-item {
+  flex: 0 0 auto;
+  width: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.hl-item-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.hl-cover {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, #7a2ff2, #ff6ea9);
+  padding: 3px;
+}
+.hl-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  border: 2px solid #fff;
+}
+.hl-title {
+  font-size: 11.5px;
+  color: #3a3350;
+  max-width: 66px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hl-add {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px dashed #c7bce6;
+  background: #f6f2ff;
+  color: #7a2ff2;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hl-add:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hl-del {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #ff4d6d;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Lightbox viewer */
+.hl-view {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 6, 20, 0.9);
+  backdrop-filter: blur(3px);
+}
+.hl-view-body {
+  margin: 0;
+  max-width: 460px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: hl-pop 0.24s ease;
+}
+.hl-view-img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 16px;
+}
+.hl-view-cap {
+  margin-top: 14px;
+  text-align: center;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hl-view-cap strong {
+  font-size: 17px;
+}
+.hl-view-cap span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hl-view-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.hl-view-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hl-view-nav.prev {
+  left: 12px;
+}
+.hl-view-nav.next {
+  right: 12px;
+}
+
+.hl-view-dots {
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.hl-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+.hl-dot.on {
+  background: #fff;
+}
+
+@keyframes hl-pop {
+  from {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hl-view-body {
+    animation: none;
+  }
+}
