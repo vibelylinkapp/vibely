@@ -124,7 +124,10 @@ export default async function DiscoverPage({
   return (
     <main className="feed-wrap">
       <div className="feed-head">
-        <span className="feed-title">Discover</span>
+        <div className="feed-head-l">
+          <span className="feed-title">Discover</span>
+          <span className="feed-sub">Find people, places and vibes around you</span>
+        </div>
         <div className="feed-actions">
           <Link
             href="/nearby"

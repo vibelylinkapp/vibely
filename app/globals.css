@@ -5242,3 +5242,56 @@ button.create-alt {
   .pcard-dot::after,.nb-dot::after,.near-dot::after,.pnear-dot::after,
   .convo-dot::after,.home-hi-dot::after,.ci-live-dot::after{ animation:none; }
 }
+
+
+/* ============================================================
+   VIBELY SCREEN REFINEMENTS — Batch 1: Home + Discover
+   Additive, screen-scoped. No data or component logic changed.
+   ============================================================ */
+
+/* Home — greeting "online now" stat becomes a frosted accent chip */
+.home-hi-stat{
+  background: linear-gradient(160deg, rgba(255,255,255,.92), rgba(246,244,252,.92));
+  border-color: rgba(122,47,242,.14);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.home-hi-stat:hover{ transform: translateY(-2px); box-shadow: var(--shadow); }
+
+/* Home — search bar gains a soft hover glow */
+.home-search{ transition: border-color .16s ease, box-shadow .16s ease; }
+.home-search:hover{ border-color: rgba(122,47,242,.28); box-shadow: 0 10px 26px -14px rgba(122,47,242,.4); }
+
+/* Home — section titles get a small gradient accent bar */
+.home-pnear .sec h3, .home-checkins .sec h3, .home-trending .sec h3{
+  position: relative; padding-left: 12px;
+}
+.home-pnear .sec h3::before, .home-checkins .sec h3::before, .home-trending .sec h3::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:4px; height:.95em; border-radius:3px; background: var(--aurora);
+}
+
+/* Home — people-near-you photo lifts on hover */
+.pnear-photo{ transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease; }
+.pnear-card:hover .pnear-photo{ transform: translateY(-3px); box-shadow: var(--shadow); }
+
+/* Discover — subtitle under the sticky title (matches mockup) */
+.feed-head-l{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.feed-sub{ font-size:12.5px; font-weight:600; color: var(--ink-3); }
+
+/* Discover — action buttons lift on hover, matching the Home appbar */
+.feed-action:hover{ transform: translateY(-1px); background: rgba(245,48,126,.16); }
+
+/* Discover — fade the scrollable filter row edges */
+.filter-row{
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+
+/* Discover — a touch more breathing room on larger phones/tablets */
+@media (min-width: 520px){ .grid{ gap: 16px; } }
+
+@media (prefers-reduced-motion: reduce){
+  .home-hi-stat, .home-search, .pnear-photo{ transition:none; }
+  .home-hi-stat:hover, .pnear-card:hover .pnear-photo{ transform:none; }
+}
