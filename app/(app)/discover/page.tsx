@@ -200,6 +200,17 @@ export default async function DiscoverPage({
     (vipRows ?? []).forEach((r) => vipSet.add(r.profile_id));
   }
 
+  // People the viewer already follows (own rows only, allowed under counts-only RLS).
+  const followingSet = new Set<string>();
+  if (ids.length) {
+    const { data: followRows } = await supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", user.id)
+      .in("following_id", ids);
+    (followRows ?? []).forEach((r) => followingSet.add(r.following_id));
+  }
+
   const events = (eventRows ?? []) as EventRow[];
   const featured = isDefault ? events.slice(0, 6) : [];
   const trending = isDefault
@@ -376,6 +387,8 @@ export default async function DiscoverPage({
                   intents={intentMap[p.id] ?? []}
                   boosted={boostedIdSet.has(p.id)}
                   vip={vipSet.has(p.id)}
+                  showFollow
+                  following={followingSet.has(p.id)}
                 />
               );
             })}
