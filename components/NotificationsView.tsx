@@ -33,6 +33,8 @@ function line(n: NotifRow): string {
   switch (n.type) {
     case "match":
       return `You matched with ${who}. Say hi!`;
+    case "follow":
+      return `${who} started following you`;
     case "post_like":
       return `${who} liked your post`;
     case "post_comment":
@@ -82,7 +84,7 @@ export default function NotificationsView({ initial }: { initial: NotifRow[] }) 
   if (rows.length === 0) {
     return (
       <p className="nb-note">
-        No notifications yet. Likes, comments, matches and event updates will
+        No notifications yet. Likes, follows, comments, matches and event updates will
         show up here.
       </p>
     );
