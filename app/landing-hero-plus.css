@@ -281,3 +281,113 @@
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   7. "Why you'll love" / "How it works" band — full-width horizontal layout
+   (desktop only — these classes live inside .lp2-desktop).
+   Stacks the two blocks so each gets the full width: Why becomes a row of 4
+   feature cards; How becomes 4 arrow-linked steps with circular icons.
+   --------------------------------------------------------------------------- */
+.lp2-light {
+  padding-top: 72px;
+}
+.lp2-two {
+  grid-template-columns: 1fr;
+  gap: 64px;
+}
+/* centered section headings + centered accent underline */
+.lp2-light .lp2-h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.lp2-light .lp2-h2::after {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --- Why: 4 feature cards across --- */
+.lp2-feats {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.lp2-feat {
+  padding: 24px 22px;
+  border-radius: 20px;
+}
+.lp2-feat-ic {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+}
+
+/* --- How: 4 steps in a row, linked by chevron arrows --- */
+.lp2-steps {
+  flex-direction: row;
+  gap: 14px;
+  align-items: flex-start;
+}
+.lp2-step {
+  flex: 1 1 0;
+  padding-left: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lp2-step-ic {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  box-shadow: 0 8px 22px rgba(122, 47, 242, 0.16);
+}
+.lp2-step-ic svg {
+  width: 26px;
+  height: 26px;
+}
+/* number badge -> bottom-center of the circular icon */
+.lp2-step .lp2-step-n {
+  top: auto;
+  right: auto;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.lp2-step b {
+  font-size: 16px;
+}
+.lp2-step small {
+  display: block;
+  max-width: 200px;
+  margin: 4px auto 0;
+}
+/* chevron arrow sitting in the gap between steps */
+.lp2-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 30px;
+  right: -7px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid rgba(122, 47, 242, 0.4);
+  border-right: 2px solid rgba(122, 47, 242, 0.4);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* responsive fallbacks (desktop band renders >=900px) */
+@media (max-width: 1040px) {
+  .lp2-feats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .lp2-feats {
+    grid-template-columns: 1fr;
+  }
+  .lp2-steps {
+    flex-direction: column;
+  }
+  .lp2-step:not(:last-child)::after {
+    display: none;
+  }
+}
