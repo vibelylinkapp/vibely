@@ -3,6 +3,7 @@
 import "@/app/profile-plus.css";
 import { useState } from "react";
 import Link from "next/link";
+import { compactCount } from "@/lib/format";
 
 type Media = { id: string; url: string | null; caption: string | null };
 type Ev = {
@@ -36,11 +37,6 @@ function eventDay(iso: string | null): string {
     day: "numeric",
     month: "short",
   });
-}
-
-function compactN(n: number): string {
-  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
-  return String(n);
 }
 
 function MediaTile({ m }: { m: Media }) {
@@ -107,7 +103,7 @@ export default function ProfileFeed({
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 20.7 4.3 13a4.6 4.6 0 0 1 6.5-6.5l1.2 1.2 1.2-1.2A4.6 4.6 0 0 1 19.7 13z" />
                       </svg>
-                      {compactN(likeCounts[p.id] ?? 0)}
+                      {compactCount(likeCounts[p.id] ?? 0)}
                     </span>
                   )}
                 </Link>
@@ -141,7 +137,7 @@ export default function ProfileFeed({
                       {eventDay(e.starts_at)}
                       {e.place ? ` \u00b7 ${e.place}` : ""}
                     </span>
-                    <span className="pf3-ev-going">{e.going} going</span>
+                    <span className="pf3-ev-going">{compactCount(e.going)} going</span>
                   </span>
                 </Link>
               ))}

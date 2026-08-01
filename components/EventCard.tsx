@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { compactCount } from "@/lib/format";
 
 export type EventCardData = {
   id: string;
@@ -51,7 +52,7 @@ export default function EventCard({
       <Link className="placecard" href={`/events/${e.id}`}>
         <div className="ph" style={bg}>
           {e.category && <span className="badge">{e.category}</span>}
-          <span className="live">{e.going} going</span>
+          <span className="live">{compactCount(e.going)} going</span>
         </div>
         <div className="body">
           <b>{e.title}</b>
@@ -76,7 +77,7 @@ export default function EventCard({
           <span>&#128336; {fmtWhen(e.starts_at)}</span>
         </div>
         <div className="going">
-          <small>{e.going} going</small>
+          <small>{compactCount(e.going)} going</small>
         </div>
       </div>
     </Link>

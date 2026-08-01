@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-function compactCount(n: number): string {
-  if (n >= 1_000_000)
-    return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + "M";
-  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
-  return String(n);
-}
+import { compactCount } from "@/lib/format";
 
 export default function PostLike({
   postId,
