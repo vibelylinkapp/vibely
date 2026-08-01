@@ -93,6 +93,11 @@ export default function SwipeDeck({
   const [excluded, setExcluded] = useState<Set<string> | null>(null);
   const [meVerified, setMeVerified] = useState<boolean | null>(null);
   const [details, setDetails] = useState<Map<string, CardDetail>>(new Map());
+  // Session history of swipes, for rewind/undo. A like that formed a match is
+  // dropped from this stack — once you match, that connection stays.
+  const [history, setHistory] = useState<
+    { id: string; dir: "like" | "nope" }[]
+  >([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -204,6 +209,9 @@ export default function SwipeDeck({
       }
       if (json.ok && json.matched) {
         setMatch(target);
+        // A like that formed a match is not rewindable — once you match, that
+        // connection stays. Drop it from the rewind history.
+        setHistory((h) => h.filter((e) => e.id !== target.id));
         // Notify the other person that they matched (best-effort).
         fetch("/api/push/send", {
           method: "POST",
@@ -234,6 +242,7 @@ export default function SwipeDeck({
       if (!top || leaving) return;
       const target = top;
       setLeaving({ id: target.id, dir });
+      setHistory((h) => [...h, { id: target.id, dir }]);
       if (dir === "like") void recordLike(target);
       else void recordPass(target);
       // Advance once the exit transition has played.
@@ -241,6 +250,35 @@ export default function SwipeDeck({
     },
     [top, leaving, recordLike, recordPass, settle]
   );
+
+  const rewind = useCallback(() => {
+    if (leaving || history.length === 0) return;
+    const entry = history[history.length - 1];
+    // Bring the card back to the top of the deck.
+    setDoneIds((prev) => {
+      const next = new Set(prev);
+      next.delete(entry.id);
+      return next;
+    });
+    setExcluded((prev) => {
+      if (!prev) return prev;
+      const next = new Set(prev);
+      next.delete(entry.id);
+      return next;
+    });
+    setHistory((h) => h.slice(0, -1));
+    setLimited(false);
+    if (match?.id === entry.id) setMatch(null);
+    // Remove the recorded like/pass so the person isn't hidden next session.
+    // Deleting a like also refunds the daily quota (it's a count of today's
+    // likes). A matched like is never in the history, so unlike is always safe.
+    const endpoint = entry.dir === "like" ? "/api/unlike" : "/api/unpass";
+    fetch(endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ targetId: entry.id }),
+    }).catch(() => {});
+  }, [leaving, history, match]);
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!top || leaving) return;
@@ -486,6 +524,32 @@ export default function SwipeDeck({
       </div>
 
       <div className="sw-actions" role="group" aria-label="Swipe actions">
+        <button
+          type="button"
+          className="sw-btn rewind"
+          onClick={rewind}
+          disabled={history.length === 0 || !!leaving}
+          aria-label="Undo last swipe"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 8h9a5 5 0 1 1 0 10H8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M6 5L3 8l3 3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
         <button
           type="button"
           className="sw-btn nope"
