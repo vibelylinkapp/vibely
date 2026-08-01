@@ -5415,3 +5415,19 @@ button.create-alt {
   .story-item{ transition:none; }
   .create-alt:hover, .story-item:hover, .story-item:active{ transform:none; }
 }
+
+
+/* ============================================================
+   VIBELY — Home "People near you" grid
+   Converts the horizontal rail into a grid: first row 2 large
+   cards, then 3 per row below. Scoped to .pnear-grid so the
+   check-ins / trending rails keep horizontal scroll.
+   ============================================================ */
+.pnear-grid{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:14px 12px;
+  max-width:560px; margin:0 auto; padding:2px;
+}
+.pnear-grid .pnear-card{ grid-column: span 2; width:auto; }          /* 3 per row */
+.pnear-grid .pnear-card:nth-child(1),
+.pnear-grid .pnear-card:nth-child(2){ grid-column: span 3; }         /* first row = 2 */
+.pnear-grid .pnear-photo{ width:100%; height:auto; aspect-ratio: 17 / 21; }
