@@ -100,6 +100,67 @@
   white-space: nowrap;
 }
 
+/* ---- Category icon chips (illustrated launcher row) ---- */
+.disc2 .disc2-cats {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  margin-bottom: 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.disc2 .disc2-cats::-webkit-scrollbar {
+  display: none;
+}
+.disc2 .disc2-cat {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 60px;
+  text-decoration: none;
+}
+.disc2 .disc2-cat-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--cat-bg, #efeafb);
+  color: var(--cat-fg, var(--d2-brand));
+  border: 1.5px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+.disc2 .disc2-cat-ico svg {
+  width: 24px;
+  height: 24px;
+}
+.disc2 .disc2-cat-label {
+  max-width: 64px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--d2-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.disc2 .disc2-cat.on .disc2-cat-ico {
+  border-color: var(--cat-fg, var(--d2-brand));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-fg, #7a2ff2) 16%, transparent);
+  transform: translateY(-1px);
+}
+.disc2 .disc2-cat.on .disc2-cat-label {
+  color: var(--d2-ink);
+  font-weight: 800;
+}
+.disc2 .disc2-cat:active .disc2-cat-ico {
+  transform: scale(0.94);
+}
+
 /* ---- Section shell ---- */
 .disc2 .disc2-sec {
   margin-top: 22px;
@@ -144,7 +205,7 @@
 /* Trending rail reuses existing EventCard rail markup (.placecard). */
 .disc2 .disc2-rail .placecard {
   flex: 0 0 auto;
-  width: 230px;
+  width: clamp(146px, 43vw, 215px);
 }
 /* Featured rail: a touch more breathing room under the larger cards. */
 .disc2 .disc2-rail-feat {
@@ -154,7 +215,7 @@
 /* ---- Featured large cards ---- */
 .disc2 .disc2-feat {
   flex: 0 0 auto;
-  width: 270px;
+  width: clamp(150px, 43vw, 240px);
   display: block;
   border-radius: 18px;
   overflow: hidden;
@@ -243,11 +304,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .disc2 .disc2-ico,
+  .disc2 .disc2-cat-ico,
   .disc2 .disc2-rail {
     transition: none;
     scroll-behavior: auto;
   }
-  .disc2 .disc2-ico:active {
+  .disc2 .disc2-ico:active,
+  .disc2 .disc2-cat.on .disc2-cat-ico,
+  .disc2 .disc2-cat:active .disc2-cat-ico {
     transform: none;
   }
 }

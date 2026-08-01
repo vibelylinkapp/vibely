@@ -6,18 +6,172 @@ import BottomNav from "@/components/BottomNav";
 import HomeSearch from "@/components/HomeSearch";
 import EventCard, { type EventCardData } from "@/components/EventCard";
 import type { Database } from "@/lib/database.types";
+import type { CSSProperties, ReactNode } from "react";
 
 type Intent = Database["public"]["Enums"]["intent_t"];
 
-const FILTERS: { id: Intent | "all"; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "dating", label: "Dating" },
-  { id: "friendship", label: "Friends" },
-  { id: "hangout", label: "Hangout" },
-  { id: "networking", label: "Networking" },
-  { id: "gym", label: "Gym" },
-  { id: "coffee", label: "Coffee" },
-  { id: "travel", label: "Travel" },
+const FILTERS: {
+  id: Intent | "all";
+  label: string;
+  bg: string;
+  fg: string;
+  icon: ReactNode;
+}[] = [
+  {
+    id: "all",
+    label: "All",
+    bg: "#efeafb",
+    fg: "#7a2ff2",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="3" y="3" width="7" height="7" rx="1.6" />
+        <rect x="14" y="3" width="7" height="7" rx="1.6" />
+        <rect x="3" y="14" width="7" height="7" rx="1.6" />
+        <rect x="14" y="14" width="7" height="7" rx="1.6" />
+      </svg>
+    ),
+  },
+  {
+    id: "dating",
+    label: "Dating",
+    bg: "#ffe4ee",
+    fg: "#e93d82",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 20.7 4.3 13a5 5 0 0 1 7.1-7l.6.6.6-.6a5 5 0 0 1 7.1 7z" />
+      </svg>
+    ),
+  },
+  {
+    id: "friendship",
+    label: "Friends",
+    bg: "#ece9fd",
+    fg: "#6d5cf0",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="8.5" cy="8" r="3" />
+        <path d="M2.5 20c0-3.3 2.7-5.5 6-5.5" />
+        <circle cx="16.5" cy="9.5" r="2.5" />
+        <path d="M14 20c0-2.6 1.9-4.5 4.5-4.5" />
+      </svg>
+    ),
+  },
+  {
+    id: "hangout",
+    label: "Hangout",
+    bg: "#fdefe0",
+    fg: "#f0932f",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-6.5A8 8 0 1 1 21 12z" />
+      </svg>
+    ),
+  },
+  {
+    id: "networking",
+    label: "Networking",
+    bg: "#e7eefe",
+    fg: "#3b6fe0",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="3" y="7" width="18" height="13" rx="2" />
+        <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <path d="M3 12h18" />
+      </svg>
+    ),
+  },
+  {
+    id: "gym",
+    label: "Gym",
+    bg: "#eafbe7",
+    fg: "#35a92f",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M4 9v6M7 7.5v9M17 7.5v9M20 9v6M7 12h10" />
+      </svg>
+    ),
+  },
+  {
+    id: "coffee",
+    label: "Coffee",
+    bg: "#f6ece1",
+    fg: "#b4722e",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M4 8h13v4.5a4.5 4.5 0 0 1-4.5 4.5h-4A4.5 4.5 0 0 1 4 12.5z" />
+        <path d="M17 9h1.8a2.2 2.2 0 0 1 0 4.4H17" />
+        <path d="M7.5 3.2v1.8M11 3.2v1.8" />
+      </svg>
+    ),
+  },
+  {
+    id: "travel",
+    label: "Travel",
+    bg: "#e3f6f6",
+    fg: "#14a3a3",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M22 2 11 13" />
+        <path d="M22 2 15 22l-4-9-9-4z" />
+      </svg>
+    ),
+  },
 ];
 
 const NO_MATCH = "00000000-0000-0000-0000-000000000000";
@@ -285,14 +439,19 @@ export default async function DiscoverPage({
         <HomeSearch />
       </div>
 
-      <div className="disc2-chips">
+      <div className="disc2-cats">
         {FILTERS.map((f) => (
           <Link
             key={f.id}
             href={f.id === "all" ? "/discover" : `/discover?intent=${f.id}`}
-            className={"chip" + (active === f.id ? " chip-on" : "")}
+            className={"disc2-cat" + (active === f.id ? " on" : "")}
+            style={{ "--cat-bg": f.bg, "--cat-fg": f.fg } as CSSProperties}
+            aria-current={active === f.id ? "page" : undefined}
           >
-            {f.label}
+            <span className="disc2-cat-ico" aria-hidden="true">
+              {f.icon}
+            </span>
+            <span className="disc2-cat-label">{f.label}</span>
           </Link>
         ))}
       </div>
