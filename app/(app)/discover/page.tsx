@@ -23,10 +23,11 @@ const NO_MATCH = "00000000-0000-0000-0000-000000000000";
 export default async function DiscoverPage({
   searchParams,
 }: {
-  searchParams: Promise<{ intent?: string }>;
+  searchParams: Promise<{ intent?: string; q?: string }>;
 }) {
   const sp = await searchParams;
   const active = sp.intent ?? "all";
+  const q = (sp.q ?? "").trim();
   const supabase = await createClient();
   const {
     data: { user },
@@ -70,7 +71,8 @@ export default async function DiscoverPage({
     .eq("onboarding_done", true)
     .eq("is_private", false)
     .eq("invisible_mode", false);
-  const boostedProfiles = boostedData ?? [];
+  // A text search (from Home) filters by name and skips boosted pinning.
+  const boostedProfiles = q ? [] : (boostedData ?? []);
 
   // Normal feed, most-recently-active first.
   let query = supabase
@@ -86,6 +88,9 @@ export default async function DiscoverPage({
     .limit(80);
   if (matchSet) {
     query = query.in("id", matchSet.size ? [...matchSet] : [NO_MATCH]);
+  }
+  if (q) {
+    query = query.ilike("display_name", `%${q}%`);
   }
   const { data: feedData } = await query;
   const feedProfiles = (feedData ?? []).filter((p) => !excludeIds.has(p.id));
@@ -126,7 +131,11 @@ export default async function DiscoverPage({
       <div className="feed-head">
         <div className="feed-head-l">
           <span className="feed-title">Discover</span>
-          <span className="feed-sub">Find people, places and vibes around you</span>
+          <span className="feed-sub">
+            {q
+              ? `Results for \u201c${q}\u201d`
+              : "Find people, places and vibes around you"}
+          </span>
         </div>
         <div className="feed-actions">
           <Link
@@ -165,9 +174,9 @@ export default async function DiscoverPage({
 
       {profiles.length === 0 ? (
         <p className="sub" style={{ textAlign: "center", marginTop: 40 }}>
-          You&apos;re all caught up. As more people join Vibely — or once you
-          clear your current likes — new faces will show up here. Invite a
-          friend to sign up and watch this fill in.
+          {q
+            ? `No people match \u201c${q}\u201d. Try a different name, or clear your search.`
+            : "You\u2019re all caught up. As more people join Vibely \u2014 or once you clear your current likes \u2014 new faces will show up here. Invite a friend to sign up and watch this fill in."}
         </p>
       ) : (
         <div className="grid">

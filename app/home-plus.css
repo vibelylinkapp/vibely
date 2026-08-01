@@ -1,0 +1,105 @@
+/* =========================================================================
+   Home polish — real search, People-near-you cards, and CTA.
+   Additive, loaded after globals.css. Only affects .home-* / .pnear-* (Home).
+   ========================================================================= */
+
+/* ---- Real search box (was a static link) ---- */
+.home-search {
+  cursor: text;
+}
+.home-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink-2);
+  padding: 0;
+}
+.home-search input::placeholder {
+  color: var(--ink-3);
+}
+/* hide the native search "clear" x so it matches our design */
+.home-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.home-search-go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 12px;
+  background: var(--aurora);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.home-search-go:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+.home-search-go svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ---- People-near-you: tags moved INSIDE the card so every card is equal
+   height and the Like buttons line up across the row ---- */
+.pnear-photo {
+  border-radius: 20px;
+}
+/* a touch more scrim at the bottom so in-card tags stay readable */
+.pnear-scrim {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.82),
+    rgba(0, 0, 0, 0.16) 46%,
+    transparent 64%
+  );
+}
+.pnear-card:hover .pnear-photo {
+  box-shadow: 0 18px 34px -16px rgba(122, 47, 242, 0.5);
+}
+.pnear-ovtags {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.pnear-ovtag {
+  flex: none;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* Like button below the (now equal-height) cards — full-width pill */
+.pnear-like {
+  margin-top: 8px;
+}
+.pnear-like .pcard-like {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ---- Home CTA (replaces the redundant "create a post" promo) ---- */
+.home-share-btn {
+  white-space: nowrap;
+}

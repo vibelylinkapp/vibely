@@ -8,6 +8,7 @@ import PostCard from "@/components/PostCard";
 import EventCard, { EventCardData } from "@/components/EventCard";
 import NotifBell from "@/components/NotifBell";
 import LikeButton from "@/components/LikeButton";
+import HomeSearch from "@/components/HomeSearch";
 import FeedLoadMore from "@/components/FeedLoadMore";
 import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 import AdminNotice from "@/components/AdminNotice";
@@ -407,18 +408,7 @@ export default async function HomePage() {
         </Link>
       </section>
 
-      <Link href="/discover" className="home-search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" />
-          <path d="m21 21-4-4" />
-        </svg>
-        <span>Search people, events, or places</span>
-        <span className="home-search-filter" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 6h16M7 12h10M10 18h4" />
-          </svg>
-        </span>
-      </Link>
+      <HomeSearch />
 
       <section className="home-stories">
         <Stories
@@ -480,17 +470,17 @@ export default async function HomePage() {
                           {p.area || p.county}
                         </small>
                       )}
+                      {tags.length > 0 && (
+                        <span className="pnear-ovtags">
+                          {tags.slice(0, 2).map((t) => (
+                            <span className="pnear-ovtag" key={t}>
+                              {t}
+                            </span>
+                          ))}
+                        </span>
+                      )}
                     </span>
                   </Link>
-                  {tags.length > 0 && (
-                    <div className="pnear-tags">
-                      {tags.slice(0, 2).map((t) => (
-                        <span className="mini" key={t}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                   <div className="pnear-like">
                     <LikeButton
                       targetId={p.id}
@@ -550,24 +540,23 @@ export default async function HomePage() {
         </section>
       )}
 
-      <Link href="/create" className="home-share">
+      <Link href="/discover" className="home-share">
         <span className="home-share-ic">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-3.6-3.6" />
+            <path d="M11 8.2v5.6M8.2 11h5.6" />
           </svg>
         </span>
         <span className="home-share-tx">
-          <b>Share your vibe</b>
-          <small>A post can start your next connection</small>
+          <b>Discover people near you</b>
+          <small>Browse profiles and find your next connection</small>
         </span>
         <span className="home-share-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+            <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>
-          Create a post
+          Start discovering
         </span>
       </Link>
 
