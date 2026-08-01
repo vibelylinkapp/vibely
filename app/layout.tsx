@@ -3,6 +3,7 @@ import "./globals.css";
 import "./landing-hero-plus.css";
 import "./home-plus.css";
 import "./nearby-plus.css";
+import "./discover-plus.css";
 
 export const metadata: Metadata = {
   title: "Vibely — Meet real people near you",
