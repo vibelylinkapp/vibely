@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import SwipeDeck from "./SwipeDeck";
 
 type NearbyRow = {
   id: string;
@@ -56,7 +57,7 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
   const [radiusKm, setRadiusKm] = useState(10);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [onlineOnly, setOnlineOnly] = useState(false);
-  const [view, setView] = useState<"grid" | "map">("grid");
+  const [view, setView] = useState<"grid" | "map" | "swipe">("grid");
   const [rows, setRows] = useState<NearbyRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -168,6 +169,14 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
         <div className="nb-viewtoggle" role="group" aria-label="View">
           <button
             type="button"
+            className={"nb-vt" + (view === "swipe" ? " on" : "")}
+            onClick={() => setView("swipe")}
+            aria-pressed={view === "swipe"}
+          >
+            Swipe
+          </button>
+          <button
+            type="button"
             className={"nb-vt" + (view === "grid" ? " on" : "")}
             onClick={() => setView("grid")}
             aria-pressed={view === "grid"}
@@ -187,6 +196,8 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
 
       {loading ? (
         <p className="nb-empty">Looking for people near you...</p>
+      ) : view === "swipe" ? (
+        <SwipeDeck rows={filtered} meId={meId} />
       ) : filtered.length === 0 ? (
         <p className="nb-empty">
           No one matches here yet. Try a wider radius or turn off filters.
@@ -257,11 +268,13 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
         </div>
       )}
 
-      <p className="nb-note">
-        On the map, distance is exact but direction is scrambled to protect
-        everyone&apos;s privacy. Members who hide their location never appear
-        here.
-      </p>
+      {view !== "swipe" && (
+        <p className="nb-note">
+          On the map, distance is exact but direction is scrambled to protect
+          everyone&apos;s privacy. Members who hide their location never appear
+          here.
+        </p>
+      )}
     </div>
   );
 }
