@@ -59,18 +59,22 @@ export default function ProfileFeed({
   stories,
   about,
   likeCounts = {},
+  showAbout = true,
 }: {
   posts: Media[];
   events: Ev[];
   stories: Media[];
   about: About;
   likeCounts?: Record<string, number>;
+  showAbout?: boolean;
 }) {
   const tabs: { id: TabId; label: string; count: number }[] = [
     { id: "posts", label: "Posts", count: posts.length },
     { id: "events", label: "Events", count: events.length },
     { id: "stories", label: "Stories", count: stories.length },
-    { id: "about", label: "About", count: 0 },
+    ...(showAbout
+      ? [{ id: "about" as TabId, label: "About", count: 0 }]
+      : []),
   ];
   const [tab, setTab] = useState<TabId>("posts");
 
