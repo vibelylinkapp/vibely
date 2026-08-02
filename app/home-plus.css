@@ -275,3 +275,93 @@
     gap: 10px;
   }
 }
+
+
+/* =========================================================================
+   People-near-you premium cards: gradient match badge (from shared interests),
+   overlay interest chips, and a 3-up action row (pass / say hi / like).
+   ========================================================================= */
+.home-pnear .pnear-match {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.2px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #f5307e, #7a2ff2);
+  box-shadow: 0 6px 16px -6px rgba(122, 47, 242, 0.7);
+  text-transform: capitalize;
+}
+.home-pnear .pnear-ov .pnear-ovtags {
+  margin-top: 6px;
+}
+.home-pnear .pnear-acts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px 10px;
+}
+.home-pnear .pnear-act {
+  flex: 1 1 0;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, background 0.15s ease,
+    border-color 0.15s ease, color 0.15s ease;
+}
+.home-pnear .pnear-act svg {
+  width: 19px;
+  height: 19px;
+}
+.home-pnear .pnear-act:hover {
+  transform: translateY(-1px);
+}
+.home-pnear .pnear-act-x:hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.home-pnear .pnear-act-hi {
+  color: #b26a00;
+}
+.home-pnear .pnear-act-hi:hover {
+  color: #d98207;
+  border-color: rgba(217, 130, 7, 0.45);
+  background: rgba(255, 179, 0, 0.08);
+}
+.home-pnear .pnear-act-heart svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+}
+.home-pnear .pnear-act-heart:hover {
+  color: #f5307e;
+  border-color: rgba(245, 48, 126, 0.45);
+}
+.home-pnear .pnear-act-heart.on {
+  color: #f5307e;
+  border-color: rgba(245, 48, 126, 0.55);
+  background: rgba(245, 48, 126, 0.1);
+}
+.home-pnear .pnear-act-heart.on svg {
+  fill: #f5307e;
+  stroke: #f5307e;
+}
+.home-pnear .pnear-act:disabled {
+  cursor: default;
+}
+.home-pnear .pnear-acts.passed {
+  opacity: 0.45;
+  filter: grayscale(0.4);
+}
