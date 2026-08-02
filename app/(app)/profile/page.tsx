@@ -12,6 +12,7 @@ import VerificationSetup from "@/components/VerificationSetup";
 import WhatsAppSetup from "@/components/WhatsAppSetup";
 import BoostButton from "@/components/BoostButton";
 import ProfileFeed from "@/components/ProfileFeed";
+import ShareProfile from "@/components/ShareProfile";
 import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
 
@@ -201,9 +202,10 @@ export default async function ProfilePage() {
     : null;
   const showVerified = !!profile.is_verified;
   const initial = profile.display_name.charAt(0).toUpperCase();
+  const highlights = myHighlights ?? [];
 
   return (
-    <main className="feed-wrap pf2 pf3">
+    <main className="feed-wrap pf2 pf3 pf4">
       {/* Cover banner */}
       <div className="pf3-cover">
         {profile.cover_url ? (
@@ -233,10 +235,10 @@ export default async function ProfilePage() {
             <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
           </svg>
         </Link>
-        <Link
-          href="/notifications"
+        <a
+          href="#manage"
           className="pf3-round pf3-bell"
-          aria-label="Notifications"
+          aria-label="Settings and tools"
         >
           <svg
             width="20"
@@ -249,10 +251,10 @@ export default async function ProfilePage() {
             strokeLinejoin="round"
             aria-hidden="true"
           >
-            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
-        </Link>
+        </a>
       </div>
 
       <section className="pf3-head">
@@ -286,6 +288,13 @@ export default async function ProfilePage() {
             {profile.is_online && (
               <span className="pf3-online-dot" aria-label="Online now" />
             )}
+            <Link
+              href="/onboarding"
+              className="pf4-av-edit"
+              aria-label="Edit profile photo"
+            >
+              Edit
+            </Link>
           </div>
 
           <div className="pf3-stats" aria-label="Profile stats">
@@ -348,11 +357,25 @@ export default async function ProfilePage() {
           </div>
         )}
 
-        {/* Primary action */}
-        <div className="pf2-actions pf3-actions">
+        {/* Primary actions */}
+        <div className="pf2-actions pf3-actions pf4-actions">
           <Link href="/onboarding" className="follow-btn pf3-editbtn">
             Edit profile
           </Link>
+          <ShareProfile userId={user.id} />
+          <a href="#manage" className="pf4-morebtn" aria-label="More options">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <circle cx="5" cy="12" r="1.8" />
+              <circle cx="12" cy="12" r="1.8" />
+              <circle cx="19" cy="12" r="1.8" />
+            </svg>
+          </a>
         </div>
 
         {/* Bio + interests */}
@@ -369,6 +392,27 @@ export default async function ProfilePage() {
             )}
           </div>
         )}
+
+        {/* Highlights row */}
+        <div className="pf4-highlights" aria-label="Highlights">
+          <a href="#manage" className="pf4-hl pf4-hl-new">
+            <span className="pf4-hl-ring pf4-hl-add" aria-hidden="true">
+              +
+            </span>
+            <span className="pf4-hl-t">New</span>
+          </a>
+          {highlights.map((h) => (
+            <div className="pf4-hl" key={h.id}>
+              <span className="pf4-hl-ring">
+                {h.media_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={h.media_url} alt="" />
+                ) : null}
+              </span>
+              <span className="pf4-hl-t">{h.title}</span>
+            </div>
+          ))}
+        </div>
 
         <ProfileFeed
           posts={postList}
@@ -388,10 +432,85 @@ export default async function ProfilePage() {
             languages: profile.languages ?? null,
           }}
         />
+
+        {/* About summary cards (mockup) */}
+        <div className="pf4-about">
+          {showVerified && (
+            <div className="pf4-card pf4-verif">
+              <span className="pf4-verif-ic" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path
+                    d="M7 12.5l3 3 7-7"
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <div className="pf4-verif-tx">
+                <b>Verified member</b>
+                <span>Identity confirmed on Vibely</span>
+              </div>
+            </div>
+          )}
+          {profile.bio && (
+            <div className="pf4-card">
+              <h4 className="pf4-card-h">About</h4>
+              <p className="pf4-card-p">{profile.bio}</p>
+            </div>
+          )}
+          {intentLabels.length > 0 && (
+            <div className="pf4-card">
+              <h4 className="pf4-card-h">My Vibe</h4>
+              <div className="pf4-card-chips">
+                {intentLabels.map((c) => (
+                  <span className="mini" key={c}>
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {(profile.occupation ||
+            profile.education ||
+            (profile.languages && profile.languages.length > 0)) && (
+            <div className="pf4-card">
+              <h4 className="pf4-card-h">Details</h4>
+              <ul className="pf4-deets">
+                {profile.occupation && (
+                  <li>
+                    <span>Work</span>
+                    <b>{profile.occupation}</b>
+                  </li>
+                )}
+                {profile.education && (
+                  <li>
+                    <span>Education</span>
+                    <b>{profile.education}</b>
+                  </li>
+                )}
+                {profile.languages && profile.languages.length > 0 && (
+                  <li>
+                    <span>Languages</span>
+                    <b>{profile.languages.join(", ")}</b>
+                  </li>
+                )}
+                {joined && (
+                  <li>
+                    <span>Joined</span>
+                    <b>{joined}</b>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Manage tools — every editor from the original self profile, preserved */}
-      <section className="profile-view pf3-manage">
+      <section id="manage" className="profile-view pf3-manage">
         <h3 className="pf2-h pf3-manage-h">Manage your profile</h3>
         <AvatarUpload
           userId={user.id}
