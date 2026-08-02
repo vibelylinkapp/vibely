@@ -93,22 +93,23 @@ export default function ProfileInfoForm({
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const update: Record<string, unknown> = {
-      display_name: displayName.trim(),
-      gender: gender ? gender : null,
-      county,
-      area: area.trim() || null,
-      bio: bio.trim() || null,
-      occupation: occupation.trim() || null,
-      education: education.trim() || null,
-      languages: langs,
-    };
-    if (handle.trim()) update.handle = handle.trim().toLowerCase();
-    if (birthdate) update.birthdate = birthdate;
-
+    // Typed object literal (not Record<string, unknown>) so it type-checks
+    // against the typed Supabase client's profiles Update type. Optional
+    // username/birthdate are spread in only when set.
     const { error: pErr } = await supabase
       .from("profiles")
-      .update(update)
+      .update({
+        display_name: displayName.trim(),
+        gender: gender ? gender : null,
+        county,
+        area: area.trim() || null,
+        bio: bio.trim() || null,
+        occupation: occupation.trim() || null,
+        education: education.trim() || null,
+        languages: langs,
+        ...(handle.trim() ? { handle: handle.trim().toLowerCase() } : {}),
+        ...(birthdate ? { birthdate } : {}),
+      })
       .eq("id", userId);
     if (pErr) {
       // Postgres unique_violation (23505) here can only be the username — it's
