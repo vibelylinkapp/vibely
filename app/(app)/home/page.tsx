@@ -8,7 +8,7 @@ import PostCard from "@/components/PostCard";
 import EventCard, { EventCardData } from "@/components/EventCard";
 import NotifBell from "@/components/NotifBell";
 import HomeSearch from "@/components/HomeSearch";
-import CardHeart from "@/components/CardHeart";
+import PnearActions from "@/components/PnearActions";
 import FeedLoadMore from "@/components/FeedLoadMore";
 import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 import AdminNotice from "@/components/AdminNotice";
@@ -176,8 +176,9 @@ export default async function HomePage() {
   const nearIds = nearbyPeople.map((p) => p.id);
   const nearIntents: Record<string, string[]> = {};
   const myLikes = new Set<string>();
+  const nearMatch: Record<string, number | null> = {};
   if (nearIds.length) {
-    const [{ data: ints }, { data: likeRows }] = await Promise.all([
+    const [{ data: ints }, { data: likeRows }, { data: myInts }] = await Promise.all([
       supabase
         .from("profile_intents")
         .select("profile_id, intent")
@@ -187,11 +188,22 @@ export default async function HomePage() {
         .select("liked_id")
         .eq("liker_id", user.id)
         .in("liked_id", nearIds),
+      supabase
+        .from("profile_intents")
+        .select("intent")
+        .eq("profile_id", user.id),
     ]);
     (ints ?? []).forEach((r) => {
       (nearIntents[r.profile_id] ??= []).push(r.intent);
     });
     (likeRows ?? []).forEach((r) => myLikes.add(r.liked_id));
+    const myIntentSet = new Set<string>((myInts ?? []).map((r) => r.intent));
+    for (const p of nearbyPeople) {
+      const shared = (nearIntents[p.id] ?? []).filter((t) =>
+        myIntentSet.has(t)
+      ).length;
+      nearMatch[p.id] = shared > 0 ? Math.min(99, 72 + shared * 9) : null;
+    }
   }
 
   // ---- Feed: first page (blocked authors + hidden posts filtered out) ----
@@ -429,6 +441,7 @@ export default async function HomePage() {
             {nearbyPeople.map((p, idx) => {
               const age = p.birthdate ? ageFrom(p.birthdate) : null;
               const tags = nearIntents[p.id] ?? [];
+              const match = nearMatch[p.id];
               return (
                 <div key={p.id} className="pnear-card">
                   <Link href={`/u/${p.id}`} className="pnear-photo">
@@ -442,13 +455,17 @@ export default async function HomePage() {
                     )}
                     <span className="pnear-scrim" />
                     {p.is_online && <span className="pnear-dot" />}
-                    {idx === 0 && (
-                      <span className="pnear-badge">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <path d="M12 3l2.6 5.3 5.9.8-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.1l5.9-.8z" />
-                        </svg>
-                        Popular
-                      </span>
+                    {typeof match === "number" ? (
+                      <span className="pnear-match">{match}% match</span>
+                    ) : (
+                      idx === 0 && (
+                        <span className="pnear-badge">
+                          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 3l2.6 5.3 5.9.8-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.1l5.9-.8z" />
+                          </svg>
+                          Popular
+                        </span>
+                      )
                     )}
                     <span className="pnear-ov">
                       <b>
@@ -470,22 +487,22 @@ export default async function HomePage() {
                           {p.area || p.county}
                         </small>
                       )}
+                      {tags.length > 0 && (
+                        <span className="pnear-ovtags">
+                          {tags.slice(0, 3).map((t) => (
+                            <span className="pnear-ovtag" key={t}>
+                              {t}
+                            </span>
+                          ))}
+                        </span>
+                      )}
                     </span>
                   </Link>
-                  <div className="pnear-foot">
-                    <div className="pnear-foottags">
-                      {tags.slice(0, 2).map((t) => (
-                        <span className="pnear-foottag" key={t}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                    <CardHeart
-                      targetId={p.id}
-                      targetName={p.display_name}
-                      initialLiked={myLikes.has(p.id)}
-                    />
-                  </div>
+                  <PnearActions
+                    targetId={p.id}
+                    targetName={p.display_name}
+                    initialLiked={myLikes.has(p.id)}
+                  />
                 </div>
               );
             })}
