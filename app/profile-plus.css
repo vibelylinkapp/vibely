@@ -1158,3 +1158,20 @@
   font-weight: 700;
   font-size: 0.85rem;
 }
+
+
+/* --- Account & settings, relocated below the profile feed (pf4-settings) --- */
+.pf4 .pf4-settings {
+  gap: 14px;
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid #eceaf5;
+}
+.pf4 .pf4-settings-h {
+  align-self: flex-start;
+  margin: 8px 2px 2px;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #14161c;
+}

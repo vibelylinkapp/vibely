@@ -2,24 +2,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
-import SignOutButton from "@/components/SignOutButton";
 import AvatarUpload from "@/components/AvatarUpload";
 import CoverPhoto from "@/components/CoverPhoto";
 import ProfileInfoForm from "@/components/ProfileInfoForm";
-import PushSetup from "@/components/PushSetup";
-import PrivacyToggles from "@/components/PrivacyToggles";
 import GalleryUpload from "@/components/GalleryUpload";
 import HighlightsEditor from "@/components/HighlightsEditor";
-import VerificationSetup from "@/components/VerificationSetup";
-import WhatsAppSetup from "@/components/WhatsAppSetup";
-import BoostButton from "@/components/BoostButton";
-import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
 
-// One-stop edit hub: everything that shapes the profile lives here so the
-// public /profile view stays clean. Basic info is edited inline (no bounce to
-// onboarding); cover + avatar + highlights + gallery + contact + verification
-// + settings all follow.
+// Edit hub for the CONTENT of your profile: information, cover, photo,
+// highlights and gallery. Account & settings (WhatsApp, verification, boost,
+// notifications, privacy, upgrade, feedback, sign out) now live on the /profile
+// page, below your posts.
 export default async function ProfileEditPage() {
   const supabase = await createClient();
   const {
@@ -51,50 +44,6 @@ export default async function ProfileEditPage() {
     .select("id, title, media_url, caption")
     .eq("profile_id", user.id)
     .order("position", { ascending: true });
-
-  const { data: verifReq } = await supabase
-    .from("verification_requests")
-    .select("status, note")
-    .eq("profile_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { data: myContact } = await supabase
-    .from("member_contacts")
-    .select("whatsapp")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-
-  const { data: subRow } = await supabase
-    .from("subscriptions")
-    .select("tier, status, expires_at")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  const ent = effectiveTier(subRow);
-  const boostQuota = BOOST_QUOTA[ent.tier] ?? 0;
-  const boostEligible = boostQuota === null || boostQuota > 0;
-
-  const nowIso = new Date().toISOString();
-  const { data: activeBoost } = await supabase
-    .from("boosts")
-    .select("expires_at")
-    .eq("profile_id", user.id)
-    .gt("expires_at", nowIso)
-    .order("expires_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  let boostRemaining: number | null = null;
-  if (boostQuota !== null && boostQuota > 0) {
-    const since = new Date(Date.now() - 30 * 86400000).toISOString();
-    const { count } = await supabase
-      .from("boosts")
-      .select("id", { count: "exact", head: true })
-      .eq("profile_id", user.id)
-      .gte("created_at", since);
-    boostRemaining = Math.max(0, boostQuota - (count ?? 0));
-  }
 
   const infoInitial = {
     displayName: profile.display_name ?? "",
@@ -134,13 +83,13 @@ export default async function ProfileEditPage() {
       </div>
 
       <section className="profile-view pf4-edit">
-        {/* Your information — edited inline, saved in place */}
+        {/* Your information \u2014 edited inline, saved in place */}
         <div className="pf4-editcard">
           <h4 className="pf4-card-h">Your information</h4>
           <ProfileInfoForm userId={user.id} initial={infoInitial} />
         </div>
 
-        {/* Cover photo — editable here too */}
+        {/* Cover photo \u2014 editable here too */}
         <div className="pf4-edit-sec">
           <h4 className="pf4-card-h">Cover photo</h4>
           <div className="pf3-cover pf4-cover-inline">
@@ -163,43 +112,6 @@ export default async function ProfileEditPage() {
           initialHighlights={myHighlights ?? []}
         />
         <GalleryUpload userId={user.id} initialPhotos={myPhotos ?? []} />
-        <WhatsAppSetup userId={user.id} initial={myContact?.whatsapp ?? null} />
-        <VerificationSetup
-          userId={user.id}
-          verification={profile.verification}
-          pending={verifReq?.status === "pending"}
-          rejectedNote={verifReq?.status === "rejected" ? verifReq.note : null}
-        />
-        <BoostButton
-          eligible={boostEligible}
-          activeUntil={activeBoost?.expires_at ?? null}
-          remaining={boostRemaining}
-        />
-        {ent.tier === "vip" && (
-          <Link href="/top-matches" className="btn vip-link">
-            See your VIP top matches
-          </Link>
-        )}
-        <PushSetup />
-        <PrivacyToggles
-          userId={user.id}
-          showLocation={profile.show_location}
-          showVerification={profile.show_verification}
-        />
-        <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>
-          <Link href="/upgrade" className="btn-ghost">
-            Upgrade
-          </Link>
-          <Link href="/feedback" className="btn-ghost">
-            Send feedback
-          </Link>
-          {profile.is_admin && (
-            <Link href="/admin" className="btn-ghost">
-              Admin panel
-            </Link>
-          )}
-          <SignOutButton />
-        </div>
       </section>
 
       <BottomNav />
