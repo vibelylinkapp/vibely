@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import ProfileFeed from "@/components/ProfileFeed";
 import ShareProfile from "@/components/ShareProfile";
+import CoverPhoto from "@/components/CoverPhoto";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import { effectiveTier } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
 
@@ -151,7 +153,6 @@ export default async function ProfilePage() {
     ? new Date(profile.created_at).getFullYear().toString()
     : null;
   const showVerified = !!profile.is_verified;
-  const initial = profile.display_name.charAt(0).toUpperCase();
   const highlights = myHighlights ?? [];
   const hasDetails =
     !!profile.occupation ||
@@ -161,35 +162,9 @@ export default async function ProfilePage() {
 
   return (
     <main className="feed-wrap pf2 pf3 pf4">
-      {/* Cover banner */}
+      {/* Cover banner — editable in place */}
       <div className="pf3-cover">
-        {profile.cover_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className="pf3-cover-img" src={profile.cover_url} alt="" />
-        ) : (
-          <div className="pf3-cover-fallback" />
-        )}
-        <div className="pf3-cover-grad" />
-        <Link
-          href="/profile/edit"
-          className="pf3-round pf3-edit"
-          aria-label="Edit profile"
-        >
-          <svg
-            width="19"
-            height="19"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-          </svg>
-        </Link>
+        <CoverPhoto userId={user.id} coverUrl={profile.cover_url} />
         <Link
           href="/profile/edit"
           className="pf3-round pf3-bell"
@@ -215,42 +190,13 @@ export default async function ProfilePage() {
       <section className="pf3-head">
         {/* Avatar + stats */}
         <div className="pf3-id-row">
-          <div className="pf3-avatar-wrap">
-            {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className="pf3-avatar"
-                src={profile.avatar_url}
-                alt={profile.display_name}
-              />
-            ) : (
-              <span className="pf3-avatar pf3-avatar-fallback">{initial}</span>
-            )}
-            {showVerified && (
-              <span className="pf3-shield" aria-label="Verified">
-                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M7 12.5l3 3 7-7"
-                    fill="none"
-                    stroke="#fff"
-                    strokeWidth="2.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-            )}
-            {profile.is_online && (
-              <span className="pf3-online-dot" aria-label="Online now" />
-            )}
-            <Link
-              href="/profile/edit"
-              className="pf4-av-edit"
-              aria-label="Edit profile photo"
-            >
-              Edit
-            </Link>
-          </div>
+          <ProfileAvatar
+            userId={user.id}
+            avatarUrl={profile.avatar_url}
+            displayName={profile.display_name}
+            showVerified={showVerified}
+            isOnline={!!profile.is_online}
+          />
 
           <div className="pf3-stats" aria-label="Profile stats">
             <div className="pf3-stat">
