@@ -111,7 +111,14 @@ export default function ProfileInfoForm({
       .update(update)
       .eq("id", userId);
     if (pErr) {
-      setMsg(pErr.message);
+      // Postgres unique_violation (23505) here can only be the username — it's
+      // the one user-editable unique column in this update — so translate it
+      // into a friendly message instead of surfacing the raw DB error.
+      setMsg(
+        pErr.code === "23505"
+          ? "That username is already taken — pick another one."
+          : pErr.message
+      );
       setSaving(false);
       return;
     }
