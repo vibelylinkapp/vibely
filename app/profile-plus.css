@@ -912,3 +912,74 @@
   font-weight: 700;
   text-align: right;
 }
+
+/* ---- pf4 cleanup pass: Details surfaced up-top + dedicated edit hub ---- */
+.pf4 .pf4-detailscard {
+  margin-top: 4px;
+  margin-bottom: 18px;
+}
+
+.pf4 .pf4-edit-top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  background: var(--night, #f6f4fc);
+  border-bottom: 1px solid rgba(20, 16, 40, 0.06);
+}
+.pf4 .pf4-edit-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: #241a44;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(20, 16, 40, 0.1);
+  flex: none;
+}
+.pf4 .pf4-edit-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1a1330;
+}
+.pf4 .pf4-edit {
+  padding-top: 16px;
+}
+.pf4 .pf4-basics {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 16px;
+  padding: 15px 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(20, 16, 40, 0.06);
+  color: #1a1330;
+  text-decoration: none;
+}
+.pf4 .pf4-basics-tx {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pf4 .pf4-basics-tx b {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+.pf4 .pf4-basics-tx span {
+  font-size: 0.82rem;
+  color: #6b6484;
+}
+.pf4 .pf4-basics > svg {
+  color: #a59fbf;
+  flex: none;
+}

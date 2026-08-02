@@ -2,18 +2,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
-import SignOutButton from "@/components/SignOutButton";
-import AvatarUpload from "@/components/AvatarUpload";
-import PushSetup from "@/components/PushSetup";
-import PrivacyToggles from "@/components/PrivacyToggles";
-import GalleryUpload from "@/components/GalleryUpload";
-import HighlightsEditor from "@/components/HighlightsEditor";
-import VerificationSetup from "@/components/VerificationSetup";
-import WhatsAppSetup from "@/components/WhatsAppSetup";
-import BoostButton from "@/components/BoostButton";
 import ProfileFeed from "@/components/ProfileFeed";
 import ShareProfile from "@/components/ShareProfile";
-import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
+import { effectiveTier } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
 
 function ageFrom(dateStr: string): number {
@@ -53,31 +44,11 @@ export default async function ProfilePage() {
     .select("intent")
     .eq("profile_id", user.id);
 
-  const { data: myPhotos } = await supabase
-    .from("photos")
-    .select("id, url")
-    .eq("profile_id", user.id)
-    .order("position", { ascending: true });
-
   const { data: myHighlights } = await supabase
     .from("highlights")
     .select("id, title, media_url, caption")
     .eq("profile_id", user.id)
     .order("position", { ascending: true });
-
-  const { data: verifReq } = await supabase
-    .from("verification_requests")
-    .select("status, note")
-    .eq("profile_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { data: myContact } = await supabase
-    .from("member_contacts")
-    .select("whatsapp")
-    .eq("profile_id", user.id)
-    .maybeSingle();
 
   const { data: subRow } = await supabase
     .from("subscriptions")
@@ -85,29 +56,8 @@ export default async function ProfilePage() {
     .eq("profile_id", user.id)
     .maybeSingle();
   const ent = effectiveTier(subRow);
-  const boostQuota = BOOST_QUOTA[ent.tier] ?? 0;
-  const boostEligible = boostQuota === null || boostQuota > 0;
 
   const nowIso = new Date().toISOString();
-  const { data: activeBoost } = await supabase
-    .from("boosts")
-    .select("expires_at")
-    .eq("profile_id", user.id)
-    .gt("expires_at", nowIso)
-    .order("expires_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  let boostRemaining: number | null = null;
-  if (boostQuota !== null && boostQuota > 0) {
-    const since = new Date(Date.now() - 30 * 86400000).toISOString();
-    const { count } = await supabase
-      .from("boosts")
-      .select("id", { count: "exact", head: true })
-      .eq("profile_id", user.id)
-      .gte("created_at", since);
-    boostRemaining = Math.max(0, boostQuota - (count ?? 0));
-  }
 
   const [{ data: followerCountRaw }, { data: followingCountRaw }] =
     await Promise.all([
@@ -203,6 +153,11 @@ export default async function ProfilePage() {
   const showVerified = !!profile.is_verified;
   const initial = profile.display_name.charAt(0).toUpperCase();
   const highlights = myHighlights ?? [];
+  const hasDetails =
+    !!profile.occupation ||
+    !!profile.education ||
+    (Array.isArray(profile.languages) && profile.languages.length > 0) ||
+    !!joined;
 
   return (
     <main className="feed-wrap pf2 pf3 pf4">
@@ -216,7 +171,7 @@ export default async function ProfilePage() {
         )}
         <div className="pf3-cover-grad" />
         <Link
-          href="/onboarding"
+          href="/profile/edit"
           className="pf3-round pf3-edit"
           aria-label="Edit profile"
         >
@@ -235,8 +190,8 @@ export default async function ProfilePage() {
             <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
           </svg>
         </Link>
-        <a
-          href="#manage"
+        <Link
+          href="/profile/edit"
           className="pf3-round pf3-bell"
           aria-label="Settings and tools"
         >
@@ -254,7 +209,7 @@ export default async function ProfilePage() {
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
-        </a>
+        </Link>
       </div>
 
       <section className="pf3-head">
@@ -289,7 +244,7 @@ export default async function ProfilePage() {
               <span className="pf3-online-dot" aria-label="Online now" />
             )}
             <Link
-              href="/onboarding"
+              href="/profile/edit"
               className="pf4-av-edit"
               aria-label="Edit profile photo"
             >
@@ -359,11 +314,15 @@ export default async function ProfilePage() {
 
         {/* Primary actions */}
         <div className="pf2-actions pf3-actions pf4-actions">
-          <Link href="/onboarding" className="follow-btn pf3-editbtn">
+          <Link href="/profile/edit" className="follow-btn pf3-editbtn">
             Edit profile
           </Link>
           <ShareProfile userId={user.id} />
-          <a href="#manage" className="pf4-morebtn" aria-label="More options">
+          <Link
+            href="/profile/edit"
+            className="pf4-morebtn"
+            aria-label="More options"
+          >
             <svg
               width="20"
               height="20"
@@ -375,7 +334,7 @@ export default async function ProfilePage() {
               <circle cx="12" cy="12" r="1.8" />
               <circle cx="19" cy="12" r="1.8" />
             </svg>
-          </a>
+          </Link>
         </div>
 
         {/* Bio + interests */}
@@ -395,12 +354,12 @@ export default async function ProfilePage() {
 
         {/* Highlights row */}
         <div className="pf4-highlights" aria-label="Highlights">
-          <a href="#manage" className="pf4-hl pf4-hl-new">
+          <Link href="/profile/edit" className="pf4-hl pf4-hl-new">
             <span className="pf4-hl-ring pf4-hl-add" aria-hidden="true">
               +
             </span>
             <span className="pf4-hl-t">New</span>
-          </a>
+          </Link>
           {highlights.map((h) => (
             <div className="pf4-hl" key={h.id}>
               <span className="pf4-hl-ring">
@@ -414,11 +373,45 @@ export default async function ProfilePage() {
           ))}
         </div>
 
+        {/* Details — surfaced directly under the profile, above the feed */}
+        {hasDetails && (
+          <div className="pf4-card pf4-detailscard">
+            <h4 className="pf4-card-h">Details</h4>
+            <ul className="pf4-deets">
+              {profile.occupation && (
+                <li>
+                  <span>Work</span>
+                  <b>{profile.occupation}</b>
+                </li>
+              )}
+              {profile.education && (
+                <li>
+                  <span>Education</span>
+                  <b>{profile.education}</b>
+                </li>
+              )}
+              {profile.languages && profile.languages.length > 0 && (
+                <li>
+                  <span>Languages</span>
+                  <b>{profile.languages.join(", ")}</b>
+                </li>
+              )}
+              {joined && (
+                <li>
+                  <span>Joined</span>
+                  <b>{joined}</b>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+
         <ProfileFeed
           posts={postList}
           events={eventList}
           stories={storyList}
           likeCounts={likeCounts}
+          showAbout={false}
           about={{
             name: profile.display_name,
             bio: profile.bio ?? null,
@@ -432,136 +425,6 @@ export default async function ProfilePage() {
             languages: profile.languages ?? null,
           }}
         />
-
-        {/* About summary cards (mockup) */}
-        <div className="pf4-about">
-          {showVerified && (
-            <div className="pf4-card pf4-verif">
-              <span className="pf4-verif-ic" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24">
-                  <path
-                    d="M7 12.5l3 3 7-7"
-                    fill="none"
-                    stroke="#fff"
-                    strokeWidth="2.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <div className="pf4-verif-tx">
-                <b>Verified member</b>
-                <span>Identity confirmed on Vibely</span>
-              </div>
-            </div>
-          )}
-          {profile.bio && (
-            <div className="pf4-card">
-              <h4 className="pf4-card-h">About</h4>
-              <p className="pf4-card-p">{profile.bio}</p>
-            </div>
-          )}
-          {intentLabels.length > 0 && (
-            <div className="pf4-card">
-              <h4 className="pf4-card-h">My Vibe</h4>
-              <div className="pf4-card-chips">
-                {intentLabels.map((c) => (
-                  <span className="mini" key={c}>
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {(profile.occupation ||
-            profile.education ||
-            (profile.languages && profile.languages.length > 0)) && (
-            <div className="pf4-card">
-              <h4 className="pf4-card-h">Details</h4>
-              <ul className="pf4-deets">
-                {profile.occupation && (
-                  <li>
-                    <span>Work</span>
-                    <b>{profile.occupation}</b>
-                  </li>
-                )}
-                {profile.education && (
-                  <li>
-                    <span>Education</span>
-                    <b>{profile.education}</b>
-                  </li>
-                )}
-                {profile.languages && profile.languages.length > 0 && (
-                  <li>
-                    <span>Languages</span>
-                    <b>{profile.languages.join(", ")}</b>
-                  </li>
-                )}
-                {joined && (
-                  <li>
-                    <span>Joined</span>
-                    <b>{joined}</b>
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Manage tools — every editor from the original self profile, preserved */}
-      <section id="manage" className="profile-view pf3-manage">
-        <h3 className="pf2-h pf3-manage-h">Manage your profile</h3>
-        <AvatarUpload
-          userId={user.id}
-          avatarUrl={profile.avatar_url}
-          displayName={profile.display_name}
-        />
-        <HighlightsEditor
-          userId={user.id}
-          initialHighlights={myHighlights ?? []}
-        />
-        <GalleryUpload userId={user.id} initialPhotos={myPhotos ?? []} />
-        <WhatsAppSetup userId={user.id} initial={myContact?.whatsapp ?? null} />
-        <VerificationSetup
-          userId={user.id}
-          verification={profile.verification}
-          pending={verifReq?.status === "pending"}
-          rejectedNote={verifReq?.status === "rejected" ? verifReq.note : null}
-        />
-        <BoostButton
-          eligible={boostEligible}
-          activeUntil={activeBoost?.expires_at ?? null}
-          remaining={boostRemaining}
-        />
-        {ent.tier === "vip" && (
-          <Link href="/top-matches" className="btn vip-link">
-            See your VIP top matches
-          </Link>
-        )}
-        <PushSetup />
-        <PrivacyToggles
-          userId={user.id}
-          showLocation={profile.show_location}
-          showVerification={profile.show_verification}
-        />
-        <div className="cta-row" style={{ marginTop: 20, maxWidth: 320 }}>
-          <Link href="/upgrade" className="btn-ghost">
-            Upgrade
-          </Link>
-          <Link href="/onboarding" className="btn-ghost">
-            Edit profile
-          </Link>
-          <Link href="/feedback" className="btn-ghost">
-            Send feedback
-          </Link>
-          {profile.is_admin && (
-            <Link href="/admin" className="btn-ghost">
-              Admin panel
-            </Link>
-          )}
-          <SignOutButton />
-        </div>
       </section>
 
       <BottomNav />
