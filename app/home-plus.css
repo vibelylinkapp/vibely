@@ -228,3 +228,50 @@
     transform: none;
   }
 }
+
+
+/* =========================================================================
+   People-near-you — full 2×4 grid (up to 8 people) with a more premium
+   card treatment. Additive; appended after the base .pnear-grid2 rules so it
+   wins on source order without raising specificity battles.
+   ========================================================================= */
+.home-pnear .pnear-grid2 {
+  gap: 12px;
+  max-width: 470px;
+}
+.home-pnear .pnear-grid2 .pnear-card {
+  border-radius: 22px;
+  box-shadow: 0 10px 26px -14px rgba(28, 10, 55, 0.3),
+    0 2px 6px rgba(28, 10, 55, 0.06);
+}
+.home-pnear .pnear-grid2 .pnear-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 44px -18px rgba(122, 47, 242, 0.5);
+}
+/* slightly larger, crisper name overlay */
+.home-pnear .pnear-ov b {
+  font-size: 15.5px;
+}
+.home-pnear .pnear-ov small {
+  font-size: 12px;
+}
+/* brighter online presence dot */
+.home-pnear .pnear-dot {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.16);
+}
+.home-pnear .pnear-badge {
+  top: 9px;
+  left: 9px;
+}
+/* the taller 4-row grid gets a little more breathing room under the heading */
+.home-pnear .sec {
+  margin-bottom: 12px;
+}
+@media (max-width: 360px) {
+  .home-pnear .pnear-grid2 {
+    gap: 10px;
+  }
+}

@@ -170,7 +170,7 @@ export default async function HomePage() {
     .limit(18);
   const nearbyPeople = (nearbyRows ?? [])
     .filter((p) => !blocked.has(p.id))
-    .slice(0, 4);
+    .slice(0, 8);
 
   // Interest tags + my existing likes for the People-near-you cards.
   const nearIds = nearbyPeople.map((p) => p.id);
