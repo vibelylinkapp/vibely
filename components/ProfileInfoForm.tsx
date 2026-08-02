@@ -28,7 +28,7 @@ export type ProfileInfoInitial = {
   displayName: string;
   handle: string;
   birthdate: string;
-  gender: Gender | "";
+  gender: string;
   county: string;
   area: string;
   bio: string;
@@ -52,7 +52,13 @@ export default function ProfileInfoForm({
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [handle, setHandle] = useState(initial.handle);
   const [birthdate, setBirthdate] = useState(initial.birthdate);
-  const [gender, setGender] = useState<Gender | "">(initial.gender);
+  const [gender, setGender] = useState<Gender | "">(
+    (["male", "female", "nonbinary", "other"] as Gender[]).includes(
+      initial.gender as Gender
+    )
+      ? (initial.gender as Gender)
+      : ""
+  );
   const [county, setCounty] = useState(initial.county || "Nairobi");
   const [area, setArea] = useState(initial.area);
   const [bio, setBio] = useState(initial.bio);
