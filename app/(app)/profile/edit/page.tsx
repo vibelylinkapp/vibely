@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import SignOutButton from "@/components/SignOutButton";
 import AvatarUpload from "@/components/AvatarUpload";
+import CoverPhoto from "@/components/CoverPhoto";
+import ProfileInfoForm from "@/components/ProfileInfoForm";
 import PushSetup from "@/components/PushSetup";
 import PrivacyToggles from "@/components/PrivacyToggles";
 import GalleryUpload from "@/components/GalleryUpload";
@@ -14,9 +16,10 @@ import BoostButton from "@/components/BoostButton";
 import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
 
-// Dedicated edit / settings hub. Every profile editor lives here so the public
-// /profile view stays clean; the profile page's Edit / gear / more / avatar-Edit
-// and Highlights "New +" all link here.
+// One-stop edit hub: everything that shapes the profile lives here so the
+// public /profile view stays clean. Basic info is edited inline (no bounce to
+// onboarding); cover + avatar + highlights + gallery + contact + verification
+// + settings all follow.
 export default async function ProfileEditPage() {
   const supabase = await createClient();
   const {
@@ -31,6 +34,11 @@ export default async function ProfileEditPage() {
     .single();
 
   if (!profile || !profile.onboarding_done) redirect("/onboarding");
+
+  const { data: intentRows } = await supabase
+    .from("profile_intents")
+    .select("intent")
+    .eq("profile_id", user.id);
 
   const { data: myPhotos } = await supabase
     .from("photos")
@@ -88,6 +96,22 @@ export default async function ProfileEditPage() {
     boostRemaining = Math.max(0, boostQuota - (count ?? 0));
   }
 
+  const infoInitial = {
+    displayName: profile.display_name ?? "",
+    handle: profile.handle ?? "",
+    birthdate: profile.birthdate ?? "",
+    gender: profile.gender ?? "",
+    county: profile.county ?? "Nairobi",
+    area: profile.area ?? "",
+    bio: profile.bio ?? "",
+    occupation: profile.occupation ?? "",
+    education: profile.education ?? "",
+    languages: Array.isArray(profile.languages)
+      ? profile.languages.join(", ")
+      : "",
+    intents: (intentRows ?? []).map((i) => i.intent),
+  };
+
   return (
     <main className="feed-wrap pf2 pf3 pf4">
       <div className="pf4-edit-top">
@@ -110,31 +134,30 @@ export default async function ProfileEditPage() {
       </div>
 
       <section className="profile-view pf4-edit">
-        <Link href="/onboarding" className="pf4-basics">
-          <span className="pf4-basics-tx">
-            <b>Basic info</b>
-            <span>Name, bio, interests &amp; location</span>
-          </span>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </Link>
+        {/* Your information — edited inline, saved in place */}
+        <div className="pf4-editcard">
+          <h4 className="pf4-card-h">Your information</h4>
+          <ProfileInfoForm userId={user.id} initial={infoInitial} />
+        </div>
 
-        <AvatarUpload
-          userId={user.id}
-          avatarUrl={profile.avatar_url}
-          displayName={profile.display_name}
-        />
+        {/* Cover photo — editable here too */}
+        <div className="pf4-edit-sec">
+          <h4 className="pf4-card-h">Cover photo</h4>
+          <div className="pf3-cover pf4-cover-inline">
+            <CoverPhoto userId={user.id} coverUrl={profile.cover_url} />
+          </div>
+        </div>
+
+        {/* Profile photo */}
+        <div className="pf4-edit-sec pf4-edit-sec-center">
+          <h4 className="pf4-card-h">Profile photo</h4>
+          <AvatarUpload
+            userId={user.id}
+            avatarUrl={profile.avatar_url}
+            displayName={profile.display_name}
+          />
+        </div>
+
         <HighlightsEditor
           userId={user.id}
           initialHighlights={myHighlights ?? []}

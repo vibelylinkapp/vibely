@@ -983,3 +983,178 @@
   color: #a59fbf;
   flex: none;
 }
+
+/* ---- pf4 in-place editing: cover pencil, avatar button, errors ---- */
+.pf4 .pf4-cover-edit {
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.pf4 .pf4-cover-edit:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.pf4 .pf4-cover-dots {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.pf4 .pf4-cover-err {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.92);
+  color: #fff;
+  font-size: 0.75rem;
+  z-index: 3;
+}
+.pf4 button.pf4-av-edit {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+.pf4 button.pf4-av-edit:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.pf4 .pf4-av-err {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.95);
+  color: #fff;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  z-index: 4;
+}
+
+/* ---- edit page: sections, inline cover banner, information form ---- */
+.pf4 .pf4-cover-inline {
+  height: 150px;
+  max-width: 560px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.pf4 .pf4-edit-sec {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto 18px;
+}
+.pf4 .pf4-edit-sec-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.pf4 .pf4-edit-sec .pf4-card-h {
+  margin: 0 0 10px;
+}
+.pf4 .pf4-editcard {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #eceaf5;
+  box-shadow: 0 6px 18px rgba(20, 16, 31, 0.04);
+}
+.pf4 .pf4-infoform {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pf4 .pf4-if-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 430px) {
+  .pf4 .pf4-if-row {
+    grid-template-columns: 1fr;
+  }
+}
+.pf4 .pf4-if-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pf4 .pf4-if-field > span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6b6484;
+}
+.pf4 .pf4-infoform input,
+.pf4 .pf4-infoform select,
+.pf4 .pf4-infoform textarea {
+  width: 100%;
+  border: 1px solid #e2def0;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #1a1330;
+  background: #faf9ff;
+}
+.pf4 .pf4-infoform input:focus,
+.pf4 .pf4-infoform select:focus,
+.pf4 .pf4-infoform textarea:focus {
+  outline: none;
+  border-color: #7a2ff2;
+  background: #fff;
+}
+.pf4 .pf4-infoform textarea {
+  resize: vertical;
+  min-height: 78px;
+}
+.pf4 .pf4-if-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pf4 .pf4-if-chip {
+  border: 1px solid #e2def0;
+  background: #fff;
+  color: #3a3550;
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pf4 .pf4-if-chip.on {
+  background: linear-gradient(135deg, #7a2ff2, #f5307e);
+  color: #fff;
+  border-color: transparent;
+}
+.pf4 .pf4-if-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+.pf4 .pf4-if-save {
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #7a2ff2, #f5307e);
+  color: #fff;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 12px 26px;
+  font-size: 0.95rem;
+}
+.pf4 .pf4-if-save:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.pf4 .pf4-saved {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
