@@ -456,6 +456,45 @@ export default async function DiscoverPage({
         ))}
       </div>
 
+      <section className="disc2-sec">
+        <div className="disc2-sec-head">
+          <h2>{peopleHeading}</h2>
+          {isDefault && (
+            <Link href="/nearby" className="disc2-seeall">
+              See all
+            </Link>
+          )}
+        </div>
+
+        {profiles.length === 0 ? (
+          <p className="sub" style={{ textAlign: "center", marginTop: 24 }}>
+            {q
+              ? `No people match \u201c${q}\u201d. Try a different name, or clear your search.`
+              : "You\u2019re all caught up. As more people join Vibely \u2014 or once you clear your current likes \u2014 new faces will show up here. Invite a friend to sign up and watch this fill in."}
+          </p>
+        ) : (
+          <div className="grid">
+            {profiles.map((p) => {
+              const card = {
+                ...p,
+                is_verified: p.is_verified && p.show_verification,
+              };
+              return (
+                <ProfileCard
+                  key={p.id}
+                  p={card}
+                  intents={intentMap[p.id] ?? []}
+                  boosted={boostedIdSet.has(p.id)}
+                  vip={vipSet.has(p.id)}
+                  showFollow
+                  following={followingSet.has(p.id)}
+                />
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       {isDefault && featured.length > 0 && (
         <section className="disc2-sec">
           <div className="disc2-sec-head">
@@ -515,45 +554,6 @@ export default async function DiscoverPage({
           </div>
         </section>
       )}
-
-      <section className="disc2-sec">
-        <div className="disc2-sec-head">
-          <h2>{peopleHeading}</h2>
-          {isDefault && (
-            <Link href="/nearby" className="disc2-seeall">
-              See all
-            </Link>
-          )}
-        </div>
-
-        {profiles.length === 0 ? (
-          <p className="sub" style={{ textAlign: "center", marginTop: 24 }}>
-            {q
-              ? `No people match \u201c${q}\u201d. Try a different name, or clear your search.`
-              : "You\u2019re all caught up. As more people join Vibely \u2014 or once you clear your current likes \u2014 new faces will show up here. Invite a friend to sign up and watch this fill in."}
-          </p>
-        ) : (
-          <div className="grid">
-            {profiles.map((p) => {
-              const card = {
-                ...p,
-                is_verified: p.is_verified && p.show_verification,
-              };
-              return (
-                <ProfileCard
-                  key={p.id}
-                  p={card}
-                  intents={intentMap[p.id] ?? []}
-                  boosted={boostedIdSet.has(p.id)}
-                  vip={vipSet.has(p.id)}
-                  showFollow
-                  following={followingSet.has(p.id)}
-                />
-              );
-            })}
-          </div>
-        )}
-      </section>
 
       <BottomNav />
     </main>
