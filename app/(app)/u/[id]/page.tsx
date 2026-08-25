@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import LikeButton from "@/components/LikeButton";
 import ProfileActions from "@/components/ProfileActions";
+import MessageConnect from "@/components/MessageConnect";
 import HighlightsView from "@/components/HighlightsView";
 import ProfileFeed from "@/components/ProfileFeed";
 import FollowButton from "@/components/FollowButton";
@@ -146,6 +147,15 @@ export default async function UserDetailPage({
   const iLiked = !!myLike;
   const matched = iLiked && !!theirLike;
   const isVip = effectiveTier(sub).tier === "vip";
+
+  // The viewer's own tier — decides whether to nudge an upgrade when they
+  // can't message this person yet.
+  const { data: mySub } = await supabase
+    .from("subscriptions")
+    .select("tier, status, expires_at")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  const viewerIsPaid = effectiveTier(mySub).isPaid;
 
   // Best-effort: record that this member was viewed.
   await supabase
@@ -355,6 +365,12 @@ export default async function UserDetailPage({
             initialLiked={iLiked}
             initialMatched={matched}
           />
+          {!matched && (
+            <MessageConnect
+              targetName={profile.display_name}
+              viewerIsPaid={viewerIsPaid}
+            />
+          )}
           <ProfileActions
             targetId={profile.id}
             targetName={profile.display_name}
