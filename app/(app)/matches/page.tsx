@@ -116,7 +116,7 @@ export default async function MatchesPage() {
                 p={p}
                 intents={intentMap[p.id] ?? []}
                 vip={vipSet.has(p.id)}
-                matched
+                primaryMessage
                 contactShare={
                   <WhatsAppShare
                     otherId={p.id}

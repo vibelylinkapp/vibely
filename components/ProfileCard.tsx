@@ -3,6 +3,7 @@ import Link from "next/link";
 import ProfileActions from "@/components/ProfileActions";
 import LikeButton from "@/components/LikeButton";
 import FollowButton from "@/components/FollowButton";
+import MessageButton from "@/components/MessageButton";
 
 type P = {
   id: string;
@@ -32,6 +33,7 @@ export default function ProfileCard({
   reason,
   liked,
   matched,
+  primaryMessage,
   contactShare,
   showFollow,
   following,
@@ -43,6 +45,10 @@ export default function ProfileCard({
   reason?: string;
   liked?: boolean;
   matched?: boolean;
+  // When true, the card leads with a Message button that opens the chat
+  // directly (used on the Matches page, where everyone is already a match)
+  // instead of the Like button.
+  primaryMessage?: boolean;
   contactShare?: ReactNode;
   showFollow?: boolean;
   following?: boolean;
@@ -99,12 +105,16 @@ export default function ProfileCard({
             ))}
           </div>
         )}
-        <LikeButton
-          targetId={p.id}
-          targetName={p.display_name}
-          initialLiked={liked}
-          initialMatched={matched}
-        />
+        {primaryMessage ? (
+          <MessageButton targetId={p.id} />
+        ) : (
+          <LikeButton
+            targetId={p.id}
+            targetName={p.display_name}
+            initialLiked={liked}
+            initialMatched={matched}
+          />
+        )}
         {showFollow && (
           <FollowButton
             targetId={p.id}
