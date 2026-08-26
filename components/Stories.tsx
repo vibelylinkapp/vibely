@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -33,6 +34,21 @@ export default function Stories({
   const [error, setError] = useState<string | null>(null);
   const [viewing, setViewing] = useState<Group | null>(null);
   const [idx, setIdx] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  // Portals need the DOM; only render into document.body once mounted.
+  useEffect(() => setMounted(true), []);
+
+  // Lock background scroll while the full-screen viewer is open, so the page
+  // behind can't scroll or bleed through it.
+  useEffect(() => {
+    if (!viewing) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [viewing]);
 
   const mine = groups.find((g) => g.author.id === currentUserId) ?? null;
   const others = groups.filter((g) => g.author.id !== currentUserId);
@@ -158,61 +174,64 @@ export default function Stories({
       />
       {error && <p className="auth-msg story-err">{error}</p>}
 
-      {viewing && (
-        <div className="story-viewer" onClick={() => setViewing(null)}>
-          <div className="story-progress">
-            {viewing.stories.map((s, i) => (
-              <span
-                key={s.id}
-                className={"story-progress-bar" + (i <= idx ? " on" : "")}
-              />
-            ))}
-          </div>
-          <div className="story-viewer-head">
-            <span className="story-viewer-name">
-              {viewing.author.display_name}
-            </span>
+      {viewing &&
+        mounted &&
+        createPortal(
+          <div className="story-viewer" onClick={() => setViewing(null)}>
+            <div className="story-progress">
+              {viewing.stories.map((s, i) => (
+                <span
+                  key={s.id}
+                  className={"story-progress-bar" + (i <= idx ? " on" : "")}
+                />
+              ))}
+            </div>
+            <div className="story-viewer-head">
+              <span className="story-viewer-name">
+                {viewing.author.display_name}
+              </span>
+              <button
+                type="button"
+                className="story-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setViewing(null);
+                }}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="story-media"
+              src={viewing.stories[idx].media_url}
+              alt=""
+            />
+            {viewing.stories[idx].caption && (
+              <p className="story-caption">{viewing.stories[idx].caption}</p>
+            )}
             <button
               type="button"
-              className="story-close"
+              className="story-nav story-nav-left"
               onClick={(e) => {
                 e.stopPropagation();
-                setViewing(null);
+                prev();
               }}
-              aria-label="Close"
-            >
-              ×
-            </button>
-          </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="story-media"
-            src={viewing.stories[idx].media_url}
-            alt=""
-          />
-          {viewing.stories[idx].caption && (
-            <p className="story-caption">{viewing.stories[idx].caption}</p>
-          )}
-          <button
-            type="button"
-            className="story-nav story-nav-left"
-            onClick={(e) => {
-              e.stopPropagation();
-              prev();
-            }}
-            aria-label="Previous"
-          />
-          <button
-            type="button"
-            className="story-nav story-nav-right"
-            onClick={(e) => {
-              e.stopPropagation();
-              next();
-            }}
-            aria-label="Next"
-          />
-        </div>
-      )}
+              aria-label="Previous"
+            />
+            <button
+              type="button"
+              className="story-nav story-nav-right"
+              onClick={(e) => {
+                e.stopPropagation();
+                next();
+              }}
+              aria-label="Next"
+            />
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
