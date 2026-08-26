@@ -65,7 +65,7 @@ export default function ProfileCard({
       >
         {p.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.avatar_url} alt={p.display_name} />
+          <img src={p.avatar_url} alt={p.display_name} loading="lazy" decoding="async" />
         ) : (
           <span className="pcard-initial">
             {p.display_name.charAt(0).toUpperCase()}

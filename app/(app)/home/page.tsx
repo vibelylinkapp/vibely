@@ -51,27 +51,30 @@ export default async function HomePage() {
   if (!profile || !profile.onboarding_done) redirect("/onboarding");
 
   const now = Date.now();
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select("tier, status, expires_at")
-    .eq("profile_id", user.id)
-    .maybeSingle();
 
-  // Live "online now" count for the greeting card.
-  const { count: onlineCount } = await supabase
-    .from("profiles")
-    .select("id", { count: "exact", head: true })
-    .eq("is_online", true)
-    .neq("id", user.id);
-
-  // Latest active admin notice -> dismissible banner at the top of Home.
-  const { data: notice } = await supabase
-    .from("announcements")
-    .select("id, body, link")
-    .eq("active", true)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // These three are independent, so fetch them in parallel rather than in three
+  // sequential round-trips: the subscription (win-back), the live "online now"
+  // count for the greeting card, and the latest active admin notice banner.
+  const [{ data: sub }, { count: onlineCount }, { data: notice }] =
+    await Promise.all([
+      supabase
+        .from("subscriptions")
+        .select("tier, status, expires_at")
+        .eq("profile_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("is_online", true)
+        .neq("id", user.id),
+      supabase
+        .from("announcements")
+        .select("id, body, link")
+        .eq("active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
   // Nudge unverified members to get the badge (unless a review is pending).
   const verified =
@@ -447,7 +450,7 @@ export default async function HomePage() {
                   <Link href={`/u/${p.id}`} className="pnear-photo">
                     {p.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.avatar_url} alt={p.display_name} />
+                      <img src={p.avatar_url} alt={p.display_name} loading="lazy" decoding="async" />
                     ) : (
                       <span className="pnear-initial">
                         {p.display_name.charAt(0).toUpperCase()}
@@ -521,7 +524,7 @@ export default async function HomePage() {
                 <span className="ci-av">
                   {c.author.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.author.avatar_url} alt={c.author.display_name} />
+                    <img src={c.author.avatar_url} alt={c.author.display_name} loading="lazy" decoding="async" />
                   ) : (
                     c.author.display_name.charAt(0).toUpperCase()
                   )}

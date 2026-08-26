@@ -170,28 +170,31 @@ export default async function ProfilePage() {
   const boostQuota = BOOST_QUOTA[ent.tier] ?? 0;
   const boostEligible = boostQuota > 0;
 
-  const { data: myContact } = await supabase
-    .from("member_contacts")
-    .select("whatsapp")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-
-  const { data: verifReq } = await supabase
-    .from("verification_requests")
-    .select("status, note")
-    .eq("profile_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { data: activeBoost } = await supabase
-    .from("boosts")
-    .select("expires_at")
-    .eq("profile_id", user.id)
-    .gt("expires_at", nowIso)
-    .order("expires_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // These account/settings lookups are independent of each other, so run them
+  // together instead of three sequential round-trips.
+  const [{ data: myContact }, { data: verifReq }, { data: activeBoost }] =
+    await Promise.all([
+      supabase
+        .from("member_contacts")
+        .select("whatsapp")
+        .eq("profile_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("verification_requests")
+        .select("status, note")
+        .eq("profile_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("boosts")
+        .select("expires_at")
+        .eq("profile_id", user.id)
+        .gt("expires_at", nowIso)
+        .order("expires_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
   let boostRemaining: number | null = null;
   if (boostQuota > 0) {
