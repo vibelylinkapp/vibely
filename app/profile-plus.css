@@ -1175,3 +1175,16 @@
   font-weight: 800;
   color: #14161c;
 }
+
+/* ---- pf4 header alignment tidy-up ----
+   The old -44px pull-up dragged BOTH the avatar and the white stats card up
+   into the cover photo, so the stats card floated half-on/half-off the cover
+   and the avatar's "Edit" pill overhung the name. Easing the pull-up lets the
+   avatar overlap the cover on its own while the stats card settles cleanly
+   below the cover edge, and the name gets clearance from the pill. */
+.pf4 .pf3-id-row {
+  margin-top: -24px;
+}
+.pf4 .pf3-name {
+  margin-top: 12px;
+}
