@@ -1,5 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import LandingMobileNav from "@/components/LandingMobileNav";
+import SiteFooter from "@/components/SiteFooter";
+import { SITE, hasStoreLinks } from "@/lib/site";
 
 const IMG = {
   jane: "/landing/jane.jpg",
@@ -105,39 +108,95 @@ const IcPhone = () => (
   </svg>
 );
 
-const STATS = [
-  { n: "2,834+", l: "Online now", ic: <IcUsers /> },
-  { n: "487", l: "People nearby", ic: <IcPin /> },
-  { n: "93", l: "Events today", ic: <IcCal /> },
-  { n: "34K+", l: "Chats today", ic: <IcChat /> },
+/**
+ * What we promise, rather than invented user counts. Every line here is
+ * something the product actually does today.
+ */
+const ASSURANCES = [
+  {
+    t: "Verified profiles",
+    s: "Accounts confirm they are a real person",
+    ic: <IcShield />,
+  },
+  {
+    t: "Kenya & East Africa",
+    s: "Built here, not adapted from elsewhere",
+    ic: <IcPin />,
+  },
+  { t: "Free to join", s: "No card needed, ever", ic: <IcHeart /> },
+  {
+    t: "Privacy you control",
+    s: "You choose what is shown, and to whom",
+    ic: <IcLock />,
+  },
 ];
 
 const EXPLORE = [
-  { t: "Events", s: "93 events today", ic: <IcStar />, bg: "linear-gradient(135deg,#FFB020,#FF7A59)" },
-  { t: "People Nearby", s: "487 around you", ic: <IcPin />, bg: "linear-gradient(135deg,#F5307E,#7A2FF2)" },
-  { t: "Groups & Chat", s: "Start vibing", ic: <IcChat />, bg: "linear-gradient(135deg,#7A2FF2,#3B82F6)" },
-  { t: "Hangouts", s: "Find your vibe", ic: <IcHeart />, bg: "linear-gradient(135deg,#FF7A59,#F5307E)" },
+  {
+    t: "Events",
+    s: "What's on near you",
+    ic: <IcStar />,
+    bg: "linear-gradient(135deg,#FFB020,#FF7A59)",
+  },
+  {
+    t: "People nearby",
+    s: "See who's around",
+    ic: <IcPin />,
+    bg: "linear-gradient(135deg,#F5307E,#7A2FF2)",
+  },
+  {
+    t: "Groups & chat",
+    s: "Start a conversation",
+    ic: <IcChat />,
+    bg: "linear-gradient(135deg,#7A2FF2,#3B82F6)",
+  },
+  {
+    t: "Hangouts",
+    s: "Make a plan for today",
+    ic: <IcHeart />,
+    bg: "linear-gradient(135deg,#FF7A59,#F5307E)",
+  },
 ];
 
 const FEATURES = [
-  { t: "Real People", s: "Verified users only. No bots, no fake profiles.", ic: <IcUsers />, bg: "linear-gradient(135deg,#7A2FF2,#F5307E)" },
-  { t: "Nearby & Global", s: "Find people near you or connect across East Africa.", ic: <IcPin />, bg: "linear-gradient(135deg,#F5307E,#FF7A59)" },
-  { t: "Events & Plans", s: "Discover events and make plans with like-minded people.", ic: <IcCal />, bg: "linear-gradient(135deg,#FF7A59,#FFB020)" },
-  { t: "Safe & Secure", s: "We prioritize your safety and privacy, always.", ic: <IcShield />, bg: "linear-gradient(135deg,#7A2FF2,#3B82F6)" },
+  {
+    t: "Real people",
+    s: "Profile verification and active moderation, so you know who you are talking to.",
+    ic: <IcUsers />,
+    bg: "linear-gradient(135deg,#7A2FF2,#F5307E)",
+  },
+  {
+    t: "Nearby and beyond",
+    s: "Find people in your area, or connect across Kenya and East Africa.",
+    ic: <IcPin />,
+    bg: "linear-gradient(135deg,#F5307E,#FF7A59)",
+  },
+  {
+    t: "Events and plans",
+    s: "Discover what is happening, or post a plan and see who joins you.",
+    ic: <IcCal />,
+    bg: "linear-gradient(135deg,#FF7A59,#FFB020)",
+  },
+  {
+    t: "Safety built in",
+    s: "Block, report and privacy controls on every profile, not buried in settings.",
+    ic: <IcShield />,
+    bg: "linear-gradient(135deg,#7A2FF2,#3B82F6)",
+  },
 ];
 
 const STEPS = [
-  { n: 1, t: "Sign up", s: "Create your profile in seconds.", ic: <IcPhone /> },
-  { n: 2, t: "Explore", s: "See people, events and places nearby.", ic: <IcPin /> },
-  { n: 3, t: "Connect", s: "Chat, vibe and build real connections.", ic: <IcChat /> },
-  { n: 4, t: "Meet up", s: "Turn online vibes into real moments.", ic: <IcHeart /> },
+  { n: 1, t: "Sign up", s: "Create your profile. Takes a minute.", ic: <IcPhone /> },
+  { n: 2, t: "Explore", s: "See people, events and plans near you.", ic: <IcPin /> },
+  { n: 3, t: "Connect", s: "Chat when you both want to.", ic: <IcChat /> },
+  { n: 4, t: "Meet up", s: "Turn it into a real plan.", ic: <IcHeart /> },
 ];
 
 const CITIES = [
-  { c: "Nairobi", n: "24.8K nearby", top: "34%", left: "50%", big: true },
-  { c: "Mombasa", n: "9.3K nearby", top: "16%", left: "82%" },
-  { c: "Kampala", n: "6.1K nearby", top: "58%", left: "80%" },
-  { c: "Kisumu", n: "3.4K nearby", top: "74%", left: "40%" },
+  { c: "Nairobi", n: "Where we started", top: "34%", left: "50%", big: true },
+  { c: "Mombasa", n: "Growing", top: "16%", left: "82%" },
+  { c: "Kampala", n: "Growing", top: "58%", left: "80%" },
+  { c: "Kisumu", n: "Growing", top: "74%", left: "40%" },
 ];
 
 function AvatarStack({ label }: { label: string }) {
@@ -148,9 +207,74 @@ function AvatarStack({ label }: { label: string }) {
           <img key={i} src={src} alt="" className="lp2-av" />
         ))}
       </div>
-      <span className="lp2-social-t">
-        <span className="lp2-live" /> {label}
-      </span>
+      <span className="lp2-social-t">{label}</span>
+    </div>
+  );
+}
+
+function Assurances({ variant }: { variant: "mobile" | "desktop" }) {
+  const wrap = variant === "mobile" ? "lp2-stats is-assure" : "lp2-dstats";
+  const item = variant === "mobile" ? "lp2-stat is-assure" : "lp2-dstat is-assure";
+  const iconClass = variant === "mobile" ? "lp2-stat-ic" : "lp2-dstat-ic";
+
+  return (
+    <section className={wrap} aria-label="What Vibely promises">
+      {ASSURANCES.map((a) => (
+        <div className={item} key={a.t}>
+          <span className={iconClass}>{a.ic}</span>
+          <div>
+            <b>{a.t}</b>
+            <small>{a.s}</small>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function StoreLinks() {
+  if (!hasStoreLinks) {
+    return (
+      <p className="lp2-soon">
+        <span className="lp2-soon-tag">Coming soon</span>
+        Android and iOS apps are on the way. Vibely works in your browser today.
+      </p>
+    );
+  }
+  return (
+    <div className="lp2-stores">
+      {SITE.stores.googlePlay ? (
+        <a className="lp2-store" href={SITE.stores.googlePlay}>
+          <IcArrow />
+          <span>
+            <small>Get it on</small>
+            <b>Google Play</b>
+          </span>
+        </a>
+      ) : null}
+      {SITE.stores.appStore ? (
+        <a className="lp2-store" href={SITE.stores.appStore}>
+          <IcArrow />
+          <span>
+            <small>Download on the</small>
+            <b>App Store</b>
+          </span>
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
+function FounderNote() {
+  return (
+    <div className="lp2-note">
+      <p>
+        We built Vibely in Nairobi because meeting people here still happens
+        mostly through friends of friends — and that leaves out anyone who has
+        just moved, just graduated, or simply wants a wider circle than the one
+        they inherited.
+      </p>
+      <span className="lp2-note-by">The Vibely team, Nairobi</span>
     </div>
   );
 }
@@ -166,17 +290,13 @@ export default function Landing() {
             <Link href="/sign-in" className="lp2-login">
               Log in
             </Link>
-            <Link href="/sign-in" className="lp2-burger" aria-label="Menu">
-              <span />
-              <span />
-              <span />
-            </Link>
+            <LandingMobileNav />
           </div>
         </header>
 
         <section className="lp2-mhero">
           <span className="lp2-pill">
-            <IcHeart /> Made in Kenya, For East Africa
+            <IcHeart /> Made in Kenya, for East Africa
           </span>
           <h1 className="lp2-h1">
             Meet real
@@ -190,24 +310,21 @@ export default function Landing() {
 
           <div className="lp2-cluster">
             <div className="lp2-pc lp2-pc-a">
-              <img src={IMG.jane} alt="Jane" />
-              <span className="lp2-dot" />
+              <img src={IMG.jane} alt="" />
               <span className="lp2-pc-cap">
                 <b>Jane, 22</b>
                 <small>300m away</small>
               </span>
             </div>
             <div className="lp2-pc lp2-pc-b">
-              <img src={IMG.kevin} alt="Kevin" />
-              <span className="lp2-dot" />
+              <img src={IMG.kevin} alt="" />
               <span className="lp2-pc-cap">
                 <b>Kevin, 26</b>
                 <small>1.2km away</small>
               </span>
             </div>
             <div className="lp2-pc lp2-pc-c">
-              <img src={IMG.ashley} alt="Ashley" />
-              <span className="lp2-dot" />
+              <img src={IMG.ashley} alt="" />
               <span className="lp2-pc-cap">
                 <b>Ashley, 23</b>
                 <small>Online</small>
@@ -220,30 +337,23 @@ export default function Landing() {
               <IcStar />
             </span>
           </div>
+          <p className="lp2-caption">Illustration of the Vibely app</p>
 
-          <AvatarStack label="2,834+ People online now" />
+          <AvatarStack label="Real people, from Nairobi and beyond" />
 
           <div className="lp2-cta">
             <Link href="/sign-in" className="btn lp2-btn-lg">
-              Join Vibely for Free <IcArrow />
+              Join Vibely for free <IcArrow />
             </Link>
             <Link href="/sign-in" className="lp2-ghost-dark">
               <IcPin /> See who&apos;s nearby
             </Link>
           </div>
 
-          <div className="lp2-stats">
-            {STATS.map((s) => (
-              <div className="lp2-stat" key={s.l}>
-                <span className="lp2-stat-ic">{s.ic}</span>
-                <b>{s.n}</b>
-                <small>{s.l}</small>
-              </div>
-            ))}
-          </div>
+          <Assurances variant="mobile" />
         </section>
 
-        <section className="lp2-msection">
+        <section className="lp2-msection" id="explore">
           <div className="lp2-row-head">
             <h2>Explore what&apos;s happening</h2>
             <Link href="/sign-in">View all</Link>
@@ -261,18 +371,8 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp2-msection">
-          <div className="lp2-quote">
-            <div className="lp2-avstack">
-              {STACK.slice(0, 4).map((src, i) => (
-                <img key={i} src={src} alt="" className="lp2-av" />
-              ))}
-            </div>
-            <p>
-              &ldquo;I found amazing friends and memories on Vibely.&rdquo;
-              <span>— Brian, Nairobi</span>
-            </p>
-          </div>
+        <section className="lp2-msection" id="story">
+          <FounderNote />
         </section>
 
         <section className="lp2-mfinal">
@@ -282,26 +382,27 @@ export default function Landing() {
             </span>
             <div className="lp2-final-tx">
               <b>Your people are closer than you think.</b>
-              <small>Download Vibely and start connecting today.</small>
+              <small>Join Vibely and start connecting today.</small>
             </div>
             <Link href="/sign-in" className="lp2-final-btn">
-              Join Free <IcArrow />
+              Join free <IcArrow />
             </Link>
           </div>
           <div className="lp2-trust">
             <span>
-              <IcShield /> Verified People
+              <IcShield /> <Link href="/safety">Safety first</Link>
             </span>
             <span>
-              <IcLock /> Safe &amp; Secure
+              <IcLock /> <Link href="/privacy">Your privacy</Link>
             </span>
             <span>
               <IcPin /> Across East Africa
             </span>
           </div>
+          <StoreLinks />
         </section>
 
-        <p className="lp2-foot">Made in Kenya · for Kenya &amp; East Africa</p>
+        <SiteFooter />
       </div>
 
       {/* ==================== DESKTOP ==================== */}
@@ -311,7 +412,8 @@ export default function Landing() {
           <nav className="lp2-nav-links">
             <a href="#why">Features</a>
             <a href="#how">How it works</a>
-            <a href="#safe">Safety</a>
+            <Link href="/safety">Safety</Link>
+            <Link href="/about">About</Link>
           </nav>
           <div className="lp2-nav-r">
             <span className="lp2-country">
@@ -321,7 +423,7 @@ export default function Landing() {
               Log in
             </Link>
             <Link href="/sign-in" className="btn lp2-btn-sm">
-              Join Free
+              Join free
             </Link>
           </div>
         </header>
@@ -329,7 +431,7 @@ export default function Landing() {
         <section className="lp2-dhero">
           <div className="lp2-dhero-l">
             <span className="lp2-pill">
-              <IcHeart /> Made in Kenya, For East Africa
+              <IcHeart /> Made in Kenya, for East Africa
             </span>
             <h1 className="lp2-dh1">
               Your next connection is{" "}
@@ -339,31 +441,16 @@ export default function Landing() {
               Meet real people, make friends, find dates, and discover events
               around you.
             </p>
-            <AvatarStack label="2,834+ People online now" />
+            <AvatarStack label="Real people, from Nairobi and beyond" />
             <div className="lp2-dcta">
               <Link href="/sign-in" className="btn lp2-btn-lg">
-                Join Free <IcArrow />
+                Join free <IcArrow />
               </Link>
               <Link href="/sign-in" className="lp2-ghost-dark">
                 <IcPin /> See who&apos;s nearby
               </Link>
             </div>
-            <div className="lp2-stores">
-              <span className="lp2-store">
-                <IcArrow />
-                <span>
-                  <small>GET IT ON</small>
-                  <b>Google Play</b>
-                </span>
-              </span>
-              <span className="lp2-store">
-                <IcArrow />
-                <span>
-                  <small>Download on the</small>
-                  <b>App Store</b>
-                </span>
-              </span>
-            </div>
+            <StoreLinks />
           </div>
 
           <div className="lp2-dhero-c">
@@ -381,7 +468,7 @@ export default function Landing() {
                   { src: IMG.kevin, n: "Kevin, 26", d: "1.2km away" },
                 ].map((m) => (
                   <div className="lp2-mini" key={m.n}>
-                    <img src={m.src} alt={m.n} />
+                    <img src={m.src} alt="" />
                     <span className="lp2-mini-cap">
                       <b>{m.n}</b>
                       <small>
@@ -405,18 +492,17 @@ export default function Landing() {
                 <span className="lp2-ev-go">Join</span>
               </div>
             </div>
+            <p className="lp2-caption">Illustration of the Vibely app</p>
 
             <div className="lp2-float lp2-float-1">
-              <img src={IMG.mike} alt="Mike" />
-              <span className="lp2-dot" />
+              <img src={IMG.mike} alt="" />
               <span className="lp2-float-cap">
                 <b>Mike, 27</b>
                 <small>1.1km away</small>
               </span>
             </div>
             <div className="lp2-float lp2-float-2">
-              <img src={IMG.ashley} alt="Ashley" />
-              <span className="lp2-dot" />
+              <img src={IMG.ashley} alt="" />
               <span className="lp2-float-cap">
                 <b>Ashley, 23</b>
                 <small>Online</small>
@@ -469,17 +555,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="lp2-dstats">
-          {STATS.map((s) => (
-            <div className="lp2-dstat" key={s.l}>
-              <span className="lp2-dstat-ic">{s.ic}</span>
-              <div>
-                <b>{s.n}</b>
-                <small>{s.l}</small>
-              </div>
-            </div>
-          ))}
-        </section>
+        <Assurances variant="desktop" />
 
         <section className="lp2-light" id="why">
           <div className="lp2-two">
@@ -518,6 +594,10 @@ export default function Landing() {
             </div>
           </div>
 
+          <div className="lp2-dnote" id="story">
+            <FounderNote />
+          </div>
+
           <div className="lp2-dfinal" id="safe">
             <span className="lp2-final-ic">
               <IcShield />
@@ -527,8 +607,10 @@ export default function Landing() {
                 Safe. Respectful. <span className="grad">Real.</span>
               </b>
               <small>
-                Vibely is built to create a positive community where everyone
-                feels welcome and respected.
+                Verification, moderation and privacy controls are part of the
+                product, not an afterthought. Read our{" "}
+                <Link href="/safety">safety guidance</Link> before you meet
+                anyone.
               </small>
             </div>
             <div className="lp2-dfinal-cta">
@@ -538,14 +620,12 @@ export default function Landing() {
                 ))}
               </div>
               <Link href="/sign-in" className="btn lp2-btn-lg">
-                Join Vibely for Free <IcArrow />
+                Join Vibely for free <IcArrow />
               </Link>
             </div>
           </div>
 
-          <p className="lp2-foot dark">
-            Made in Kenya · for Kenya &amp; East Africa
-          </p>
+          <SiteFooter tone="light" />
         </section>
       </div>
     </main>
