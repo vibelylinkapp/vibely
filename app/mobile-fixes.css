@@ -262,3 +262,41 @@
     margin-left: auto;
   }
 }
+
+/* ------------------------------------------------------------
+   7. Section headings: "See all" jammed against the title
+
+   .sec is `display:flex; justify-content:space-between` with
+   `margin: 18px auto 10px`. Its parents (.home-pnear, and the
+   other rails) are `display:flex; flex-direction:column`. Auto
+   margins on a flex item's cross axis override align-items:
+   stretch, so .sec shrink-wrapped to its content and centred -
+   leaving space-between with no free space to distribute. The
+   result was "People near youSee all" with no gap at all.
+
+   Giving it an explicit width restores the stretch, so the link
+   sits at the right edge where it belongs. The gap is a floor so
+   the two can never touch even when a title runs long.
+   ------------------------------------------------------------ */
+.sec {
+  width: 100%;
+  gap: 12px;
+}
+
+/* ------------------------------------------------------------
+   8. Profile cover bled left but not right
+
+   .pf3 .pf3-cover sets `width: 100%`. Fix 4 above bleeds it past
+   the page gutter with `margin: 0 -16px`, but a negative margin
+   shifts a fixed-width box without widening it: the cover began
+   16px past the left edge and ended 16px short of the right,
+   which read as unbalanced padding on the right.
+
+   `width: auto` lets the used width resolve to the containing
+   block plus both negative margins, so it bleeds evenly. The
+   selector carries an extra class because profile-plus.css is
+   imported per-page and would otherwise win the tie.
+   ------------------------------------------------------------ */
+.detail-wrap.pf3 .pf3-cover {
+  width: auto;
+}
