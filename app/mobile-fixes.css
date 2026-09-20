@@ -58,10 +58,16 @@
    it forced the town name to clip to "Nairob" and the mark to "Vib...".
    Truncating your own brand and the user's location to preserve a
    duplicate of the brand is the wrong trade, so the text goes and the
-   controls get their full size back. */
+   controls get their full size back.
+
+   Updated: with the duplicate heart removed the row is one control
+   lighter, so the wordmark now survives down to 400px instead of
+   460px - it only disappears on genuinely narrow handsets. */
+@media (max-width: 400px) {
+  .appbar .wordmark { display: none; }
+}
 @media (max-width: 460px) {
   .appbar { padding-left: 2px; padding-right: 2px; }
-  .appbar .wordmark { display: none; }
   .appbar-actions { gap: 6px; }
   .appbar-loc { padding: 8px 10px; font-size: 13px; max-width: 46vw; }
   .appbar-btn { width: 36px; height: 36px; }

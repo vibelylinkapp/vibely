@@ -367,15 +367,6 @@ export default async function HomePage() {
               <path d="M15 8a3.5 3.5 0 0 0-3.5 3.5c0 3 5 6 5 6s5-3 5-6A3.5 3.5 0 0 0 15 8z" />
             </svg>
           </Link>
-          <Link
-            href="/liked-you"
-            className="appbar-btn likes"
-            aria-label="See who likes you"
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 20.7 4.3 13a5 5 0 0 1 7.1-7l.6.6.6-.6a5 5 0 0 1 7.1 7z" />
-            </svg>
-          </Link>
         </div>
       </header>
 
