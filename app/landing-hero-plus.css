@@ -291,24 +291,6 @@
 /* --- Mobile menu ---------------------------------------------------
    The burger used to be a <Link> straight to /sign-in, so there was no
    menu at all. It is a real disclosure now; these are its styles. */
-.lp2-burger-btn {
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  width: 44px;
-  height: 44px;
-  padding: 0 10px;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.lp2-burger-btn span {
-  display: block;
-  height: 2px;
-  border-radius: 2px;
-  background: #fff;
-}
 .lp-menu-scrim {
   position: fixed;
   inset: 0;
@@ -368,7 +350,7 @@
   color: #fff;
 }
 @media (min-width: 900px) {
-  .lp2-burger-btn,
+  .lp-burger,
   .lp-menu-scrim,
   .lp-menu-panel { display: none; }
 }
@@ -455,4 +437,71 @@
   .lp2-feats { grid-template-columns: repeat(2, 1fr); }
   .lp2-steps { flex-wrap: wrap; }
   .lp2-steps .lp2-step { flex: 1 1 calc(50% - 10px); }
+}
+
+/* --- Mobile menu button ---------------------------------------------
+   FIX: in #46 I wrote these rules for `.lp2-burger-btn`, but the
+   component renders `.lp-burger`. The selector matched nothing, so the
+   button shipped completely unstyled - the faint dot beside "Log in".
+   These are the real styles, and the bars become an X while open so
+   there is a visible way to close the menu. */
+.lp-burger {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 42px;
+  height: 40px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  z-index: 70; /* above the panel, so it doubles as the close button */
+}
+.lp-burger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: #fff;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.lp-burger.is-open { position: fixed; top: 14px; right: 16px; }
+.lp-burger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.lp-burger.is-open span:nth-child(2) { opacity: 0; }
+.lp-burger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* --- Mobile hero: get the photos and the CTA above the fold ----------
+   The headline ran to clamp(38px, 12vw, 52px), which is ~49px on a
+   412px phone and pushed the profile cards and both buttons off screen.
+   Smaller headline and lead, tighter rhythm - no wording changes. */
+@media (max-width: 899px) {
+  .lp2-h1 {
+    font-size: clamp(30px, 8.8vw, 38px);
+    letter-spacing: -1.1px;
+  }
+  .lp2-mhero {
+    padding-top: 10px;
+    gap: 14px;
+  }
+  .lp2-mhero .lp2-lead {
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 320px;
+  }
+
+  /* --- Explore: all four visible ------------------------------------
+     It was a horizontal scroll rail, so the 4th card sat off screen and
+     the 3rd was cut mid-word. Two-up grid shows all four at once. */
+  .lp2-explore {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+  .lp2-exp { flex: initial; }
 }
