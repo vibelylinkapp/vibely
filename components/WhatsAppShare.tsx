@@ -34,6 +34,7 @@ export default function WhatsAppShare({
   const [incoming, setIncoming] = useState<Status>(inInit);
   const [number, setNumber] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [needsNumber, setNeedsNumber] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const first = otherName.split(" ")[0];
 
@@ -54,13 +55,19 @@ export default function WhatsAppShare({
   async function respond(approve: boolean) {
     setBusy(true);
     setError(null);
-    const { error: e } = await createClient().rpc("respond_whatsapp", {
+    const { data, error: e } = await createClient().rpc("respond_whatsapp", {
       from_id: otherId,
       approve,
     });
     setBusy(false);
     if (e) {
       setError(e.message);
+      return;
+    }
+    // No number saved yet. The request stays pending rather than being
+    // spent on an approval that could not reveal anything.
+    if (data === "no_number") {
+      setNeedsNumber(true);
       return;
     }
     setIncoming(approve ? "approved" : "declined");
@@ -105,6 +112,12 @@ export default function WhatsAppShare({
               Decline
             </button>
           </div>
+          {needsNumber && (
+            <span className="wa-muted">
+              Add your WhatsApp number in <a href="/profile">your profile</a>{" "}
+              first, then approve.
+            </span>
+          )}
         </div>
       )}
 
