@@ -81,7 +81,6 @@ Shipped:
 Next:
 
 - [ ] Android and iOS store builds
-- [ ] Set `legalEntity` in `lib/site.ts` to the registered company name
 - [ ] Legal review of the privacy policy and terms before launch
 - [ ] **Run `select public.purge_demo_content();`** before public launch. The
       seeded demo members, plans, stories and events are now flagged
