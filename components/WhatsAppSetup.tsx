@@ -1,42 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useTransition } from "react";
+import { saveWhatsAppNumber } from "@/app/(app)/profile/actions";
+import { forDisplay } from "@/lib/phone";
 
 export default function WhatsAppSetup({
-  userId,
   initial,
 }: {
-  userId: string;
   initial: string | null;
 }) {
-  const [num, setNum] = useState(initial ?? "");
-  const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [num, setNum] = useState(forDisplay(initial));
+  const [savedValue, setSavedValue] = useState<string | null>(initial);
   const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
-  async function save() {
-    setBusy(true);
+  const dirty = num.trim() !== forDisplay(savedValue).trim();
+
+  function save() {
     setError(null);
-    setSaved(false);
-    const supabase = createClient();
-    const { error: dbErr } = await supabase.from("member_contacts").upsert({
-      profile_id: userId,
-      whatsapp: num.trim() || null,
-      updated_at: new Date().toISOString(),
+    startTransition(async () => {
+      const res = await saveWhatsAppNumber(num);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setSavedValue(res.value);
+      setNum(forDisplay(res.value));
     });
-    setBusy(false);
-    if (dbErr) {
-      setError(dbErr.message);
-      return;
-    }
-    setSaved(true);
   }
 
   return (
     <div className="verify-box wa-setup">
       <div className="verify-head">
         <strong>WhatsApp number</strong>
+        {savedValue && !dirty && <span className="wa-ok">Saved</span>}
       </div>
       <span className="sub">
         Shared only with matches who ask — and only after you approve. It is
@@ -46,11 +43,12 @@ export default function WhatsAppSetup({
         className="modal-input"
         type="tel"
         inputMode="tel"
+        autoComplete="tel"
         placeholder="e.g. 0712 345 678"
         value={num}
         onChange={(e) => {
           setNum(e.target.value);
-          setSaved(false);
+          setError(null);
         }}
       />
       {error && <p className="auth-msg">{error}</p>}
@@ -58,10 +56,10 @@ export default function WhatsAppSetup({
         type="button"
         className="btn"
         onClick={save}
-        disabled={busy}
+        disabled={pending || !dirty}
         style={{ marginTop: 10 }}
       >
-        {busy ? "Saving..." : saved ? "Saved" : "Save number"}
+        {pending ? "Saving..." : dirty ? "Save number" : "Saved"}
       </button>
     </div>
   );
