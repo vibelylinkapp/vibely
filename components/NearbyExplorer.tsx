@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import SwipeDeck from "./SwipeDeck";
+import WhatsAppAskButton from "./WhatsAppAskButton";
 
 type NearbyRow = {
   id: string;
@@ -205,7 +206,8 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
       ) : view === "grid" ? (
         <div className="nb-grid">
           {filtered.map((r) => (
-            <Link key={r.id} href={`/u/${r.id}`} className="nb-card">
+            <div key={r.id} className="nb-cell">
+              <Link href={`/u/${r.id}`} className="nb-card">
               <div className="nb-ph">
                 {r.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -224,7 +226,12 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
                 </span>
                 <span className="nb-dist">{fmtDistance(r.distance_m)}</span>
               </div>
-            </Link>
+              </Link>
+              <WhatsAppAskButton
+                otherId={r.id}
+                otherName={r.display_name}
+              />
+            </div>
           ))}
         </div>
       ) : (

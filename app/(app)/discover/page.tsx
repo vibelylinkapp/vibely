@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/ProfileCard";
+import WhatsAppAskButton from "@/components/WhatsAppAskButton";
 import BottomNav from "@/components/BottomNav";
 import HomeSearch from "@/components/HomeSearch";
 import EventCard, { type EventCardData } from "@/components/EventCard";
@@ -242,6 +243,17 @@ export default async function DiscoverPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
+
+  // My outgoing WhatsApp requests, so each card renders the right state
+  // without a round trip per card. One small query for the whole grid.
+  type WaStatus = "none" | "pending" | "approved" | "declined";
+  const { data: waOutRows } = await supabase
+    .from("contact_requests")
+    .select("target_id, status")
+    .eq("requester_id", user.id);
+  const waOutMap = new Map<string, WaStatus>(
+    (waOutRows ?? []).map((r) => [r.target_id, r.status as WaStatus])
+  );
 
   const nowIso = new Date().toISOString();
 
@@ -488,6 +500,13 @@ export default async function DiscoverPage({
                   vip={vipSet.has(p.id)}
                   showFollow
                   following={followingSet.has(p.id)}
+                  contactShare={
+                    <WhatsAppAskButton
+                      otherId={p.id}
+                      otherName={p.display_name}
+                      outgoing={waOutMap.get(p.id) ?? "none"}
+                    />
+                  }
                 />
               );
             })}

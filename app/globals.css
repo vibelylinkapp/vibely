@@ -5442,3 +5442,48 @@ button.create-alt {
 .pnear-grid .pnear-card:nth-child(1),
 .pnear-grid .pnear-card:nth-child(2){ grid-column: span 3; }         /* first row = 2 */
 .pnear-grid .pnear-photo{ width:100%; height:auto; aspect-ratio: 17 / 21; }
+
+/* ==================================================================
+   WhatsApp ask button (cards)
+   Compact form of the WhatsAppShare panel, used in the Discover grid
+   and the Nearby grid. See components/WhatsAppAskButton.tsx.
+   ================================================================== */
+.wa-ask {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(37, 211, 102, 0.4);
+  background: rgba(37, 211, 102, 0.12);
+  color: #128c3e;
+  font-size: 13.5px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.wa-ask svg { width: 16px; height: 16px; flex: none; color: #25d366; }
+.wa-ask:disabled { opacity: 0.65; cursor: default; }
+.wa-ask.on { background: #25d366; border-color: #25d366; color: #fff; }
+.wa-ask.on svg { color: #fff; }
+.wa-ask.is-wait,
+.wa-ask.is-off {
+  background: rgba(20, 16, 31, 0.05);
+  border-color: rgba(20, 16, 31, 0.12);
+  color: var(--ink-3, #4a4458);
+  cursor: default;
+}
+.wa-ask.is-wait svg,
+.wa-ask.is-off svg { color: var(--ink-3, #4a4458); }
+.wa-ask-err {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #c2255c;
+  text-align: center;
+}
+.nb-cell { display: flex; flex-direction: column; gap: 8px; }
+.nb-cell .nb-card { margin: 0; }
