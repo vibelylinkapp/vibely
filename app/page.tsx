@@ -203,11 +203,16 @@ const STEPS = [
   { n: 4, t: "Meet up", s: "Turn a conversation into a real plan." },
 ];
 
+/**
+ * `flip` renders the label to the left of the dot. Pins in the right-hand
+ * half of the map would otherwise push a nowrap label past the edge and get
+ * clipped by the container's overflow on narrow screens.
+ */
 const CITIES = [
-  { c: "Nairobi", n: "Where we started", top: "36%", left: "46%", big: true },
-  { c: "Mombasa", n: "Growing", top: "68%", left: "76%" },
-  { c: "Kisumu", n: "Growing", top: "30%", left: "18%" },
-  { c: "Kampala", n: "Growing", top: "14%", left: "40%" },
+  { c: "Nairobi", n: "Where we started", top: "36%", left: "44%", big: true },
+  { c: "Mombasa", n: "Growing", top: "68%", left: "74%", flip: true },
+  { c: "Kisumu", n: "Growing", top: "30%", left: "17%" },
+  { c: "Kampala", n: "Growing", top: "14%", left: "38%" },
 ];
 
 const SAFETY = [
@@ -288,6 +293,7 @@ function PhoneMock() {
   ];
   return (
     <div className="lp-visual">
+      <span className="lp-phone-aura" aria-hidden="true" />
       <div className="lp-phone">
         <div className="lp-phone-top">
           <span className="lp-phone-word">Vibely</span>
@@ -327,21 +333,6 @@ function PhoneMock() {
           </span>
           <span className="lp-phone-event-go">Join</span>
         </div>
-      </div>
-
-      <div className="lp-float lp-float--1">
-        <Image src={IMG.mike} alt="" width={34} height={34} />
-        <span>
-          <b>Mike, 27</b>
-          <small>1.1km away</small>
-        </span>
-      </div>
-      <div className="lp-float lp-float--2">
-        <Image src={IMG.ashley} alt="" width={34} height={34} />
-        <span>
-          <b>Ashley, 23</b>
-          <small>Nearby</small>
-        </span>
       </div>
 
       <p className="lp-caption">Illustration of the Vibely app</p>
@@ -565,7 +556,11 @@ export default function Landing() {
                   {CITIES.map((c) => (
                     <span
                       key={c.c}
-                      className={"lp-pin" + (c.big ? " lp-pin--big" : "")}
+                      className={
+                        "lp-pin" +
+                        (c.big ? " lp-pin--big" : "") +
+                        (c.flip ? " lp-pin--flip" : "")
+                      }
                       style={{ top: c.top, left: c.left }}
                     >
                       <span className="lp-pin-dot" />
