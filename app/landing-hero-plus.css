@@ -398,9 +398,9 @@
   .lp2 *,
   .lp2 *::before,
   .lp2 *::after {
-    animation-duration: 0.001ms \!important;
-    animation-iteration-count: 1 \!important;
-    transition-duration: 0.001ms \!important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
 
