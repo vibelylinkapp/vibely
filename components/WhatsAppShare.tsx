@@ -2,14 +2,9 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { waLink } from "@/lib/wa";
 
 type Status = "none" | "pending" | "approved" | "declined";
-
-function waLink(num: string): string {
-  let d = num.replace(/[^0-9]/g, "");
-  if (d.startsWith("0")) d = "254" + d.slice(1);
-  return "https://wa.me/" + d;
-}
 
 function WaIcon() {
   return (
