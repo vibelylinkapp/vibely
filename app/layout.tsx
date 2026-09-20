@@ -32,10 +32,15 @@ const display = Sora({
   display: "swap",
 });
 
+/**
+ * Fraunces is a variable font, so it must not be pinned to a weight list.
+ * next/font rejects `axes` alongside a fixed `weight` ("Axes can only be
+ * defined for variable fonts when the weight property is nonexistent or set
+ * to `variable`"), which broke the build. Dropping both gives the full
+ * variable weight range, which is what the landing headlines want anyway.
+ */
 const serif = Fraunces({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  axes: ["SOFT", "WONK"],
   variable: "--font-serif",
   display: "swap",
 });
