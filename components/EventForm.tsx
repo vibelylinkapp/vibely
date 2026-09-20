@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import CoverUpload from "./CoverUpload";
 
 const CATS = [
   "Nightlife",
@@ -253,17 +254,7 @@ export default function EventForm({
                 />
               </label>
             </div>
-            <label className="fld">
-              <span className="fld-l">
-                Cover image URL <em>optional</em>
-              </span>
-              <input
-                className="modal-input"
-                placeholder="https://..."
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-              />
-            </label>
+            <CoverUpload value={image} onChange={setImage} />
             <label className="fld">
               <span className="fld-l">
                 About this event <em>optional</em>

@@ -5580,3 +5580,66 @@ button.create-alt {
 .fld-sec:first-of-type { margin-top: 2px; }
 .modal-row { align-items: flex-start; }
 .modal .modal-input[type="datetime-local"] { min-height: 46px; }
+
+
+/* ============================================================
+   Cover photo upload (Sep 2026)
+
+   The event form asked people to paste an image URL, which on a
+   phone means leaving the app, hosting a file somewhere and coming
+   back with a link. Almost nobody will. This uploads from the
+   camera roll to the existing public post-media bucket.
+   ============================================================ */
+.cvr-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 22px 16px;
+  border: 1.5px dashed #d9d4e6;
+  border-radius: 14px;
+  background: var(--bg-soft, #f6f4fb);
+  color: #6b7280;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.cvr-drop:hover:not(:disabled) {
+  border-color: #7a2ff2;
+  background: rgba(122, 47, 242, 0.05);
+}
+.cvr-drop:disabled { opacity: 0.65; cursor: default; }
+.cvr-drop svg { width: 26px; height: 26px; color: #7a2ff2; }
+.cvr-drop b { font-size: 0.9rem; font-weight: 700; color: #14161c; }
+.cvr-drop span { font-size: 0.76rem; color: #6b7280; }
+
+.cvr-prev { position: relative; border-radius: 14px; overflow: hidden; }
+.cvr-prev img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  background: #ece9f2;
+}
+.cvr-prev-a {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 6px;
+}
+.cvr-mini {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #14161c;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+.cvr-mini:disabled { opacity: 0.6; cursor: default; }
+.fld-err { font-size: 0.78rem; font-weight: 600; color: #d92d52; }

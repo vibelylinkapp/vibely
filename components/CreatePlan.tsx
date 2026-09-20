@@ -97,50 +97,87 @@ export default function CreatePlan({
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>Create a plan</h3>
-            <input
-              className="modal-input"
-              placeholder="Title (e.g. Saturday hike at Karura)"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <select
-              className="modal-input"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <input
-              className="modal-input"
-              placeholder="County / area (optional)"
-              value={county}
-              onChange={(e) => setCounty(e.target.value)}
-            />
-            <input
-              className="modal-input"
-              type="datetime-local"
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-            />
-            <input
-              className="modal-input"
-              type="number"
-              min={2}
-              placeholder="Max people (optional)"
-              value={maxPeople}
-              onChange={(e) => setMaxPeople(e.target.value)}
-            />
-            <textarea
-              className="modal-input"
-              rows={3}
-              placeholder="What is the plan? (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+
+            <div className="fld-sec">Basics</div>
+            <label className="fld">
+              <span className="fld-l">Plan name</span>
+              <input
+                className="modal-input"
+                placeholder="e.g. Saturday hike at Karura"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </label>
+            <label className="fld">
+              <span className="fld-l">Category</span>
+              <select
+                className="modal-input"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="fld-sec">When</div>
+            <label className="fld">
+              <span className="fld-l">
+                Starts <em>optional</em>
+              </span>
+              <input
+                className="modal-input"
+                type="datetime-local"
+                value={startsAt}
+                onChange={(e) => setStartsAt(e.target.value)}
+              />
+              <span className="fld-hint">
+                Leave empty if the time is still flexible.
+              </span>
+            </label>
+
+            <div className="fld-sec">Where</div>
+            <label className="fld">
+              <span className="fld-l">
+                County / area <em>optional</em>
+              </span>
+              <input
+                className="modal-input"
+                placeholder="e.g. Westlands, Nairobi"
+                value={county}
+                onChange={(e) => setCounty(e.target.value)}
+              />
+            </label>
+
+            <div className="fld-sec">Details</div>
+            <label className="fld">
+              <span className="fld-l">
+                Max people <em>optional</em>
+              </span>
+              <input
+                className="modal-input"
+                type="number"
+                min={2}
+                placeholder="No limit"
+                value={maxPeople}
+                onChange={(e) => setMaxPeople(e.target.value)}
+              />
+            </label>
+            <label className="fld">
+              <span className="fld-l">
+                What is the plan? <em>optional</em>
+              </span>
+              <textarea
+                className="modal-input"
+                rows={3}
+                placeholder="Where to meet, what to bring, anything else."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </label>
             <div className="modal-actions">
               <button
                 type="button"
