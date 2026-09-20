@@ -505,3 +505,58 @@
   }
   .lp2-exp { flex: initial; }
 }
+
+/* --- Mobile hero: text left, photo cluster right ---------------------
+   Matching the design mockup. The cluster was a full-width 340px block
+   sitting below the lead, so the photos ate a whole screen on their own
+   and pushed both CTAs under the fold. In the mockup the cards sit
+   beside the headline, which is what makes the pill, headline, lead,
+   avatars and both buttons fit on one screen.
+
+   The hero becomes an explicit 2-column grid. The cards are positioned
+   absolutely at fixed pixel sizes, so they are rescaled for the
+   narrower column rather than just moved - otherwise they overflow. */
+@media (max-width: 899px) {
+  .lp2-mhero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 46%;
+    column-gap: 6px;
+    row-gap: 10px;
+    align-items: start;
+  }
+  .lp2-pill  { grid-column: 1; grid-row: 1; justify-self: start; }
+  .lp2-h1    { grid-column: 1; grid-row: 2; font-size: clamp(26px, 7.6vw, 34px); }
+  .lp2-lead  { grid-column: 1; grid-row: 3; }
+  .lp2-mhero .lp2-lead { max-width: none; font-size: 13.5px; }
+
+  .lp2-cluster {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    height: 296px;
+    margin: 0;
+  }
+
+  /* full-width rows below the split */
+  .lp2-social,
+  .lp2-cta,
+  .lp2-stats { grid-column: 1 / -1; }
+
+  /* cards rescaled to the ~46% column */
+  .lp2-pc-a { width: 104px; height: 146px; left: -10%; top: 52px; }
+  .lp2-pc-b { width: 96px;  height: 134px; right: 0;   top: 4px; }
+  .lp2-pc-c { width: 104px; height: 144px; right: 4%;  top: 146px; }
+  .lp2-pc-cap b     { font-size: 11px; }
+  .lp2-pc-cap small { font-size: 9.5px; }
+  .lp2-badge        { width: 30px; height: 30px; border-radius: 10px; }
+  .lp2-badge svg    { width: 14px; height: 14px; }
+  .lp2-badge-heart  { left: 30%; top: -4px; }
+
+  /* the stat strip reads better as 2x2 than 4 cramped columns */
+  .lp2-stats { grid-template-columns: repeat(2, 1fr); gap: 10px 6px; }
+}
+
+/* Very narrow phones cannot take the split - stack it back. */
+@media (max-width: 359px) {
+  .lp2-mhero { display: flex; flex-direction: column; }
+  .lp2-cluster { height: 300px; }
+}
