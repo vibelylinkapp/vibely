@@ -96,9 +96,21 @@ export default async function EventsPage() {
           ))}
         </div>
       ) : (
-        <p className="nb-note">
-          No upcoming events yet. Be the first to host one.
-        </p>
+        <div className="ev-empty">
+          <div className="ev-empty-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="5" width="18" height="16" rx="3" />
+              <path d="M8 3v4M16 3v4M3 11h18" />
+            </svg>
+          </div>
+          <h4>No events yet</h4>
+          <p>
+            Vibely is new here. Anything you host shows up on this page for
+            everyone nearby, and people can reach you on WhatsApp to ask about
+            it.
+          </p>
+          <EventForm triggerLabel="Host the first event" triggerClass="btn ev-empty-cta" />
+        </div>
       )}
 
       <BottomNav />
