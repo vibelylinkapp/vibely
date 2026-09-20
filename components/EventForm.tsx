@@ -147,86 +147,135 @@ export default function EventForm({
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>{existing ? "Edit event" : "Create an event"}</h3>
-            <input
-              className="modal-input"
-              placeholder="Title (e.g. Rooftop Sundowner)"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <select
-              className="modal-input"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              {CATS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <input
-              className="modal-input"
-              placeholder="Venue (e.g. Sarova Stanley Rooftop)"
-              value={venue}
-              onChange={(e) => setVenue(e.target.value)}
-            />
+
+            <div className="fld-sec">Basics</div>
+            <label className="fld">
+              <span className="fld-l">Event name</span>
+              <input
+                className="modal-input"
+                placeholder="e.g. Rooftop Sundowner"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </label>
+            <label className="fld">
+              <span className="fld-l">Category</span>
+              <select
+                className="modal-input"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="fld-sec">When</div>
+            <label className="fld">
+              <span className="fld-l">Starts</span>
+              <input
+                className="modal-input"
+                type="datetime-local"
+                value={startsAt}
+                onChange={(e) => setStartsAt(e.target.value)}
+              />
+              <span className="fld-hint">Date and time the event begins.</span>
+            </label>
+
+            <div className="fld-sec">Where</div>
+            <label className="fld">
+              <span className="fld-l">Venue</span>
+              <input
+                className="modal-input"
+                placeholder="e.g. Sarova Stanley Rooftop"
+                value={venue}
+                onChange={(e) => setVenue(e.target.value)}
+              />
+            </label>
             <div className="modal-row">
-              <input
-                className="modal-input"
-                placeholder="Area (e.g. Westlands)"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-              />
-              <input
-                className="modal-input"
-                placeholder="City"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
+              <label className="fld">
+                <span className="fld-l">Area</span>
+                <input
+                  className="modal-input"
+                  placeholder="e.g. Westlands"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                />
+              </label>
+              <label className="fld">
+                <span className="fld-l">City</span>
+                <input
+                  className="modal-input"
+                  placeholder="e.g. Nairobi"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              </label>
             </div>
-            <input
-              className="modal-input"
-              placeholder="Country (e.g. Kenya, Uganda, Rwanda)"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
-            <input
-              className="modal-input"
-              type="datetime-local"
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-            />
+            <label className="fld">
+              <span className="fld-l">Country</span>
+              <input
+                className="modal-input"
+                placeholder="e.g. Kenya"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
+            </label>
+
+            <div className="fld-sec">Details</div>
             <div className="modal-row">
-              <input
-                className="modal-input"
-                type="number"
-                min={0}
-                placeholder="Price KSh (0 = free)"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-              <input
-                className="modal-input"
-                type="number"
-                min={1}
-                placeholder="Capacity (optional)"
-                value={capacity}
-                onChange={(e) => setCapacity(e.target.value)}
-              />
+              <label className="fld">
+                <span className="fld-l">Price (KSh)</span>
+                <input
+                  className="modal-input"
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                />
+                <span className="fld-hint">Leave 0 for a free event.</span>
+              </label>
+              <label className="fld">
+                <span className="fld-l">
+                  Capacity <em>optional</em>
+                </span>
+                <input
+                  className="modal-input"
+                  type="number"
+                  min={1}
+                  placeholder="No limit"
+                  value={capacity}
+                  onChange={(e) => setCapacity(e.target.value)}
+                />
+              </label>
             </div>
-            <input
-              className="modal-input"
-              placeholder="Cover image URL (optional)"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-            />
-            <textarea
-              className="modal-input"
-              rows={3}
-              placeholder="About this event (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <label className="fld">
+              <span className="fld-l">
+                Cover image URL <em>optional</em>
+              </span>
+              <input
+                className="modal-input"
+                placeholder="https://..."
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+              />
+            </label>
+            <label className="fld">
+              <span className="fld-l">
+                About this event <em>optional</em>
+              </span>
+              <textarea
+                className="modal-input"
+                rows={3}
+                placeholder="What should people know before they come?"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </label>
             <div className="modal-actions">
               <button
                 type="button"

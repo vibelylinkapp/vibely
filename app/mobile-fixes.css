@@ -34,8 +34,8 @@
    step control sizes down on narrow screens.
    ------------------------------------------------------------ */
 .appbar { gap: 8px; min-width: 0; }
-.appbar-brand { min-width: 0; flex: 0 1 auto; overflow: hidden; }
-.appbar .wordmark { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.appbar-brand { flex: 0 0 auto; min-width: 0; }
+.appbar .wordmark { white-space: nowrap; flex: 0 0 auto; }
 .appbar-actions { flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
 .appbar-loc {
   min-width: 0;
@@ -46,20 +46,31 @@
 .appbar-loc svg { flex: 0 0 auto; }
 .appbar-btn { flex: 0 0 auto; }
 
-/* Belt and braces: never let one wide child sidescroll a screen.
-   `clip` rather than `hidden` so the sticky appbar still sticks. */
-.feed-wrap { overflow-x: clip; }
+/* NOTE: a `.feed-wrap { overflow-x: clip }` guard lived here and was
+   removed. `overflow: clip` establishes a clip region that fixed
+   descendants do NOT escape, and EventForm's .modal-overlay renders
+   inside .feed-wrap - so on the near-empty Events page the dialog was
+   clipped to the wrapper's ~285px box. The shrink rules above fix the
+   overflow at source; this guard only masked it and broke a core flow. */
 
-@media (max-width: 420px) {
+/* On a phone the logo mark carries the brand on its own. The "Vibely"
+   wordmark was the widest non-functional thing in the row, and keeping
+   it forced the town name to clip to "Nairob" and the mark to "Vib...".
+   Truncating your own brand and the user's location to preserve a
+   duplicate of the brand is the wrong trade, so the text goes and the
+   controls get their full size back. */
+@media (max-width: 460px) {
   .appbar { padding-left: 2px; padding-right: 2px; }
-  .appbar-actions { gap: 5px; }
-  .appbar-loc { padding: 7px 9px; font-size: 12.5px; max-width: 38vw; }
+  .appbar .wordmark { display: none; }
+  .appbar-actions { gap: 6px; }
+  .appbar-loc { padding: 8px 10px; font-size: 13px; max-width: 46vw; }
   .appbar-btn { width: 36px; height: 36px; }
   .appbar-btn svg { width: 19px; height: 19px; }
 }
 @media (max-width: 340px) {
-  .appbar .wordmark { font-size: 20px; }
-  .appbar-loc { max-width: 30vw; }
+  .appbar-actions { gap: 4px; }
+  .appbar-btn { width: 34px; height: 34px; }
+  .appbar-loc { max-width: 40vw; }
 }
 
 
@@ -144,4 +155,29 @@
   .pf3 .pf3-head .pf3-actions { display: flex; gap: 10px; }
   .pf3 .pf3-head .pf3-actions > * { flex: 1 1 auto; }
   .pf3 .pf3-head .pf3-actions .pf4-morebtn { flex: 0 0 auto; }
+}
+
+
+/* ------------------------------------------------------------
+   4. Profile / detail pages - horizontal margins
+
+   .detail-wrap is `padding-bottom: 84px; max-width: 520px` with no
+   left/right padding, while .feed-wrap has 16px. So every profile
+   built on it - bio, chips, Highlights rail, Posts grid, the action
+   buttons - sat flush against both screen edges and ran off the
+   right. Give it the same gutter, and let the cover image keep its
+   full-bleed look by cancelling the gutter only for itself.
+   ------------------------------------------------------------ */
+.detail-wrap { padding-left: 16px; padding-right: 16px; }
+.detail-wrap .pf3-cover,
+.detail-wrap .detail-head {
+  margin-left: -16px;
+  margin-right: -16px;
+}
+/* Horizontal rails keep their edge-to-edge scroll inside the gutter. */
+.detail-wrap .pf4-highlights {
+  margin-left: -16px;
+  margin-right: -16px;
+  padding-left: 16px;
+  padding-right: 16px;
 }

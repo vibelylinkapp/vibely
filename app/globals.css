@@ -5536,3 +5536,47 @@ button.create-alt {
   color: #6b7280;
 }
 .ev-empty .ev-empty-cta { margin-top: 6px; }
+
+
+/* ============================================================
+   Labelled form fields (Sep 2026)
+
+   The Create-an-event dialog relied entirely on placeholders, so a
+   field's meaning vanished the moment you typed in it, and the
+   datetime-local input - the one control with no placeholder to fall
+   back on - rendered as an unexplained empty box. Persistent labels
+   fix both, and group headings give ten stacked fields some order.
+   ============================================================ */
+.fld {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 0;
+}
+.fld-l {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #14161c;
+}
+.fld-l em {
+  font-style: normal;
+  font-weight: 600;
+  color: #9aa0ab;
+}
+.fld-hint {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #6b7280;
+}
+.fld-sec {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9aa0ab;
+}
+.fld-sec:first-of-type { margin-top: 2px; }
+.modal-row { align-items: flex-start; }
+.modal .modal-input[type="datetime-local"] { min-height: 46px; }
