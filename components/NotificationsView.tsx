@@ -45,6 +45,10 @@ function line(n: NotifRow): string {
       return `Your event${n.body ? ` "${n.body}"` : ""} was approved and is now live`;
     case "event_rejected":
       return `Your event was not approved${n.body ? `: ${n.body}` : ""}`;
+    case "whatsapp_request":
+      return `${who} asked for your WhatsApp number`;
+    case "whatsapp_approved":
+      return `${who} shared their WhatsApp number with you`;
     default:
       return `${who} sent you an update`;
   }
