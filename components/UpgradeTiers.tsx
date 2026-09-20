@@ -132,10 +132,18 @@ export default function UpgradeTiers({
     <section className="upgrade">
       {isActive && (
         <div className="upgrade-current">
-          You&apos;re on <strong>{currentTier.toUpperCase()}</strong>
-          {expiresAt
-            ? ` · renews ${new Date(expiresAt).toLocaleDateString()}`
-            : ""}
+          <span>
+            You&apos;re on <strong>{currentTier.toUpperCase()}</strong>
+            {expiresAt
+              ? ` · ends ${new Date(expiresAt).toLocaleDateString()}`
+              : ""}
+          </span>
+          {/* Nothing auto-renews: one M-Pesa payment buys SUBSCRIPTION_DAYS
+              of access and then the account drops back to free. Saying
+              "renews" here contradicted the terms of service. */}
+          <small className="upgrade-norenew">
+            This does not renew automatically. Pay again to extend.
+          </small>
         </div>
       )}
 

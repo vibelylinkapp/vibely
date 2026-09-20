@@ -12,8 +12,10 @@ import BoostButton from "@/components/BoostButton";
 import PushSetup from "@/components/PushSetup";
 import PrivacyToggles from "@/components/PrivacyToggles";
 import SignOutButton from "@/components/SignOutButton";
+import DeleteAccount from "@/components/DeleteAccount";
 import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
+import "@/app/danger-zone.css";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
@@ -460,6 +462,8 @@ export default async function ProfilePage() {
           )}
           <SignOutButton />
         </div>
+
+        <DeleteAccount hasActivePlan={ent.isPaid} />
       </section>
 
       <BottomNav />

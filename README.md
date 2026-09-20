@@ -83,12 +83,29 @@ Next:
 - [ ] Android and iOS store builds
 - [ ] Set `legalEntity` in `lib/site.ts` to the registered company name
 - [ ] Legal review of the privacy policy and terms before launch
-- [ ] **Self-service account deletion** — there is no delete flow in the app.
-      The privacy page currently directs members to email us instead.
-- [ ] **Scheduled data cleanup** — expired stories, soft-deleted messages and
-      closed accounts are never purged. No cron job does this today.
-- [ ] Fix the "renews <date>" label in `UpgradeTiers.tsx` — subscriptions do
-      not auto-renew, they expire after `SUBSCRIPTION_DAYS`
-- [ ] Remove or clearly mark the seeded demo profiles, events and stories
-      (migrations 0017, 0021, 0026) before public launch
+- [ ] **Run `select public.purge_demo_content();`** before public launch. The
+      seeded demo members, plans, stories and events are now flagged
+      `is_demo` and are excluded from People Nearby and the map, but they
+      still appear in Discover, the stories rail and Trending until purged.
+- [ ] **Scheduled data cleanup** — expired stories and soft-deleted messages
+      are never purged. No cron job does this today.
 - [ ] Expand beyond Nairobi city by city
+
+## Account deletion
+
+Members delete their own account from **Account & settings** on `/profile`.
+The flow is `components/DeleteAccount.tsx` → `POST /api/account/delete`, which:
+
+1. requires a live session and a typed `DELETE` confirmation;
+2. writes an `account_deletions` audit row **before** destroying anything —
+   if the audit write fails, the deletion does not proceed;
+3. recursively removes the member's files from the `avatars`, `post-media`,
+   `chat-media` and `verifications` buckets;
+4. deletes the `auth.users` row, which cascades to `profiles` and onward;
+5. stamps the audit row and clears the session cookie.
+
+Retained by design (see `supabase/migrations/0030_account_deletion.sql`):
+payment records, `admin_actions`, and reports about the deleted member —
+these are `SET NULL` rather than `CASCADE`, and a `before delete` trigger on
+`profiles` stamps `reports.reported_snapshot` so moderation history survives
+without keeping a live profile.

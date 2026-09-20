@@ -166,12 +166,18 @@ export default function Terms() {
 
       <h2>11. Ending your account</h2>
       <p>
-        There is no self-service delete button in the app yet. To close your
-        account, email{" "}
+        You can delete your account at any time from{" "}
+        <strong>Account &amp; settings</strong> on your profile. It takes
+        effect immediately and cannot be undone. Deleting while you have paid
+        time remaining forfeits that time; there is no refund for unused days.
+        What we delete and the two things we retain are set out in the{" "}
+        <a href="/privacy">privacy policy</a>.
+      </p>
+      <p>
+        If you would rather we closed it for you, email{" "}
         <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> from the
         address or phone number on the account and we will action it within{" "}
-        {SITE.dataRequestDays} days. What we delete and what we retain is set
-        out in the <a href="/privacy">privacy policy</a>.
+        {SITE.dataRequestDays} days.
       </p>
       <p>
         We may suspend or end your account if you break these terms, if the law
