@@ -219,3 +219,46 @@
     padding-right: 12px;
   }
 }
+
+/* ------------------------------------------------------------
+   6. Home hero: stop squeezing the headline (Sep 2026)
+
+   .home-hi is `grid-template-columns: auto 1fr auto` - avatar,
+   text, online-now card. On a 360px screen the 48px avatar, two
+   12px gaps and the ~175px stat card leave roughly 80px for the
+   middle column, so "People, vibes and moments near you" wraps
+   into a narrow squeezed ribbon. The three-across arrangement
+   needs width the phone does not have.
+
+   Below 520px the stat card drops to its own full-width row and
+   lays out horizontally. The headline then gets the entire width
+   beside the avatar and can come back up to a readable size.
+   The card reads better this way too: "3 online now" is one line
+   of information, not a three-line block stacked in a corner.
+   ------------------------------------------------------------ */
+@media (max-width: 520px) {
+  .home-hi {
+    grid-template-columns: auto 1fr;
+    row-gap: 12px;
+  }
+  .home-hi-h {
+    font-size: 22px;
+    letter-spacing: -0.6px;
+  }
+  .home-hi-stat {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 14px;
+  }
+  .home-hi-stat small {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .home-hi-avs {
+    margin-top: 0;
+    margin-left: auto;
+  }
+}
