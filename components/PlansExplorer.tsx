@@ -1,5 +1,8 @@
 "use client";
 
+import CreatePlan from "./CreatePlan";
+import EmptyState from "./EmptyState";
+
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import JoinPlanButton from "@/components/JoinPlanButton";
@@ -115,11 +118,30 @@ export default function PlansExplorer({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="nb-note">
-          {scope === "near"
-            ? "No plans near you yet. Try All areas, or create the first one."
-            : "No plans match. Be the first to create one."}
-        </p>
+        <EmptyState
+          icon={
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.7}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M8 3v4M16 3v4M3 11h18" />
+              <rect x="3" y="5" width="18" height="16" rx="3" />
+            </svg>
+          }
+          title={scope === "near" ? "No plans near you yet" : "No plans match"}
+          body={
+            scope === "near"
+              ? "A plan is just an open invite - coffee, a hike, a night out. Post one and people nearby can join or reach you on WhatsApp."
+              : "Nothing matches these filters. Try All areas or a different category."
+          }
+          action={
+            <CreatePlan triggerClass="btn emp-cta" triggerContent="Create a plan" />
+          }
+        />
       ) : (
         <div className="plan-list">
           {filtered.map((p) => {
