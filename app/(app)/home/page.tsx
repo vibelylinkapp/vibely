@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BottomNav from "@/components/BottomNav";
 import Stories from "@/components/Stories";
+import MessagesBell from "@/components/MessagesBell";
+import { FEATURES } from "@/lib/features";
 import WinbackBanner from "@/components/WinbackBanner";
 import PostCard from "@/components/PostCard";
 import EventCard, { EventCardData } from "@/components/EventCard";
@@ -353,6 +355,7 @@ export default async function HomePage() {
               <path d="M6 9l6 6 6-6" />
             </svg>
           </Link>
+          <MessagesBell />
           <NotifBell />
           <Link
             href="/matches"
@@ -425,6 +428,7 @@ export default async function HomePage() {
 
       <HomeSearch />
 
+      {FEATURES.stories && (
       <section className="home-stories">
         <Stories
           currentUserId={user.id}
@@ -433,6 +437,7 @@ export default async function HomePage() {
           groups={groups}
         />
       </section>
+      )}
 
       {nearbyPeople.length > 0 && (
         <section className="home-pnear">
@@ -586,7 +591,7 @@ export default async function HomePage() {
         />
       )}
 
-      {feedItems.length > 0 ? (
+      {!FEATURES.feed ? null : feedItems.length > 0 ? (
         <section className="feed-list">
           {feedItems.map((it) => (
             <PostCard

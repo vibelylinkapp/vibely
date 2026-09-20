@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { FEATURES } from "@/lib/features";
 
 const ICONS = {
   home: (
@@ -23,6 +24,12 @@ const ICONS = {
       <path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-6.5A8 8 0 1 1 21 12z" />
     </svg>
   ),
+  events: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M8 3v4M16 3v4M3 11h18" />
+    </svg>
+  ),
   profile: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="8" r="4" />
@@ -33,10 +40,16 @@ const ICONS = {
 
 type TabKey = keyof typeof ICONS;
 
+// WhatsApp is the conversation layer, so the Chats slot goes to Events -
+// the reason most people open this app on a Friday. /messages still works
+// and sits in the Home header (MessagesBell), badge included. Set
+// NEXT_PUBLIC_FEATURE_CHAT_TAB=1 to put Chats back in the bar.
 const TABS: { href: string; label: string; key: TabKey }[] = [
   { href: "/home", label: "Home", key: "home" },
   { href: "/discover", label: "Discover", key: "discover" },
-  { href: "/messages", label: "Chats", key: "messages" },
+  FEATURES.chatTab
+    ? { href: "/messages", label: "Chats", key: "messages" as TabKey }
+    : { href: "/events", label: "Events", key: "events" as TabKey },
   { href: "/profile", label: "Profile", key: "profile" },
 ];
 

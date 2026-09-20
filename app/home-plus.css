@@ -365,3 +365,8 @@
   opacity: 0.45;
   filter: grayscale(0.4);
 }
+
+/* Messages moved out of the bottom nav into the Home header (BottomNav gave
+   the slot to Events). Badge styling is shared with .appbar-badge. */
+.appbar-btn.msgs { position: relative; color: var(--violet, #7a2ff2); background: rgba(122, 47, 242, 0.1); }
+.appbar-btn.msgs:hover { background: rgba(122, 47, 242, 0.16); }
