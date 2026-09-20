@@ -12,6 +12,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      account_deletions: {
+        Row: {
+          completed_at: string | null;
+          deleted_by: string;
+          display_name: string | null;
+          files_removed: number;
+          handle: string | null;
+          id: string;
+          identity_hash: string | null;
+          open_reports: number;
+          profile_id: string;
+          reason: string | null;
+          requested_at: string;
+          was_banned: boolean;
+        };
+        Insert: {
+          completed_at?: string | null;
+          deleted_by?: string;
+          display_name?: string | null;
+          files_removed?: number;
+          handle?: string | null;
+          id?: string;
+          identity_hash?: string | null;
+          open_reports?: number;
+          profile_id: string;
+          reason?: string | null;
+          requested_at?: string;
+          was_banned?: boolean;
+        };
+        Update: {
+          completed_at?: string | null;
+          deleted_by?: string;
+          display_name?: string | null;
+          files_removed?: number;
+          handle?: string | null;
+          id?: string;
+          identity_hash?: string | null;
+          open_reports?: number;
+          profile_id?: string;
+          reason?: string | null;
+          requested_at?: string;
+          was_banned?: boolean;
+        };
+        Relationships: [];
+      };
       follows: {
         Row: {
           created_at: string;
