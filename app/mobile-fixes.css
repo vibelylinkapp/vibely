@@ -300,3 +300,30 @@
 .detail-wrap.pf3 .pf3-cover {
   width: auto;
 }
+
+
+/* ------------------------------------------------------------
+   9. "People near you" cards are too narrow, with dead space
+   either side of the grid.
+
+   Same root cause as fix 8, on the sibling element. globals.css
+   sets `.home-pnear { display: flex; flex-direction: column }`
+   and home-plus.css sets `.pnear-grid2 { margin: 0 auto }`.
+   Auto margins on a flex item's cross axis override
+   `align-items: stretch`, so the grid shrink-wraps to its
+   max-content width and centres itself instead of filling the
+   row. The 1fr columns then divide that shrunken width, giving
+   ~120px cards with a large empty gutter on each side.
+
+   This was masked until tonight: while the appbar overflowed,
+   the row was wider than the viewport, so the shrink-to-fit
+   width resolved larger and the cards looked correct. Fixing
+   the overflow exposed the real width.
+
+   `width: 100%` restores the stretch so the columns divide the
+   full content box. max-width: 470px still centres it on
+   desktop; this only changes the constrained mobile case.
+   ------------------------------------------------------------ */
+.pnear-grid2 {
+  width: 100%;
+}
