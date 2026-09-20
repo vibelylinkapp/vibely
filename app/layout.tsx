@@ -6,6 +6,7 @@ import "./marketing.css";
 import "./home-plus.css";
 import "./nearby-plus.css";
 import "./discover-plus.css";
+import "./mobile-fixes.css";
 
 /**
  * Fonts are self-hosted by next/font rather than pulled from Google.
