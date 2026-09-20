@@ -421,3 +421,38 @@
     transition-duration: 0.001ms \!important;
   }
 }
+
+/* --- Why / How band: two full-width rows ----------------------------
+   The band was one row split in half: Why as a 2x2 card grid on the
+   left, How as four steps stacked vertically on the right. That left
+   the right side sparse and made the band tall. Both sections now run
+   the full width as rows of four, Why above How. Steps read left to
+   right, which is what a numbered sequence should do.
+
+   Overrides only .lp2-two / .lp2-feats / .lp2-steps; the cards and
+   steps themselves are untouched. The mobile tree does not use these
+   rules, so nothing below 900px changes. */
+.lp2-two {
+  grid-template-columns: 1fr;
+  gap: 44px;
+}
+.lp2-feats {
+  grid-template-columns: repeat(4, 1fr);
+}
+.lp2-steps {
+  flex-direction: row;
+  gap: 20px;
+}
+.lp2-steps .lp2-step {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Between 900px (where the desktop tree starts) and 1100px there is not
+   enough room for four across without the copy going ragged, so both
+   fall back to two-up rather than squeezing. */
+@media (max-width: 1100px) {
+  .lp2-feats { grid-template-columns: repeat(2, 1fr); }
+  .lp2-steps { flex-wrap: wrap; }
+  .lp2-steps .lp2-step { flex: 1 1 calc(50% - 10px); }
+}
