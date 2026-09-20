@@ -81,6 +81,14 @@ Shipped:
 Next:
 
 - [ ] Android and iOS store builds
-- [ ] Replace the placeholder contact addresses in `lib/site.ts`
+- [ ] Set `legalEntity` in `lib/site.ts` to the registered company name
 - [ ] Legal review of the privacy policy and terms before launch
+- [ ] **Self-service account deletion** — there is no delete flow in the app.
+      The privacy page currently directs members to email us instead.
+- [ ] **Scheduled data cleanup** — expired stories, soft-deleted messages and
+      closed accounts are never purged. No cron job does this today.
+- [ ] Fix the "renews <date>" label in `UpgradeTiers.tsx` — subscriptions do
+      not auto-renew, they expire after `SUBSCRIPTION_DAYS`
+- [ ] Remove or clearly mark the seeded demo profiles, events and stories
+      (migrations 0017, 0021, 0026) before public launch
 - [ ] Expand beyond Nairobi city by city
