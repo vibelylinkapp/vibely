@@ -31,13 +31,6 @@ const S = {
   strokeLinejoin: "round" as const,
 };
 
-const IcUsers = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" {...S}>
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
 const IcPin = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" {...S}>
     <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
@@ -123,21 +116,34 @@ function Logo({ size = 32 }: { size?: number }) {
 
 /* ----------------------------- content ----------------------------------- */
 
+/**
+ * One strip of four, not two.
+ *
+ * There was an assurance strip here AND a "Why you'll love Vibely" section
+ * further down making the same four claims in different words — verified
+ * people, nearby-and-beyond, the multi-intent pitch, and safety. That is a
+ * whole screen of scrolling to read the same thing twice. The duplicate
+ * section is deleted and the strongest wording survives here.
+ */
 const ASSURANCES = [
   {
-    t: "Verified profiles",
-    s: "Members confirm they are a real person",
+    t: "Real, verified people",
+    s: "Verification and active moderation, so you know who you are talking to.",
     ic: <IcShield />,
   },
   {
-    t: "Kenya & East Africa",
-    s: "Built here, not adapted from elsewhere",
+    t: "Nearby and beyond",
+    s: "Your own area, or anywhere across Kenya and East Africa.",
     ic: <IcPin />,
   },
-  { t: "Free to join", s: "No card needed, ever", ic: <IcHeart /> },
+  {
+    t: "One app, four reasons",
+    s: "Dating, friendship, hangouts or networking. You choose.",
+    ic: <IcHeart />,
+  },
   {
     t: "Privacy you control",
-    s: "You choose what is shown, and to whom",
+    s: "You decide what is shown, and to whom.",
     ic: <IcLock />,
   },
 ];
@@ -169,33 +175,6 @@ const EXPLORE = [
   },
 ];
 
-const FEATURES = [
-  {
-    t: "Real people",
-    s: "Profile verification and active moderation, so you know who you are talking to.",
-    ic: <IcUsers />,
-    bg: "linear-gradient(135deg,#7A2FF2,#F5307E)",
-  },
-  {
-    t: "Nearby and beyond",
-    s: "Find people in your area, or connect across Kenya and East Africa.",
-    ic: <IcPin />,
-    bg: "linear-gradient(135deg,#F5307E,#FF7A59)",
-  },
-  {
-    t: "One app, four reasons",
-    s: "Dating, friendship, hangouts or networking. You say which, and we match it.",
-    ic: <IcHeart />,
-    bg: "linear-gradient(135deg,#FF7A59,#FFB020)",
-  },
-  {
-    t: "Safety built in",
-    s: "Block, report and privacy controls on every profile, not buried in settings.",
-    ic: <IcShield />,
-    bg: "linear-gradient(135deg,#7A2FF2,#3B82F6)",
-  },
-];
-
 const STEPS = [
   { n: 1, t: "Sign up", s: "Create your profile. It takes a minute." },
   { n: 2, t: "Say what you want", s: "Dating, friends, a hangout, or networking." },
@@ -203,11 +182,16 @@ const STEPS = [
   { n: 4, t: "Meet up", s: "Turn a conversation into a real plan." },
 ];
 
+/**
+ * `flip` renders the label to the left of the dot. Pins in the right-hand
+ * half of the map would otherwise push a nowrap label past the edge and get
+ * clipped by the container's overflow on narrow screens.
+ */
 const CITIES = [
-  { c: "Nairobi", n: "Where we started", top: "36%", left: "46%", big: true },
-  { c: "Mombasa", n: "Growing", top: "68%", left: "76%" },
-  { c: "Kisumu", n: "Growing", top: "30%", left: "18%" },
-  { c: "Kampala", n: "Growing", top: "14%", left: "40%" },
+  { c: "Nairobi", n: "Where we started", top: "36%", left: "44%", big: true },
+  { c: "Mombasa", n: "Growing", top: "68%", left: "74%", flip: true },
+  { c: "Kisumu", n: "Growing", top: "30%", left: "17%" },
+  { c: "Kampala", n: "Growing", top: "14%", left: "38%" },
 ];
 
 const SAFETY = [
@@ -288,6 +272,7 @@ function PhoneMock() {
   ];
   return (
     <div className="lp-visual">
+      <span className="lp-phone-aura" aria-hidden="true" />
       <div className="lp-phone">
         <div className="lp-phone-top">
           <span className="lp-phone-word">Vibely</span>
@@ -329,21 +314,6 @@ function PhoneMock() {
         </div>
       </div>
 
-      <div className="lp-float lp-float--1">
-        <Image src={IMG.mike} alt="" width={34} height={34} />
-        <span>
-          <b>Mike, 27</b>
-          <small>1.1km away</small>
-        </span>
-      </div>
-      <div className="lp-float lp-float--2">
-        <Image src={IMG.ashley} alt="" width={34} height={34} />
-        <span>
-          <b>Ashley, 23</b>
-          <small>Nearby</small>
-        </span>
-      </div>
-
       <p className="lp-caption">Illustration of the Vibely app</p>
     </div>
   );
@@ -367,8 +337,8 @@ export default function Landing() {
 
           <nav className="lp-nav" aria-label="Main">
             <a href="#explore">Explore</a>
-            <a href="#why">Why Vibely</a>
             <a href="#how">How it works</a>
+            <a href="#where">Where we are</a>
             <a href="#safety">Safety</a>
           </nav>
 
@@ -413,6 +383,8 @@ export default function Landing() {
                   </Link>
                 </div>
 
+                <p className="lp-cta-note">Free to join · No card needed</p>
+
                 <Trust />
               </div>
 
@@ -448,7 +420,7 @@ export default function Landing() {
                 </p>
               </div>
 
-              <div className="lp-grid">
+              <div className="lp-grid lp-rail">
                 {EXPLORE.map((e) => (
                   <div className="lp-card" key={e.t}>
                     <span className="lp-card-ic" style={{ background: e.bg }}>
@@ -463,32 +435,16 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* ---------------- light run ---------------- */}
-        <div className="lp-surface lp-surface--light">
+        {/* ---------------- light run — desktop enrichment ----------------
+            Everything in here is depth for someone browsing on a big screen
+            with time to read. On a phone the page goes straight from Explore
+            to Safety, which is roughly what the original mobile page did and
+            it read better for it. Nobody scrolls four extra screens to be
+            convinced; the hero has to do that work. */}
+        <div className="lp-surface lp-surface--light lp-desk-only">
           <div className="lp-wrap">
-            <section className="lp-section" id="why" aria-labelledby="why-h">
-              <div className="lp-head lp-head--center">
-                <span className="lp-eyebrow">Why Vibely</span>
-                <h2 className="lp-h2" id="why-h">
-                  Built for how people actually meet here.
-                </h2>
-              </div>
-
-              <div className="lp-grid">
-                {FEATURES.map((f) => (
-                  <div className="lp-card" key={f.t}>
-                    <span className="lp-card-ic" style={{ background: f.bg }}>
-                      {f.ic}
-                    </span>
-                    <b>{f.t}</b>
-                    <small>{f.s}</small>
-                  </div>
-                ))}
-              </div>
-            </section>
-
             <section
-              className="lp-section lp-section--tight"
+              className="lp-section"
               id="how"
               aria-labelledby="how-h"
             >
@@ -514,7 +470,7 @@ export default function Landing() {
               </ol>
             </section>
 
-            <section className="lp-section" aria-labelledby="where-h">
+            <section className="lp-section" id="where" aria-labelledby="where-h">
               <div className="lp-where">
                 <div>
                   <span className="lp-eyebrow">Where we are</span>
@@ -565,7 +521,11 @@ export default function Landing() {
                   {CITIES.map((c) => (
                     <span
                       key={c.c}
-                      className={"lp-pin" + (c.big ? " lp-pin--big" : "")}
+                      className={
+                        "lp-pin" +
+                        (c.big ? " lp-pin--big" : "") +
+                        (c.flip ? " lp-pin--flip" : "")
+                      }
                       style={{ top: c.top, left: c.left }}
                     >
                       <span className="lp-pin-dot" />
@@ -623,10 +583,9 @@ export default function Landing() {
             >
               <div className="lp-note">
                 <p>
-                  We built Vibely in Nairobi because meeting people here still
-                  happens mostly through friends of friends — and that leaves
-                  out anyone who has just moved, just graduated, or simply
-                  wants a wider circle than the one they inherited.
+                  We built Vibely in Nairobi, because meeting people here
+                  still happens mostly through friends of friends — and that
+                  leaves out anyone new in town.
                 </p>
                 <span className="lp-note-by">The Vibely team, Nairobi</span>
               </div>

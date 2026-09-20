@@ -11,10 +11,13 @@ import { useEffect, useRef, useState } from "react";
  * carries the legal links, which are otherwise only reachable by scrolling to
  * the footer.
  */
+/**
+ * Only sections that actually render on a phone. "How it works" and "Where
+ * we are" are desktop enrichment, so linking to them from the mobile menu
+ * would scroll to nothing.
+ */
 const SECTIONS = [
   { href: "/#explore", label: "Explore" },
-  { href: "/#why", label: "Why Vibely" },
-  { href: "/#how", label: "How it works" },
   { href: "/#safety", label: "Safety" },
   { href: "/#story", label: "Our story" },
 ];
