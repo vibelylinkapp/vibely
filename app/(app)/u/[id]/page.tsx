@@ -5,6 +5,7 @@ import BottomNav from "@/components/BottomNav";
 import LikeButton from "@/components/LikeButton";
 import ProfileActions from "@/components/ProfileActions";
 import MessageConnect from "@/components/MessageConnect";
+import WhatsAppShare from "@/components/WhatsAppShare";
 import HighlightsView from "@/components/HighlightsView";
 import ProfileFeed from "@/components/ProfileFeed";
 import FollowButton from "@/components/FollowButton";
@@ -146,6 +147,27 @@ export default async function UserDetailPage({
 
   const iLiked = !!myLike;
   const matched = iLiked && !!theirLike;
+
+  // WhatsApp handoff state, both directions. Migration 0032 removed the
+  // match requirement, so this is reachable from any profile - which is
+  // the point: with a small member base almost nobody reaches a match.
+  type ReqStatus = "none" | "pending" | "approved" | "declined";
+  const [{ data: waOut }, { data: waIn }] = await Promise.all([
+    supabase
+      .from("contact_requests")
+      .select("status")
+      .eq("requester_id", user.id)
+      .eq("target_id", profile.id)
+      .maybeSingle(),
+    supabase
+      .from("contact_requests")
+      .select("status")
+      .eq("requester_id", profile.id)
+      .eq("target_id", user.id)
+      .maybeSingle(),
+  ]);
+  const waOutgoing = (waOut?.status ?? "none") as ReqStatus;
+  const waIncoming = (waIn?.status ?? "none") as ReqStatus;
   const isVip = effectiveTier(sub).tier === "vip";
 
   // The viewer's own tier — decides whether to nudge an upgrade when they
@@ -371,6 +393,12 @@ export default async function UserDetailPage({
               viewerIsPaid={viewerIsPaid}
             />
           )}
+          <WhatsAppShare
+            otherId={profile.id}
+            otherName={profile.display_name}
+            outgoing={waOutgoing}
+            incoming={waIncoming}
+          />
           <ProfileActions
             targetId={profile.id}
             targetName={profile.display_name}
