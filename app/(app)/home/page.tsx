@@ -161,18 +161,53 @@ export default async function HomePage() {
       a.author.id === user.id ? -1 : b.author.id === user.id ? 1 : 0
     );
 
-  // ---- People near you rail (welcoming faces right under the stories) ----
-  const { data: nearbyRows } = await supabase
-    .from("profiles")
-    .select(
-      "id, display_name, avatar_url, area, county, is_online, birthdate, is_verified"
-    )
-    .eq("onboarding_done", true)
-    .eq("is_private", false)
-    .eq("invisible_mode", false)
-    .neq("id", user.id)
-    .order("last_active_at", { ascending: false, nullsFirst: false })
-    .limit(18);
+  // ---- Independent rails, fetched in one wave ----
+  // People-near-you, the first feed page, trending events and active
+  // check-ins share no data dependency: each needs only `user`. They were
+  // four sequential round trips, so the page could not paint until the
+  // slowest of them had waited behind the other three. Issuing them
+  // together turns four waves into one.
+  const trendNow = new Date().toISOString();
+  const ciNow = new Date().toISOString();
+
+  const [
+    { data: nearbyRows },
+    feedPage,
+    { data: trendRows },
+    { data: ciRows },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select(
+        "id, display_name, avatar_url, area, county, is_online, birthdate, is_verified"
+      )
+      .eq("onboarding_done", true)
+      .eq("is_private", false)
+      .eq("invisible_mode", false)
+      .neq("id", user.id)
+      .order("last_active_at", { ascending: false, nullsFirst: false })
+      .limit(18),
+    getFeedPage(supabase, user.id, { limit: FEED_PAGE_SIZE }),
+    supabase
+      .from("events")
+      .select(
+        "id, title, image_url, category, venue, area, city, country, price_kes, starts_at, going_base"
+      )
+      .eq("status", "published")
+      .eq("is_trending", true)
+      .gte("starts_at", trendNow)
+      .order("starts_at", { ascending: true })
+      .limit(8),
+    supabase
+      .from("checkins")
+      .select("id, profile_id, place, area, note, created_at")
+      .gt("expires_at", ciNow)
+      .order("created_at", { ascending: false })
+      .limit(15),
+  ]);
+
+  const { items: feedItems, nextCursor: feedNextCursor } = feedPage;
+
   const nearbyPeople = (nearbyRows ?? [])
     .filter((p) => !blocked.has(p.id))
     .slice(0, 8);
@@ -212,27 +247,11 @@ export default async function HomePage() {
   }
 
   // ---- Feed: first page (blocked authors + hidden posts filtered out) ----
-  const { items: feedItems, nextCursor: feedNextCursor } = await getFeedPage(
-    supabase,
-    user.id,
-    { limit: FEED_PAGE_SIZE }
-  );
 
   // Author cache for the check-ins rail (seeded from story authors).
   const postAuthorMap: Record<string, Author> = { ...authorMap };
 
   // ---- Trending events rail ----
-  const trendNow = new Date().toISOString();
-  const { data: trendRows } = await supabase
-    .from("events")
-    .select(
-      "id, title, image_url, category, venue, area, city, country, price_kes, starts_at, going_base"
-    )
-    .eq("status", "published")
-    .eq("is_trending", true)
-    .gte("starts_at", trendNow)
-    .order("starts_at", { ascending: true })
-    .limit(8);
   const trendList = trendRows ?? [];
   const trendGoing: Record<string, number> = {};
   if (trendList.length) {
@@ -261,13 +280,6 @@ export default async function HomePage() {
     going: (trendGoing[e.id] ?? 0) + e.going_base,
   }));
 
-  // ---- Out right now (active check-ins) ----
-  const { data: ciRows } = await supabase
-    .from("checkins")
-    .select("id, profile_id, place, area, note, created_at")
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false })
-    .limit(15);
   const ciFiltered = (ciRows ?? []).filter((c) => !blocked.has(c.profile_id));
   const ciMissing = Array.from(
     new Set(ciFiltered.map((c) => c.profile_id))
