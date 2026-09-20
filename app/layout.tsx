@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Sora, Fraunces } from "next/font/google";
 import "./globals.css";
-import "./landing.css";
+import "./landing-hero-plus.css";
 import "./marketing.css";
 import "./home-plus.css";
 import "./nearby-plus.css";
