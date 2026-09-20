@@ -187,3 +187,35 @@
   padding-left: 16px;
   padding-right: 16px;
 }
+
+/* ------------------------------------------------------------
+   5. Appbar: full-bleed bar, no dead gap (Sep 2026)
+
+   Two things surfaced once #57 removed the fifth control and the
+   wordmark began hiding below 400px:
+
+   a) A large empty gap opened between the logo and the location
+      pill. .appbar-actions is `flex: 1 1 auto` with
+      `justify-content: flex-end`, so with the wordmark gone the
+      whole group hugged the right edge and left a void in the
+      middle. Pushing the location pill to the start of that group
+      fills it - and the town name belongs beside the brand
+      anyway, because it is context, not an action.
+
+   b) The sticky bar's background is inset by .feed-wrap's 16px
+      gutter, so scrolling cards showed through the 16px strips
+      either side of it. Cancelling the gutter for the appbar only
+      lets the blurred bar cover the full width it implies, and
+      buys back 8px of usable room in a row that has been tight
+      since #53.
+   ------------------------------------------------------------ */
+.appbar-loc { margin-right: auto; }
+
+@media (max-width: 900px) {
+  .appbar {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
