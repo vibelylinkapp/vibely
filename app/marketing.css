@@ -1,368 +1,66 @@
 /* =========================================================================
-   Marketing surface — typography refinement, landing fixes, mobile menu,
-   shared footer, and the plain content pages (about / safety / privacy /
-   terms). Loaded AFTER globals.css and landing-hero-plus.css.
+   Shared marketing chrome: the site footer, and the plain content pages
+   (about, safety, privacy, terms).
+
+   The landing page's own styles used to live here too. They now live in
+   app/landing.css, which owns the `lp-` namespace end to end. This file is
+   only what those pages share with the footer.
    ========================================================================= */
 
 /* -------------------------------------------------------------------------
-   1. Typography
-   The landing used one geometric sans (Sora) for every heading, which is
-   what makes a page read as generated. Headlines now sit in Fraunces — a
-   humanist serif with real optical sizing — over Plus Jakarta Sans for
-   everything else. Scoped to the marketing surface so the app UI is
-   untouched.
-   ------------------------------------------------------------------------- */
-.lp2,
-.doc {
-  font-family: "Plus Jakarta Sans", "Inter", system-ui, -apple-system,
-    "Segoe UI", sans-serif;
-  font-feature-settings: "ss01", "cv05";
-}
-
-.lp2-h1,
-.lp2-dh1,
-.lp2-h2,
-.lp2-row-head h2,
-.doc-body h1,
-.doc-body h2 {
-  font-family: "Fraunces", "Iowan Old Style", Georgia, serif;
-  font-optical-sizing: auto;
-  font-variation-settings: "SOFT" 20, "WONK" 0;
-  font-weight: 600;
-}
-
-.lp2-h1 {
-  font-size: clamp(38px, 11.5vw, 50px);
-  line-height: 1.05;
-  letter-spacing: -1.2px;
-}
-.lp2-dh1 {
-  font-size: clamp(42px, 4.1vw, 62px);
-  line-height: 1.04;
-  letter-spacing: -1.6px;
-}
-.lp2-h2 {
-  font-size: 32px;
-  letter-spacing: -0.8px;
-}
-
-/* Body copy: slightly larger, looser, and held to a readable measure. */
-.lp2-lead {
-  font-size: 16.5px;
-  line-height: 1.62;
-  color: rgba(244, 241, 250, 0.74);
-  max-width: 46ch;
-}
-.lp2-dhero-l .lp2-lead {
-  font-size: 18px;
-  max-width: 44ch;
-}
-.lp2-mhero .lp2-lead {
-  max-width: 34ch;
-}
-
-/* Wordmark stays sans, just tighter and warmer than Sora. */
-.lp2-word,
-.lp2-word-sm {
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.9px;
-}
-
-/* The eyebrow pill reads as a label, not a shout. */
-.lp2-pill {
-  font-size: 12px;
-  letter-spacing: 0.2px;
-  text-transform: none;
-}
-
-.lp2-feat b,
-.lp2-step b,
-.lp2-exp b {
-  letter-spacing: -0.2px;
-}
-.lp2-feat small,
-.lp2-step small {
-  font-size: 14px;
-  line-height: 1.58;
-}
-
-/* -------------------------------------------------------------------------
-   2. Assurance row — replaces the invented stat counters
-   ------------------------------------------------------------------------- */
-.lp2-stats.is-assure {
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 12px;
-  padding: 18px 16px;
-}
-.lp2-stat.is-assure {
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 10px;
-  text-align: left;
-}
-.lp2-stat.is-assure .lp2-stat-ic {
-  height: auto;
-  margin-top: 1px;
-}
-.lp2-stat.is-assure b {
-  display: block;
-  font-size: 13.5px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-.lp2-stat.is-assure small {
-  display: block;
-  font-size: 11.5px;
-  line-height: 1.4;
-  margin-top: 2px;
-}
-
-.lp2-dstat.is-assure {
-  align-items: flex-start;
-  gap: 14px;
-}
-.lp2-dstat.is-assure b {
-  font-size: 16px;
-  letter-spacing: -0.2px;
-  line-height: 1.3;
-  background: none;
-  -webkit-text-fill-color: #fff;
-  color: #fff;
-}
-.lp2-dstat.is-assure small {
-  display: block;
-  margin-top: 3px;
-  font-size: 13px;
-  line-height: 1.45;
-  color: rgba(244, 241, 250, 0.62);
-}
-
-/* -------------------------------------------------------------------------
-   3. Honest labelling of the illustrative UI
-   ------------------------------------------------------------------------- */
-.lp2-caption {
-  font-size: 11.5px;
-  letter-spacing: 0.3px;
-  color: rgba(244, 241, 250, 0.38);
-  text-align: center;
-  margin: -6px 0 2px;
-}
-.lp2-dhero-c .lp2-caption {
-  margin-top: 14px;
-}
-
-/* -------------------------------------------------------------------------
-   4. App stores — real links, or an honest "coming soon" line
-   ------------------------------------------------------------------------- */
-.lp2-store {
-  text-decoration: none;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-.lp2-store:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-.lp2-soon {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: rgba(244, 241, 250, 0.6);
-  max-width: 42ch;
-}
-.lp2-soon-tag {
-  display: inline-flex;
-  align-items: center;
-  flex: none;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #ffd9ea;
-  background: rgba(245, 48, 126, 0.16);
-  border: 1px solid rgba(245, 48, 126, 0.32);
-  border-radius: 999px;
-  padding: 5px 11px;
-}
-.lp2-mfinal .lp2-soon {
-  justify-content: center;
-  text-align: center;
-  margin: 16px auto 0;
-}
-
-/* -------------------------------------------------------------------------
-   5. Founder note — replaces the fabricated testimonial
-   ------------------------------------------------------------------------- */
-.lp2-note {
-  position: relative;
-  border-left: 2px solid rgba(245, 48, 126, 0.5);
-  padding: 2px 0 2px 18px;
-}
-.lp2-note p {
-  font-family: "Fraunces", Georgia, serif;
-  font-optical-sizing: auto;
-  font-size: 17px;
-  line-height: 1.55;
-  color: rgba(244, 241, 250, 0.86);
-  max-width: 58ch;
-}
-.lp2-note-by {
-  display: block;
-  margin-top: 12px;
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  color: rgba(244, 241, 250, 0.5);
-}
-.lp2-dnote {
-  max-width: 1180px;
-  margin: 56px auto 0;
-}
-.lp2-dnote .lp2-note {
-  border-left-color: rgba(122, 47, 242, 0.45);
-}
-.lp2-dnote .lp2-note p {
-  font-size: 20px;
-  color: #241a3a;
-}
-.lp2-dnote .lp2-note-by {
-  color: #6b6480;
-}
-
-/* -------------------------------------------------------------------------
-   6. Trust row links
-   ------------------------------------------------------------------------- */
-.lp2-trust a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-}
-.lp2-trust a:hover {
-  border-bottom-color: rgba(255, 255, 255, 0.5);
-}
-
-/* -------------------------------------------------------------------------
-   7. Mobile menu
-   ------------------------------------------------------------------------- */
-.lp2-burger {
-  cursor: pointer;
-  padding: 0;
-}
-.lp2-burger span {
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-.lp2-burger.is-open span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
-}
-.lp2-burger.is-open span:nth-child(2) {
-  opacity: 0;
-}
-.lp2-burger.is-open span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
-}
-
-.lp2-menu {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-}
-.lp2-menu-scrim {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  border: 0;
-  padding: 0;
-  background: rgba(8, 5, 16, 0.66);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  cursor: default;
-}
-.lp2-menu-panel {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  left: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, #1d1233, #150d26);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
-  animation: lp2-menu-in 0.18s ease-out;
-}
-@keyframes lp2-menu-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-}
-.lp2-menu-panel a {
-  color: #f4f1fa;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 13px 8px;
-  border-radius: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-.lp2-menu-panel a:active {
-  background: rgba(255, 255, 255, 0.06);
-}
-.lp2-menu-cta {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-.lp2-menu-cta > * {
-  flex: 1;
-  justify-content: center;
-  text-align: center;
-  border-bottom: 0;
-}
-@media (prefers-reduced-motion: reduce) {
-  .lp2-menu-panel {
-    animation: none;
-  }
-}
-
-/* -------------------------------------------------------------------------
-   8. Shared footer
+   Site footer — rendered on the dark landing page and on the light doc pages
    ------------------------------------------------------------------------- */
 .site-foot {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  padding: 30px 16px 36px;
+  padding: 34px clamp(20px, 5vw, 48px) 40px;
   text-align: center;
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
+
 .site-foot-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px 22px;
+  gap: 10px 24px;
 }
+
 .site-foot-links a {
+  /* Contrast: the old value was rgba(244,241,250,0.66) on dark and failed
+     AA for a 13.5px link. 0.82 clears it comfortably. */
+  color: rgba(247, 244, 253, 0.82);
   font-size: 13.5px;
   font-weight: 600;
   text-decoration: none;
-  color: rgba(244, 241, 250, 0.66);
+  padding: 6px 2px;
 }
 .site-foot-links a:hover {
   color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
+.site-foot-links a:focus-visible {
+  outline: 2px solid #ffb9d4;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
 .site-foot-note {
   font-size: 12.5px;
   line-height: 1.6;
-  color: rgba(244, 241, 250, 0.38);
+  /* Was 0.38 — invisible in bright daylight, which is how a lot of this
+     audience reads the page. */
+  color: rgba(247, 244, 253, 0.62);
 }
 .site-foot-note span {
   display: block;
+}
+
+/* Light variant, used on the doc pages */
+.site-foot.light {
+  border-top: 1px solid #efecf6;
 }
 .site-foot.light .site-foot-links a {
   color: #4a4458;
@@ -370,22 +68,29 @@
 .site-foot.light .site-foot-links a:hover {
   color: #14101f;
 }
-.site-foot.light .site-foot-note {
-  color: #8a8397;
+.site-foot.light .site-foot-links a:focus-visible {
+  outline-color: #7a2ff2;
 }
-.lp2-desktop .site-foot {
-  border-top: 1px solid #e7e2f2;
-  margin-top: 48px;
+.site-foot.light .site-foot-note {
+  color: #6f6885;
+}
+
+/* On the landing page the footer closes out the dark run. */
+.lp .site-foot {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: clamp(24px, 4vw, 48px);
 }
 
 /* -------------------------------------------------------------------------
-   9. Content pages — about / safety / privacy / terms
+   Content pages — about / safety / privacy / terms
    ------------------------------------------------------------------------- */
 .doc {
   min-height: 100dvh;
   background: #fff;
   color: #241f33;
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
+
 .doc-top {
   position: sticky;
   top: 0;
@@ -394,70 +99,105 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 14px clamp(20px, 5vw, 40px);
   background: rgba(255, 255, 255, 0.9);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #efecf6;
 }
+
 .doc-back {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 800;
   font-size: 17px;
   letter-spacing: -0.5px;
   color: #14101f;
   text-decoration: none;
 }
+
 .doc-join {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
   font-size: 13.5px;
   font-weight: 700;
   text-decoration: none;
   color: #fff;
   background: linear-gradient(135deg, #f5307e, #7a2ff2);
-  padding: 9px 16px;
-  border-radius: 999px;
+}
+.doc-join:hover {
+  box-shadow: 0 8px 22px rgba(245, 48, 126, 0.3);
+}
+
+.doc a:focus-visible {
+  outline: 2px solid #7a2ff2;
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
 .doc-body {
   max-width: 720px;
   margin: 0 auto;
-  padding: 44px 20px 24px;
+  padding: clamp(36px, 6vw, 64px) clamp(20px, 5vw, 24px) 24px;
 }
+
 .doc-body h1 {
+  font-family: var(--font-serif), "Iowan Old Style", Georgia, serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
   font-size: clamp(32px, 6vw, 44px);
   line-height: 1.12;
-  letter-spacing: -1px;
+  letter-spacing: -0.8px;
   color: #14101f;
+  text-wrap: balance;
 }
+
 .doc-intro {
   margin-top: 14px;
-  font-size: 18px;
+  font-size: clamp(16.5px, 2vw, 18px);
   line-height: 1.6;
   color: #4a4458;
   max-width: 54ch;
 }
+
 .doc-updated {
   margin-top: 16px;
   font-size: 13px;
   letter-spacing: 0.3px;
   color: #8a8397;
 }
+
 .doc-body h2 {
-  margin-top: 40px;
-  font-size: 22px;
+  font-family: var(--font-serif), "Iowan Old Style", Georgia, serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  margin-top: 44px;
+  font-size: clamp(21px, 2.6vw, 24px);
   letter-spacing: -0.4px;
   line-height: 1.25;
   color: #14101f;
 }
+
+.doc-body h3 {
+  margin-top: 26px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #14101f;
+}
+
 .doc-body p,
 .doc-body li {
   margin-top: 14px;
   font-size: 16px;
-  line-height: 1.68;
+  line-height: 1.7;
   color: #3b3550;
 }
+
 .doc-body ul {
   margin-top: 6px;
   padding-left: 20px;
@@ -468,10 +208,12 @@
 .doc-body li::marker {
   color: #b9aee0;
 }
+
 .doc-body strong {
   color: #14101f;
   font-weight: 700;
 }
+
 .doc-body a {
   color: #7a2ff2;
   text-decoration: underline;
@@ -480,17 +222,8 @@
 .doc-body a:hover {
   color: #f5307e;
 }
+
 .doc .site-foot {
   max-width: 720px;
-  margin: 40px auto 0;
-  border-top: 1px solid #efecf6;
-}
-
-@media (min-width: 900px) {
-  .doc-top {
-    padding: 18px 40px;
-  }
-  .doc-body {
-    padding-top: 64px;
-  }
+  margin: 44px auto 0;
 }
