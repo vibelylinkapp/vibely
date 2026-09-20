@@ -205,17 +205,43 @@ export default function Privacy() {
 
       <h2>8. Deleting your account</h2>
       <p>
-        There is no self-service delete button in the app yet. This is a gap and
-        we are building it.
+        You can delete your account yourself, at any time, from{" "}
+        <strong>Account &amp; settings</strong> on your profile. You type
+        DELETE to confirm, and it happens immediately — we do not queue it,
+        hold it for a cooling-off period, or ask you to email anyone.
       </p>
       <p>
-        In the meantime, email{" "}
+        Deleting removes your profile, photos, cover image, gallery,
+        highlights, stories, posts, comments, messages and voice notes, likes,
+        matches, follows, plans, event bookings, check-ins, verification
+        documents, push subscriptions and your saved WhatsApp number. The
+        uploaded files themselves are removed from storage, not just the
+        database rows pointing at them. You cannot sign back in afterwards and
+        we cannot restore it.
+      </p>
+      <p>Two things survive, and only these:</p>
+      <ul>
+        <li>
+          <strong>Payment records</strong>, which are detached from your
+          profile but kept for tax and accounting purposes.
+        </li>
+        <li>
+          <strong>Reports made about your account</strong>, reduced to your
+          display name, handle, county and the date of deletion, so that
+          someone removed for abusing others cannot immediately return with a
+          clean record.
+        </li>
+      </ul>
+      <p>
+        We also keep a deletion log entry: an internal record that a deletion
+        happened, when, and a one-way hash of your sign-in identifier. The hash
+        cannot be reversed into your phone number or email.
+      </p>
+      <p>
+        If you would rather we did it for you, email{" "}
         <a href={`mailto:${SITE.privacyEmail}`}>{SITE.privacyEmail}</a> from the
-        address on your account, or from the phone number you signed up with,
-        and we will delete it within {SITE.dataRequestDays} days. Deleting your
-        account removes your profile, photos, messages, posts, stories, plans
-        and bookings. We keep only the payment and moderation records described
-        in section 7.
+        address or phone number on the account and we will action it within{" "}
+        {SITE.dataRequestDays} days.
       </p>
 
       <h2>9. Your rights</h2>
