@@ -2,12 +2,9 @@
 
 import { useState, type MouseEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { waLink } from "@/lib/wa";
 
 type Status = "none" | "pending" | "approved" | "declined";
-
-function waLink(num: string): string {
-  return "https://wa.me/" + num.replace(/[^\d]/g, "");
-}
 
 function WaIcon() {
   return (
