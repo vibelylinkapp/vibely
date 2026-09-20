@@ -5487,3 +5487,52 @@ button.create-alt {
 }
 .nb-cell { display: flex; flex-direction: column; gap: 8px; }
 .nb-cell .nb-card { margin: 0; }
+
+
+/* ============================================================
+   Events - empty state (Sep 2026)
+
+   Events became a primary nav destination in #52, and every
+   event in the database at the time was seeded demo content.
+   Once purge_demo_content() runs the tab is genuinely empty, so
+   the previous single line of grey text was the whole screen a
+   new member saw. This gives that state a shape: what the page
+   is for, what happens if you post, and one obvious action.
+   ============================================================ */
+.ev-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  margin: 8px 0 24px;
+  padding: 32px 22px;
+  border: 1px solid var(--line, #e7e6ee);
+  border-radius: 20px;
+  background: #fff;
+}
+.ev-empty-ic {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  color: #7a2ff2;
+  background: rgba(122, 47, 242, 0.09);
+}
+.ev-empty-ic svg { width: 26px; height: 26px; }
+.ev-empty h4 {
+  margin: 2px 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #14161c;
+}
+.ev-empty p {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #6b7280;
+}
+.ev-empty .ev-empty-cta { margin-top: 6px; }
