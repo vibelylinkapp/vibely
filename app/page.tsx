@@ -268,8 +268,8 @@ export default function Landing() {
               ))}
             </div>
             <p>
-              &ldquo;I found amazing friends and memories on Vibely.&rdquo;
-              <span>— Brian, Nairobi</span>
+              Built in Nairobi, for Kenya and East Africa.
+              <span>— The Vibely team</span>
             </p>
           </div>
         </section>
