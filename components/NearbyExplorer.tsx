@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import SwipeDeck from "./SwipeDeck";
+import EmptyState from "./EmptyState";
 import WhatsAppAskButton from "./WhatsAppAskButton";
 
 type NearbyRow = {
@@ -200,9 +201,23 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
       ) : view === "swipe" ? (
         <SwipeDeck rows={filtered} meId={meId} />
       ) : filtered.length === 0 ? (
-        <p className="nb-empty">
-          No one matches here yet. Try a wider radius or turn off filters.
-        </p>
+        <EmptyState
+          icon={
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.7}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+          }
+          title="Nobody here yet"
+          body="Vibely is still new in your area. Widen the radius or clear your filters - and check back, because this fills up as people join."
+        />
       ) : view === "grid" ? (
         <div className="nb-grid">
           {filtered.map((r) => (
