@@ -1,111 +1,116 @@
 # Vibely
 
-The easiest way to meet real people near you — a social discovery platform for
-Kenya and East Africa (dating, friends, hangouts, networking).
+Meet real people near you. Dating, friends, hangouts and networking across
+Kenya and East Africa.
 
-This repo is a **Next.js 15 (App Router) PWA**. The marketing site and the
-product both live here; the product runs on Supabase.
+Live at **https://vibely-inky.vercel.app**
+
+---
+
+## Documentation
+
+| Document | Read it when |
+|---|---|
+| `ARCHITECTURE-ESSENTIALS.md` | **Start here.** The short version and the six things that will bite you. |
+| `ARCHITECTURE.md` | You need detail on routing, auth, data model, payments. |
+| `AGENTS.md` | You are about to change code. Operating rules and known traps. |
+| `SECURITY-AUDIT.md` | Reviewing security posture or picking up hardening work. |
+| `PRD.md` | You need product intent — what exists, what it is for, what is deferred. |
+
+---
 
 ## Stack
 
-- Next.js 15 + React 19 + TypeScript
-- Supabase (Postgres + PostGIS, Auth, Realtime, Storage)
-- M-Pesa (Safaricom Daraja) for subscriptions and boosts
-- Web Push for notifications
-- Deployed on Vercel (auto-deploys on every push to `main`)
+Next.js 15.5.22 (App Router) with React 19 and TypeScript 5.7. Supabase for
+Postgres, auth, storage and realtime. Hosted on Vercel, auto-deploying from
+`main`. Payments in via M-Pesa Daraja; host payouts via Paystack split.
 
-## Local development
+---
+
+## Running locally
+
+Requires Node 20 or newer.
 
 ```bash
 npm install
-npm run dev
-# open http://localhost:3000
+cp .env.example .env.local   # then fill it in, see below
+npm run dev                  # http://localhost:3000
 ```
 
-## Environment
+Scripts are `dev`, `build` and `start`. There is no test suite and no lint step
+in CI, so `npm run build` is the only gate before merging.
 
-Copy `.env.example` to `.env.local` and fill in your Supabase + M-Pesa keys.
+### Environment
 
-## Project layout
+Copy `.env.example` and populate it. The application will not start without the
+first two.
 
-```
-app/
-  page.tsx            Landing page (marketing)
-  about|safety|       Public content pages
-  privacy|terms/
-  (auth)/sign-in      Phone OTP + Google sign-in
-  (app)/              The product, behind auth
-  admin/              Moderation panel (reachable only via ADMIN_PATH)
-  api/                Route handlers (like, pass, follow, feed, boost,
-                      push, mpesa, cron, unread, admin)
-components/           UI components (SwipeDeck, Chat, Stories, Highlights,
-                      NearbyExplorer, PlansExplorer, Heatmap, UpgradeTiers,
-                      VerificationSetup, ...)
-lib/                  Supabase clients, generated DB types, M-Pesa, tiers,
-                      entitlements, feed helpers, site config
-supabase/             SQL migrations
-```
+**Required**
 
-## Editing the marketing and legal pages
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key, RLS-constrained |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only. **Bypasses RLS.** Never expose. |
 
-Company details, contact addresses and app-store links live in one place:
-**`lib/site.ts`**. The about, safety, privacy and terms pages read from it, so
-change it there rather than editing each page.
+**Payments**
 
-App-store badges are driven by `SITE.stores`. While those values are `null` the
-landing page shows a "coming soon" line; set them to the live listing URLs and
-real store buttons appear automatically.
+| Variable | Purpose |
+|---|---|
+| `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET` | Daraja credentials |
+| `MPESA_SHORTCODE`, `MPESA_PASSKEY` | STK push identity |
+| `MPESA_CALLBACK_SECRET` | Shared secret on the callback URL. **Set this** — the gate is skipped when absent, which lets a forged callback confirm an unpaid ticket. See `SECURITY-AUDIT.md`, HIGH-2. |
+| `PAYSTACK_SECRET_KEY` | Host payout subaccounts and split transactions |
+
+**Optional**
+
+| Variable | Purpose |
+|---|---|
+| `ADMIN_EMAILS` | Comma-separated admin allowlist. **Leaving this unset is currently the safer choice** — see `SECURITY-AUDIT.md`, HIGH-1. |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Web push |
+| `CRON_SECRET` | Guards `/api/cron/winback` |
+| `NEXT_PUBLIC_FEATURE_*` | Density-dependent surfaces, all default off |
+
+### Feature flags
+
+Stories, the social feed, heatmap, top matches, boosts and the chat tab are
+built and correct but default **off**: with 16 profiles they render as empty
+shells. Set the matching `NEXT_PUBLIC_FEATURE_*` variable to `1` to bring one
+back. See `lib/features.ts`.
+
+---
 
 ## Database
 
-The full Postgres/PostGIS schema (profiles, intents, chat, stories, plans,
-reports, subscriptions, M-Pesa payments, RLS policies, and a
-`nearby_profiles()` function) lives in `supabase/migrations/`.
+39 tables, 52 migrations, 103 RLS policies. Row-level security is enabled on
+every table.
 
-## Status
+**Migrations are applied by hand.** There is no runner in the deploy pipeline.
+Committing a file under `supabase/migrations/` changes nothing until it is
+pasted into the Supabase SQL editor and run. Code that depends on a new column
+will build, merge, deploy, and then fail in production.
 
-Shipped:
+The SQL editor only shows the last statement's result, so run one statement per
+tab when you need to read the output.
 
-- [x] Branded landing page, plus about / safety / privacy / terms
-- [x] Auth: phone OTP + Google
-- [x] Onboarding + rich profiles (avatar, cover, gallery, highlights)
-- [x] Discover: swipe deck, nearby people, top matches, liked-you
-- [x] In-app chat with Supabase Realtime, including voice notes
-- [x] Stories and a social feed (posts, likes, comments)
-- [x] Events and plans, with booking and check-ins
-- [x] Safety and moderation: verification, reporting, blocking, admin panel
-- [x] M-Pesa subscriptions, tiers, entitlements and boosts
-- [x] Web push notifications
-- [x] Nearby heatmap
+**`lib/database.types.ts` is hand-maintained, not generated.** Every new table
+and column must be added there by hand or the build fails on a type error.
 
-Next:
+---
 
-- [ ] Android and iOS store builds
-- [ ] Set `legalEntity` in `lib/site.ts` to the registered company name
-- [ ] Legal review of the privacy policy and terms before launch
-- [ ] **Run `select public.purge_demo_content();`** before public launch. The
-      seeded demo members, plans, stories and events are now flagged
-      `is_demo` and are excluded from People Nearby and the map, but they
-      still appear in Discover, the stories rail and Trending until purged.
-- [ ] **Scheduled data cleanup** — expired stories and soft-deleted messages
-      are never purged. No cron job does this today.
-- [ ] Expand beyond Nairobi city by city
+## Deployment
 
-## Account deletion
+Pushing to `main` deploys to Vercel.
 
-Members delete their own account from **Account & settings** on `/profile`.
-The flow is `components/DeleteAccount.tsx` → `POST /api/account/delete`, which:
+A merged pull request is **not** a deployed one — Vercel can fail the build
+while GitHub shows everything merged. This has happened, and three PRs sat
+merged-but-undeployed for hours. To confirm a change is live, fetch a deployed
+asset and grep it for a marker from your change.
 
-1. requires a live session and a typed `DELETE` confirmation;
-2. writes an `account_deletions` audit row **before** destroying anything —
-   if the audit write fails, the deletion does not proceed;
-3. recursively removes the member's files from the `avatars`, `post-media`,
-   `chat-media` and `verifications` buckets;
-4. deletes the `auth.users` row, which cascades to `profiles` and onward;
-5. stamps the audit row and clears the session cookie.
+---
 
-Retained by design (see `supabase/migrations/0030_account_deletion.sql`):
-payment records, `admin_actions`, and reports about the deleted member —
-these are `SET NULL` rather than `CASCADE`, and a `before delete` trigger on
-`profiles` stamps `reports.reported_snapshot` so moderation history survives
-without keeping a live profile.
+## Contributing
+
+Read `AGENTS.md` before your first change. In particular: always
+`git fetch origin main && git reset --hard origin/main` before writing, because
+committing from a stale clone has silently reverted merged work three times.
