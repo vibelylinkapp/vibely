@@ -1,7 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import LikeButton from "@/components/LikeButton";
 import ProfileActions from "@/components/ProfileActions";
 import MessageConnect from "@/components/MessageConnect";
@@ -446,7 +445,6 @@ export default async function UserDetailPage({
         />
       </section>
 
-      <BottomNav />
     </main>
   );
 }

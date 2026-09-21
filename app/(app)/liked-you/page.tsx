@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import ProfileCard from "@/components/ProfileCard";
 import { effectiveTier } from "@/lib/entitlements";
 import { TIER_RANK } from "@/lib/tiers";
@@ -55,7 +54,6 @@ export default async function LikedYouPage() {
             See who likes you
           </Link>
         </div>
-        <BottomNav />
       </main>
     );
   }
@@ -118,7 +116,6 @@ export default async function LikedYouPage() {
           ))}
         </div>
       )}
-      <BottomNav />
     </main>
   );
 }

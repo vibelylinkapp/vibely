@@ -1,15 +1,22 @@
-// Shared instant-loading skeleton for every route in the (app) group.
-// Next.js renders this as the Suspense fallback the moment a navigation
-// starts, so tapping between tabs feels immediate instead of showing a blank
-// screen while the server renders the (force-dynamic) page.
+/**
+ * Fallback for the {children} slot of the signed-in shell.
+ *
+ * Kept SHAPE-NEUTRAL on purpose. The previous version mirrored the home
+ * feed -- a stories row and a two-column card grid -- so navigating to
+ * Messages or Profile flashed a skeleton of a completely different page
+ * before the real one arrived, which looked like a rendering fault rather
+ * than loading. Generic bars read as "loading" everywhere.
+ *
+ * No longer 100vh: the tab bar now persists outside this boundary, so a
+ * full-height fallback would push it off screen.
+ */
 export default function AppLoading() {
-  const cards = [0, 1, 2, 3];
-  const dots = [0, 1, 2, 3, 4];
+  const rows = [0, 1, 2, 3, 4];
   return (
     <div
       aria-busy="true"
       aria-label="Loading"
-      style={{ maxWidth: 640, margin: "0 auto", padding: 16, minHeight: "100vh" }}
+      style={{ maxWidth: 640, margin: "0 auto", padding: 16 }}
     >
       <style>{`
         @keyframes vbShimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
@@ -23,7 +30,6 @@ export default function AppLoading() {
         @media (prefers-reduced-motion: reduce) { .vb-sk { animation: none; } }
       `}</style>
 
-      {/* Top bar */}
       <div
         style={{
           display: "flex",
@@ -32,44 +38,22 @@ export default function AppLoading() {
           marginBottom: 20,
         }}
       >
-        <div className="vb-sk" style={{ width: 110, height: 28 }} />
-        <div className="vb-sk" style={{ width: 96, height: 32, borderRadius: 999 }} />
+        <div className="vb-sk" style={{ width: 120, height: 26 }} />
+        <div className="vb-sk" style={{ width: 84, height: 30, borderRadius: 999 }} />
       </div>
 
-      {/* Greeting / hero card */}
-      <div className="vb-sk" style={{ width: "100%", height: 92, marginBottom: 16 }} />
-
-      {/* Search */}
-      <div
-        className="vb-sk"
-        style={{ width: "100%", height: 48, borderRadius: 999, marginBottom: 22 }}
-      />
-
-      {/* Stories row */}
-      <div style={{ display: "flex", gap: 14, marginBottom: 24 }}>
-        {dots.map((i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <div className="vb-sk" style={{ width: 62, height: 62, borderRadius: "50%" }} />
-            <div className="vb-sk" style={{ width: 44, height: 10 }} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {rows.map((i) => (
+          <div key={i} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <div
+              className="vb-sk"
+              style={{ width: 54, height: 54, borderRadius: "50%", flex: "0 0 auto" }}
+            />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+              <div className="vb-sk" style={{ width: "58%", height: 14 }} />
+              <div className="vb-sk" style={{ width: "34%", height: 12 }} />
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Section title */}
-      <div className="vb-sk" style={{ width: 168, height: 20, marginBottom: 14 }} />
-
-      {/* Card grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {cards.map((i) => (
-          <div key={i} className="vb-sk" style={{ width: "100%", aspectRatio: "3 / 4" }} />
         ))}
       </div>
     </div>

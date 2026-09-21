@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import CreatePlan from "@/components/CreatePlan";
 import PlansExplorer, { PlanItem } from "@/components/PlansExplorer";
 
@@ -116,7 +115,6 @@ export default async function PlansPage() {
         <CreatePlan />
       </div>
       <PlansExplorer plans={plans} myCounty={myCounty} />
-      <BottomNav />
     </main>
   );
 }

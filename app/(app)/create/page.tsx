@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import CreatePost from "@/components/CreatePost";
 import AddStory from "@/components/AddStory";
 import CreatePlan from "@/components/CreatePlan";
@@ -153,7 +152,6 @@ export default async function CreatePage() {
         />
       </div>
 
-      <BottomNav />
     </main>
   );
 }

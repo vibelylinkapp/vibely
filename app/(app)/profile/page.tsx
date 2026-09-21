@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import ProfileFeed from "@/components/ProfileFeed";
 import ShareProfile from "@/components/ShareProfile";
 import CoverPhoto from "@/components/CoverPhoto";
@@ -481,7 +480,6 @@ export default async function ProfilePage() {
         <DeleteAccount hasActivePlan={ent.isPaid} />
       </section>
 
-      <BottomNav />
     </main>
   );
 }

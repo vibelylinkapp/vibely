@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import AvatarUpload from "@/components/AvatarUpload";
 import CoverPhoto from "@/components/CoverPhoto";
 import ProfileInfoForm from "@/components/ProfileInfoForm";
@@ -114,7 +113,6 @@ export default async function ProfileEditPage() {
         <GalleryUpload userId={user.id} initialPhotos={myPhotos ?? []} />
       </section>
 
-      <BottomNav />
     </main>
   );
 }

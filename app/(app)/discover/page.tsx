@@ -3,7 +3,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/ProfileCard";
 import WhatsAppAskButton from "@/components/WhatsAppAskButton";
-import BottomNav from "@/components/BottomNav";
 import HomeSearch from "@/components/HomeSearch";
 import EventCard, { type EventCardData } from "@/components/EventCard";
 import type { Database } from "@/lib/database.types";
@@ -574,7 +573,6 @@ export default async function DiscoverPage({
         </section>
       )}
 
-      <BottomNav />
     </main>
   );
 }

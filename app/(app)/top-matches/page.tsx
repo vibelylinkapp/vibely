@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import ProfileCard from "@/components/ProfileCard";
 import { effectiveTier } from "@/lib/entitlements";
 
@@ -69,7 +68,6 @@ export default async function TopMatchesPage() {
             Go VIP
           </Link>
         </div>
-        <BottomNav />
       </main>
     );
   }
@@ -185,7 +183,6 @@ export default async function TopMatchesPage() {
         </div>
       )}
 
-      <BottomNav />
     </main>
   );
 }
