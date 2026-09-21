@@ -73,12 +73,51 @@ export type Subaccount = {
   business_name?: string;
   settlement_bank?: string;
   account_number?: string;
+  percentage_charge?: number;
 };
 
-/** Create a subaccount that settles to a host's M-Pesa number. */
+/**
+ * Create a subaccount that settles to a host's M-Pesa number.
+ *
+ * ---------------------------------------------------------------------------
+ * percentage_charge: READ THIS BEFORE CHANGING IT
+ * ---------------------------------------------------------------------------
+ * It is REQUIRED. Omitting it fails with "Percentage charge is required".
+ *
+ * Its meaning is genuinely documented two different ways by Paystack:
+ *
+ *   paystack.com/docs/payments/split-payments
+ *     "if a subaccount was created with percentage_charge: 20,
+ *      20% goes to the MAIN ACCOUNT and the rest goes to the subaccount"
+ *
+ *   docs-v2.paystack.com/docs/payments/split-payments
+ *     "if a subaccount was created with percentage_charge: 0.2,
+ *      20% goes to the SUBACCOUNT and the rest goes to the main account"
+ *
+ * Those are opposite, and they even disagree on the scale (20 vs 0.2).
+ * The Subaccount API reference -- the authoritative page for this specific
+ * field -- resolves it:
+ *
+ *   docs-v2.production.paystack.co/docs/api/subaccount
+ *     "percentage_charge: The percentage THE MAIN ACCOUNT RECEIVES from
+ *      each payment made to the subaccount"
+ *
+ * and its own example passes a whole number (30 for 30%). So this value is
+ * the PLATFORM's commission, as whole percent: 10, not 90.
+ *
+ * Note the deliberate asymmetry with initializeSplitTransaction below,
+ * where `share` is the SUBACCOUNT's share (90). Both are correct in their
+ * own context; they are framed from opposite sides. Both are derived from
+ * the same commission figure so they cannot drift apart.
+ *
+ * This is still an inference from docs rather than an observed split, so
+ * the caller echoes back whatever Paystack stored. Confirm it against a
+ * real transaction before trusting live money to it.
+ */
 export function createSubaccount(params: {
   businessName: string;
   mpesaNumber: string; // normalised 254...
+  platformPct: number; // platform commission, whole percent
   settlementBank?: string;
 }) {
   return call<Subaccount>("/subaccount", {
@@ -87,12 +126,14 @@ export function createSubaccount(params: {
       business_name: params.businessName,
       settlement_bank: params.settlementBank ?? "MPESA",
       account_number: toLocalKePhone(params.mpesaNumber),
-      // percentage_charge is deliberately NOT set here. The two live
-      // versions of Paystack's docs disagree about which side it applies
-      // to, so the split is expressed explicitly per transaction instead
-      // (see initializeSplitTransaction).
+      percentage_charge: params.platformPct,
     },
   });
+}
+
+/** Read a subaccount back, to confirm what Paystack actually stored. */
+export function fetchSubaccount(codeOrId: string) {
+  return call<Subaccount>(`/subaccount/${encodeURIComponent(codeOrId)}`);
 }
 
 export type InitializedTransaction = {
