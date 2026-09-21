@@ -143,6 +143,7 @@ export type Database = {
           ends_at: string | null;
           price_kes: number;
           capacity: number | null;
+          commission_pct: number | null;
           host_name: string | null;
           going_base: number;
           is_trending: boolean;
@@ -168,6 +169,7 @@ export type Database = {
           ends_at?: string | null;
           price_kes?: number;
           capacity?: number | null;
+          commission_pct?: number | null;
           host_name?: string | null;
           going_base?: number;
           is_trending?: boolean;
@@ -193,6 +195,7 @@ export type Database = {
           ends_at?: string | null;
           price_kes?: number;
           capacity?: number | null;
+          commission_pct?: number | null;
           host_name?: string | null;
           going_base?: number;
           is_trending?: boolean;
@@ -225,6 +228,39 @@ export type Database = {
           profile_id?: string;
           status?: string;
           payment_id?: string | null;
+        };
+        Relationships: [];
+      };
+      host_payouts: {
+        Row: {
+          profile_id: string;
+          mpesa_number: string | null;
+          settlement_bank: string;
+          paystack_subaccount_code: string | null;
+          status: string;
+          last_error: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          mpesa_number?: string | null;
+          settlement_bank?: string;
+          paystack_subaccount_code?: string | null;
+          status?: string;
+          last_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          mpesa_number?: string | null;
+          settlement_bank?: string;
+          paystack_subaccount_code?: string | null;
+          status?: string;
+          last_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -773,6 +809,10 @@ export type Database = {
           amount_kes: number;
           created_at: string;
           event_id: string | null;
+          commission_kes: number | null;
+          net_to_host_kes: number | null;
+          paystack_reference: string | null;
+          host_profile_id: string | null;
           id: string;
           mpesa_checkout_id: string | null;
           mpesa_receipt: string | null;
@@ -787,6 +827,10 @@ export type Database = {
           amount_kes: number;
           created_at?: string;
           event_id?: string | null;
+          commission_kes?: number | null;
+          net_to_host_kes?: number | null;
+          paystack_reference?: string | null;
+          host_profile_id?: string | null;
           id?: string;
           mpesa_checkout_id?: string | null;
           mpesa_receipt?: string | null;
@@ -801,6 +845,10 @@ export type Database = {
           amount_kes?: number;
           created_at?: string;
           event_id?: string | null;
+          commission_kes?: number | null;
+          net_to_host_kes?: number | null;
+          paystack_reference?: string | null;
+          host_profile_id?: string | null;
           id?: string;
           mpesa_checkout_id?: string | null;
           mpesa_receipt?: string | null;
