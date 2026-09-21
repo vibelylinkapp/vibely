@@ -23,7 +23,7 @@ const SHOW_PORTRAITS = [
   { src: "/landing/ashley.jpg", n: "Ashley, 23", d: "Online", cls: "c" },
 ];
 
-export default function SignInForm() {
+export default function SignInForm({ next = "/home" }: { next?: string }) {
   const router = useRouter();
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [mode, setMode] = useState<"in" | "up">("in");
@@ -42,7 +42,11 @@ export default function SignInForm() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        // The callback route already honours a `next` search param, so the
+        // Google path lands in the same place as email and phone.
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
     });
     if (error) {
       setMsg(error.message);
@@ -95,7 +99,7 @@ export default function SignInForm() {
         setLoading(false);
         return;
       }
-      router.push("/home");
+      router.push(next);
       router.refresh();
     }
   }
@@ -137,7 +141,7 @@ export default function SignInForm() {
       setLoading(false);
       return;
     }
-    router.push("/home");
+    router.push(next);
     router.refresh();
   }
 
