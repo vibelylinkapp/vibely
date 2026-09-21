@@ -45,54 +45,71 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, county, area, birthdate, last_active_at, avatar_url, onboarding_done, verification")
-    .eq("id", user.id)
-    .single();
+  // ---- One wave ----
+  // profile, subscription, online count, notice and the most recent
+  // verification request all key on user.id and nothing else, so none of them
+  // needs to wait for another. They used to run as three sequential stages
+  // plus a conditional fourth.
+  //
+  // That sequencing was the expensive part. Functions run in Frankfurt
+  // alongside the database (see vercel.json), but this page still issues
+  // several dependent waves, and every avoidable stage is a round trip the
+  // page cannot paint without. Four stages became one.
+  //
+  // The verification request is fetched unconditionally now. It was behind an
+  // `if (unverified)` check, which saved a query for verified members at the
+  // cost of an extra sequential stage for everyone else. Fetching it in the
+  // wave costs nothing, because it runs alongside queries we already wait for.
+  const [
+    { data: profile },
+    { data: sub },
+    { count: onlineCount },
+    { data: notice },
+    { data: vReq },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("display_name, county, area, birthdate, last_active_at, avatar_url, onboarding_done, verification")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("subscriptions")
+      .select("tier, status, expires_at")
+      .eq("profile_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("is_online", true)
+      .neq("id", user.id),
+    supabase
+      .from("announcements")
+      .select("id, body, link")
+      .eq("active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("verification_requests")
+      .select("status")
+      .eq("profile_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   if (!profile || !profile.onboarding_done) redirect("/onboarding");
 
   const now = Date.now();
-
-  // These three are independent, so fetch them in parallel rather than in three
-  // sequential round-trips: the subscription (win-back), the live "online now"
-  // count for the greeting card, and the latest active admin notice banner.
-  const [{ data: sub }, { count: onlineCount }, { data: notice }] =
-    await Promise.all([
-      supabase
-        .from("subscriptions")
-        .select("tier, status, expires_at")
-        .eq("profile_id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("is_online", true)
-        .neq("id", user.id),
-      supabase
-        .from("announcements")
-        .select("id, body, link")
-        .eq("active", true)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
 
   // Nudge unverified members to get the badge (unless a review is pending).
   const verified =
     profile.verification === "selfie" ||
     profile.verification === "national_id" ||
     profile.verification === "passport";
+  // vReq came back in the wave above, so this is pure computation now.
   let showVerifyNudge = false;
   if (!verified) {
-    const { data: vReq } = await supabase
-      .from("verification_requests")
-      .select("status")
-      .eq("profile_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
     showVerifyNudge = vReq?.status !== "pending";
   }
 
