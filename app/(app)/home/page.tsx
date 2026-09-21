@@ -16,6 +16,7 @@ import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 import AdminNotice from "@/components/AdminNotice";
 import VerifyNudge from "@/components/VerifyNudge";
 import { pickPeopleNearYou, touchLastActive } from "@/lib/discovery";
+import { buildIdf, scoreMatch } from "@/lib/matching";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,7 @@ export default async function HomePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, county, area, last_active_at, avatar_url, onboarding_done, verification")
+    .select("display_name, county, area, birthdate, last_active_at, avatar_url, onboarding_done, verification")
     .eq("id", user.id)
     .single();
 
@@ -218,7 +219,13 @@ export default async function HomePage() {
   const myLikes = new Set<string>();
   const nearMatch: Record<string, number | null> = {};
   if (nearIds.length) {
-    const [{ data: ints }, { data: likeRows }, { data: myInts }] = await Promise.all([
+    const [
+      { data: ints },
+      { data: likeRows },
+      { data: myInts },
+      { data: allIntents },
+      { count: profileCount },
+    ] = await Promise.all([
       supabase
         .from("profile_intents")
         .select("profile_id, intent")
@@ -232,17 +239,35 @@ export default async function HomePage() {
         .from("profile_intents")
         .select("intent")
         .eq("profile_id", user.id),
+      // Corpus for inverse document frequency: how common is each
+      // intent? Sharing a near-universal interest should count for far
+      // less than sharing a rare one.
+      supabase.from("profile_intents").select("intent").limit(5000),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("onboarding_done", true),
     ]);
     (ints ?? []).forEach((r) => {
       (nearIntents[r.profile_id] ??= []).push(r.intent);
     });
     (likeRows ?? []).forEach((r) => myLikes.add(r.liked_id));
-    const myIntentSet = new Set<string>((myInts ?? []).map((r) => r.intent));
+    const myIntentList = (myInts ?? []).map((r) => r.intent);
+    const idf = buildIdf(allIntents ?? [], profileCount ?? 0);
     for (const p of nearbyPeople) {
-      const shared = (nearIntents[p.id] ?? []).filter((t) =>
-        myIntentSet.has(t)
-      ).length;
-      nearMatch[p.id] = shared > 0 ? Math.min(99, 72 + shared * 9) : null;
+      nearMatch[p.id] = scoreMatch(
+        {
+          myIntents: myIntentList,
+          myBirthdate: profile.birthdate,
+          myArea: profile.area,
+          myCounty: profile.county,
+          theirIntents: nearIntents[p.id] ?? [],
+          theirBirthdate: p.birthdate,
+          theirArea: p.area,
+          theirCounty: p.county,
+        },
+        idf
+      ).score;
     }
   }
 
