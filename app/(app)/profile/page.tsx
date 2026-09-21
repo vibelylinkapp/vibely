@@ -16,6 +16,7 @@ import DeleteAccount from "@/components/DeleteAccount";
 import { effectiveTier, BOOST_QUOTA } from "@/lib/entitlements";
 import "@/app/profile-plus.css";
 import "@/app/danger-zone.css";
+import { ADMIN_PATH } from "@/lib/admin/path";
 
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
@@ -425,7 +426,7 @@ export default async function ProfilePage() {
       <section className="profile-view pf4-settings">
         <h2 className="pf4-settings-h">Account &amp; settings</h2>
 
-        <WhatsAppSetup initial={myContact?.whatsapp ?? null} />
+        <WhatsAppSetup userId={user.id} initial={myContact?.whatsapp ?? null} />
         <VerificationSetup
           userId={user.id}
           verification={profile.verification}
@@ -456,7 +457,7 @@ export default async function ProfilePage() {
             Send feedback
           </Link>
           {profile.is_admin && (
-            <Link href="/admin" className="btn-ghost">
+            <Link href={`/${ADMIN_PATH}`} className="btn-ghost">
               Admin panel
             </Link>
           )}
