@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normaliseKeNumber } from "@/lib/phone";
 import { createSubaccount, paystackConfigured } from "@/lib/paystack";
+import { DEFAULT_COMMISSION_PCT } from "@/lib/commission";
 
 export type PayoutResult = {
   ok: boolean;
@@ -53,6 +54,8 @@ export async function savePayoutNumber(raw: string): Promise<PayoutResult> {
   const res = await createSubaccount({
     businessName: profile?.display_name || "Vibely host",
     mpesaNumber: normalised,
+    // Paystack requires this, and reads it as the platform's cut.
+    platformPct: DEFAULT_COMMISSION_PCT,
   });
 
   if (!res.ok || !res.data?.subaccount_code) {
@@ -82,9 +85,21 @@ export async function savePayoutNumber(raw: string): Promise<PayoutResult> {
     { onConflict: "profile_id" }
   );
 
+  // Echo back the figure Paystack actually stored rather than the one we
+  // sent. If the percentage_charge semantics are inverted from what the
+  // API reference states, this is where it becomes visible -- before any
+  // real ticket money moves.
+  const storedPct = res.data.percentage_charge;
+  const pctNote =
+    typeof storedPct === "number"
+      ? ` Paystack recorded a ${storedPct}% platform commission, so you keep ${
+          100 - storedPct
+        }%.`
+      : "";
+
   return {
     ok: true,
-    message: "Payouts are set up. Ticket money will come straight to you.",
+    message: `Payouts are set up. Ticket money will come straight to you.${pctNote}`,
     status: "active",
   };
 }
