@@ -71,6 +71,69 @@ error they triggered — not from a heuristic.
 
 ---
 
+## Verifying a claim without inventing one
+
+Grep is how most root causes in this repository were found, and it is also how
+two fabricated "critical findings" were nearly reported. Both were caught only
+by reading the code the pattern had matched. Treat a grep hit as a candidate to
+verify, never as a conclusion.
+
+### `.from("x")` is two different APIs
+
+`supabase.from("x")` reads a **database table**. `supabase.storage.from("x")`
+reads a **storage bucket**. A pattern matching `.from("...")` alone catches both
+and cannot tell them apart.
+
+That produced a report that the `verifications` table was missing and the admin
+verification queue was broken. It was not. The page queries the
+`verification_requests` table, and `verifications` is the private storage bucket
+holding selfies, created in `0007_verification.sql`. Nothing was wrong.
+
+Match the receiver, not just the method: grep `storage\.from\(` separately, or
+include the preceding characters.
+
+### One RLS pattern does not prove RLS is absent
+
+`alter table ... enable row level security` appears with varying whitespace and
+line breaks across 52 migrations. A single-line pattern missed most of them and
+suggested 13 tables had no row-level security, including `messages`, `payments`
+and `profiles`.
+
+A whitespace-tolerant check found 39 statements for 39 tables: RLS is enabled
+everywhere. The real finding was far narrower and far less alarming - three
+tables have RLS with no policies.
+
+Before reporting a table as unprotected, cross-check it against `create policy`
+for that same table. Policies only take effect when RLS is on, so their presence
+contradicts the claim.
+
+### Reading the Supabase tooling's replies
+
+The row-count tool distinguishes these, and the difference matters:
+
+- `count: 0`, no error - the table **exists and is empty**.
+- `count: null`, no error - the query **did not resolve**. Usually the table does
+  not exist, or it sits outside the exposed schema. `auth.users` returns this,
+  because PostgREST does not expose the `auth` schema.
+
+Do not read `null` as zero. It means "no answer", not "no rows".
+
+### Probing for a column on an empty table
+
+Selecting from an empty table returns `[]` and reveals nothing about its
+columns. To test whether a column exists, **order by it**: a missing column
+fails with PostgreSQL error `42703`, and that works regardless of row count.
+That is how every column the admin moderation actions write was confirmed
+present while `reports`, `announcements`, `admin_actions` and
+`verification_requests` were all empty.
+
+### Say which kind of check you ran
+
+"The query resolves and the columns exist" is a different claim from "the flow
+works". `admin_actions` holding zero rows means no moderation action has ever
+executed, however well the pages render. State that difference rather than
+letting a passing static check imply a passing flow.
+
 ## Building and verifying
 
 ```bash
@@ -98,7 +161,7 @@ wasted more time than any other single issue.
 - After **every** file write, repair at the byte level:
   `data.replace(bytes([92, 33]), bytes([33]))`.
 - To search for text containing `!`, build the literal with `chr(33)`.
-- Audit with `grep -c '\\!' file` and expect zero.
+- Audit with `grep -c '\!' file` and expect zero.
 
 String `.replace()` on the text does not reliably fix it. Byte-level repair
 does.

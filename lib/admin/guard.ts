@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ADMIN_PATH } from "@/lib/admin/path";
 
 // Ensures the current user is a signed-in admin. Redirects otherwise.
 // Admin access is granted by EITHER the profiles.is_admin flag OR an email in
@@ -10,7 +11,7 @@ export async function requireAdmin() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect(`/sign-in?next=${encodeURIComponent(`/${ADMIN_PATH}`)}`);
 
   const allowlist = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
