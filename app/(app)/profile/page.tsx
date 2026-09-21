@@ -7,6 +7,7 @@ import ShareProfile from "@/components/ShareProfile";
 import CoverPhoto from "@/components/CoverPhoto";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import WhatsAppSetup from "@/components/WhatsAppSetup";
+import PayoutSetup from "@/components/PayoutSetup";
 import VerificationSetup from "@/components/VerificationSetup";
 import BoostButton from "@/components/BoostButton";
 import PushSetup from "@/components/PushSetup";
@@ -175,8 +176,12 @@ export default async function ProfilePage() {
 
   // These account/settings lookups are independent of each other, so run them
   // together instead of three sequential round-trips.
-  const [{ data: myContact }, { data: verifReq }, { data: activeBoost }] =
-    await Promise.all([
+  const [
+    { data: myContact },
+    { data: verifReq },
+    { data: activeBoost },
+    { data: myPayout },
+  ] = await Promise.all([
       supabase
         .from("member_contacts")
         .select("whatsapp")
@@ -196,6 +201,11 @@ export default async function ProfilePage() {
         .gt("expires_at", nowIso)
         .order("expires_at", { ascending: false })
         .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("host_payouts")
+        .select("mpesa_number, status")
+        .eq("profile_id", user.id)
         .maybeSingle(),
     ]);
 
@@ -427,6 +437,10 @@ export default async function ProfilePage() {
         <h2 className="pf4-settings-h">Account &amp; settings</h2>
 
         <WhatsAppSetup initial={myContact?.whatsapp ?? null} />
+        <PayoutSetup
+          initialNumber={myPayout?.mpesa_number ?? null}
+          initialStatus={myPayout?.status ?? null}
+        />
         <VerificationSetup
           userId={user.id}
           verification={profile.verification}
