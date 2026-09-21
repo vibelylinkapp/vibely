@@ -347,3 +347,24 @@
   opacity: 1;
   color: #ff8a8a;
 }
+
+
+/* ------------------------------------------------------------------
+   12. Trending rail: show TWO whole cards on a phone
+
+   Section 10 let the rail bleed to the screen edge so the row no
+   longer looked sliced, but .placecard is a fixed 190px and the gap
+   is 12px, so on a 360px screen two cards need 392px of a 328px
+   row -- the second card was still cut in half. A rail whose second
+   card is always cut reads as broken rather than scrollable.
+
+   Sizing the card off the row instead of a fixed px fits exactly
+   two whole cards with ~20px of the third peeking in, which is the
+   affordance that says "scroll me".
+   ------------------------------------------------------------------ */
+@media (max-width: 592px) {
+  .placecard {
+    width: auto;
+    flex: 0 0 calc(50% - 16px);
+  }
+}
