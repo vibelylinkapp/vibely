@@ -263,67 +263,31 @@
   }
 }
 
-/* ------------------------------------------------------------
-   7. Section headings: "See all" jammed against the title
-
-   .sec is `display:flex; justify-content:space-between` with
-   `margin: 18px auto 10px`. Its parents (.home-pnear, and the
-   other rails) are `display:flex; flex-direction:column`. Auto
-   margins on a flex item's cross axis override align-items:
-   stretch, so .sec shrink-wrapped to its content and centred -
-   leaving space-between with no free space to distribute. The
-   result was "People near youSee all" with no gap at all.
-
-   Giving it an explicit width restores the stretch, so the link
-   sits at the right edge where it belongs. The gap is a floor so
-   the two can never touch even when a title runs long.
-   ------------------------------------------------------------ */
-.sec {
-  width: 100%;
-  gap: 12px;
-}
 
 /* ------------------------------------------------------------
-   8. Profile cover bled left but not right
+   10. Trending rail on Events looked cut off on the right.
 
-   .pf3 .pf3-cover sets `width: 100%`. Fix 4 above bleeds it past
-   the page gutter with `margin: 0 -16px`, but a negative margin
-   shifts a fixed-width box without widening it: the cover began
-   16px past the left edge and ended 16px short of the right,
-   which read as unbalanced padding on the right.
+   .hscroll is a horizontal scroller with `max-width: 560px;
+   margin: 0 auto`, sitting inside .feed-wrap's 16px gutter. On a
+   360px screen the rail ends exactly at the gutter, so the second
+   card is sliced straight down its edge with no visual cue that
+   the row scrolls. It reads as broken layout rather than as more
+   content.
 
-   `width: auto` lets the used width resolve to the containing
-   block plus both negative margins, so it bleeds evenly. The
-   selector carries an extra class because profile-plus.css is
-   imported per-page and would otherwise win the tie.
+   Letting the rail bleed to the true screen edge, while keeping
+   the first card aligned to the gutter via padding, is the
+   standard mobile pattern: the next card is visibly peeking in
+   from off-screen, which reads as "scroll me". scroll-padding
+   keeps snapped cards aligned to the gutter rather than the
+   bleeding edge.
    ------------------------------------------------------------ */
-.detail-wrap.pf3 .pf3-cover {
-  width: auto;
-}
-
-
-/* ------------------------------------------------------------
-   9. "People near you" cards are too narrow, with dead space
-   either side of the grid.
-
-   Same root cause as fix 8, on the sibling element. globals.css
-   sets `.home-pnear { display: flex; flex-direction: column }`
-   and home-plus.css sets `.pnear-grid2 { margin: 0 auto }`.
-   Auto margins on a flex item's cross axis override
-   `align-items: stretch`, so the grid shrink-wraps to its
-   max-content width and centres itself instead of filling the
-   row. The 1fr columns then divide that shrunken width, giving
-   ~120px cards with a large empty gutter on each side.
-
-   This was masked until tonight: while the appbar overflowed,
-   the row was wider than the viewport, so the shrink-to-fit
-   width resolved larger and the cards looked correct. Fixing
-   the overflow exposed the real width.
-
-   `width: 100%` restores the stretch so the columns divide the
-   full content box. max-width: 470px still centres it on
-   desktop; this only changes the constrained mobile case.
-   ------------------------------------------------------------ */
-.pnear-grid2 {
-  width: 100%;
+@media (max-width: 592px) {
+  .hscroll {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    scroll-padding-left: 16px;
+    max-width: none;
+  }
 }
