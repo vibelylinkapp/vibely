@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -53,10 +53,22 @@ const TABS: { href: string; label: string; key: TabKey }[] = [
   { href: "/profile", label: "Profile", key: "profile" },
 ];
 
+/**
+ * Routes that deliberately have no tab bar. Before the shared layout each
+ * page opted IN by rendering the bar itself, so these three simply never
+ * did. Now that the shell renders it once, they opt out here instead --
+ * same result, one place to look.
+ */
+const NAV_HIDDEN_EXACT = new Set(["/onboarding"]);
+const NAV_HIDDEN_DETAIL = /^\/(messages|events)\/[^/]+$/;
+
+function navHidden(pathname: string): boolean {
+  return NAV_HIDDEN_EXACT.has(pathname) || NAV_HIDDEN_DETAIL.test(pathname);
+}
+
 export default function BottomNav() {
   const path = usePathname();
   const [unread, setUnread] = useState(0);
-  const supabase = useRef(createClient()).current;
 
   const refetch = useCallback(async () => {
     try {
@@ -84,6 +96,13 @@ export default function BottomNav() {
   }, [refetch]);
 
   useEffect(() => {
+    // Created HERE rather than during render. This component now lives in
+    // the signed-in layout, and layouts are prerendered, so a render-time
+    // createClient() would construct a browser Supabase client on the
+    // server for every signed-in page -- and fail outright at build time
+    // wherever NEXT_PUBLIC_SUPABASE_* is absent. The client is only needed
+    // for this realtime subscription, so it belongs in the effect.
+    const supabase = createClient();
     const channel = supabase
       .channel("nav-unread")
       .on(
@@ -95,7 +114,11 @@ export default function BottomNav() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, refetch]);
+  }, [refetch]);
+
+  // Must sit below every hook above: bailing out earlier would change hook
+  // order between routes and crash React.
+  if (navHidden(path)) return null;
 
   const isActive = (href: string) =>
     path === href || path.startsWith(href + "/");

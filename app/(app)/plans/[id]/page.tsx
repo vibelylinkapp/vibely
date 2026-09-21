@@ -1,7 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import JoinPlanButton from "@/components/JoinPlanButton";
 
 export const dynamic = "force-dynamic";
@@ -175,7 +174,6 @@ export default async function PlanDetailPage({
         </div>
       </section>
 
-      <BottomNav />
     </main>
   );
 }

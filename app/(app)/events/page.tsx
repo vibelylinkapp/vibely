@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import EventCard, { EventCardData } from "@/components/EventCard";
 import EventForm from "@/components/EventForm";
 
@@ -113,7 +112,6 @@ export default async function EventsPage() {
         </div>
       )}
 
-      <BottomNav />
     </main>
   );
 }

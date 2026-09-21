@@ -1,7 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import PostComments from "@/components/PostComments";
 
@@ -117,7 +116,6 @@ export default async function PostDetailPage({
         />
       </div>
 
-      <BottomNav />
     </main>
   );
 }

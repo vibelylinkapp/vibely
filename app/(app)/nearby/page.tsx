@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import NearbyExplorer from "@/components/NearbyExplorer";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +33,6 @@ export default async function NearbyPage() {
         </Link>
       </div>
       <NearbyExplorer meId={user.id} />
-      <BottomNav />
     </main>
   );
 }

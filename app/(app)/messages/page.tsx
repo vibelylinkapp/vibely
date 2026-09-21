@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import MatchRow from "@/components/MatchRow";
 
 export const dynamic = "force-dynamic";
@@ -187,7 +186,6 @@ export default async function MessagesPage() {
         </p>
       )}
 
-      <BottomNav />
     </main>
   );
 }

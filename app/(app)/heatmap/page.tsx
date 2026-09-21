@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import Heatmap from "@/components/Heatmap";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +33,6 @@ export default async function HeatmapPage() {
         </Link>
       </div>
       <Heatmap />
-      <BottomNav />
     </main>
   );
 }

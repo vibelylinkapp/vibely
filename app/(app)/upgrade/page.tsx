@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import UpgradeTiers from "@/components/UpgradeTiers";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +30,6 @@ export default async function UpgradePage() {
         currentStatus={sub?.status ?? "active"}
         expiresAt={sub?.expires_at ?? null}
       />
-      <BottomNav />
     </main>
   );
 }

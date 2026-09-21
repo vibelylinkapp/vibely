@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import Stories from "@/components/Stories";
 import MessagesBell from "@/components/MessagesBell";
 import { FEATURES } from "@/lib/features";
@@ -662,7 +661,6 @@ export default async function HomePage() {
         </div>
       )}
 
-      <BottomNav />
     </main>
   );
 }

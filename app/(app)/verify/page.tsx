@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import VerificationSetup from "@/components/VerificationSetup";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +73,6 @@ export default async function VerifyPage() {
         rejectedNote={verifReq?.status === "rejected" ? verifReq.note : null}
       />
 
-      <BottomNav />
     </main>
   );
 }

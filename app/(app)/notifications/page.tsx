@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import NotificationsView, { NotifRow } from "@/components/NotificationsView";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +59,6 @@ export default async function NotificationsPage() {
         <span className="feed-title">Notifications</span>
       </div>
       <NotificationsView initial={rows} />
-      <BottomNav />
     </main>
   );
 }

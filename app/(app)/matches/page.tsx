@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import ProfileCard from "@/components/ProfileCard";
 import WhatsAppShare from "@/components/WhatsAppShare";
 
@@ -131,7 +130,6 @@ export default async function MatchesPage() {
         </>
       )}
 
-      <BottomNav />
     </main>
   );
 }

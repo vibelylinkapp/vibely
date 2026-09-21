@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import BottomNav from "@/components/BottomNav";
 import FeedbackForm from "@/components/FeedbackForm";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +40,6 @@ export default async function FeedbackPage() {
 
       <FeedbackForm userId={user.id} />
 
-      <BottomNav />
     </main>
   );
 }
