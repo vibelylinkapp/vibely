@@ -15,6 +15,7 @@ import FeedLoadMore from "@/components/FeedLoadMore";
 import { getFeedPage, FEED_PAGE_SIZE } from "@/lib/feed";
 import AdminNotice from "@/components/AdminNotice";
 import VerifyNudge from "@/components/VerifyNudge";
+import { pickPeopleNearYou, touchLastActive } from "@/lib/discovery";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,7 @@ export default async function HomePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, county, avatar_url, onboarding_done, verification")
+    .select("display_name, county, area, last_active_at, avatar_url, onboarding_done, verification")
     .eq("id", user.id)
     .single();
 
@@ -171,22 +172,21 @@ export default async function HomePage() {
   const ciNow = new Date().toISOString();
 
   const [
-    { data: nearbyRows },
+    nearbyPeople,
     feedPage,
     { data: trendRows },
     { data: ciRows },
   ] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select(
-        "id, display_name, avatar_url, area, county, is_online, birthdate, is_verified"
-      )
-      .eq("onboarding_done", true)
-      .eq("is_private", false)
-      .eq("invisible_mode", false)
-      .neq("id", user.id)
-      .order("last_active_at", { ascending: false, nullsFirst: false })
-      .limit(18),
+    // Ranked + shuffled candidate pool. Replaces an ORDER BY on
+    // last_active_at, which nothing outside the seed migrations ever
+    // wrote, so the same eight demo profiles led the rail on every
+    // reload and real members were unreachable.
+    pickPeopleNearYou(supabase, user.id, {
+      limit: 8,
+      blocked,
+      viewerArea: profile.area,
+      viewerCounty: profile.county,
+    }),
     getFeedPage(supabase, user.id, { limit: FEED_PAGE_SIZE }),
     supabase
       .from("events")
@@ -204,13 +204,13 @@ export default async function HomePage() {
       .gt("expires_at", ciNow)
       .order("created_at", { ascending: false })
       .limit(15),
+    // Keep last_active_at truthful so the ranking above has a real
+    // signal to work with. Throttled inside the helper.
+    touchLastActive(supabase, user.id, profile.last_active_at),
   ]);
 
   const { items: feedItems, nextCursor: feedNextCursor } = feedPage;
 
-  const nearbyPeople = (nearbyRows ?? [])
-    .filter((p) => !blocked.has(p.id))
-    .slice(0, 8);
 
   // Interest tags + my existing likes for the People-near-you cards.
   const nearIds = nearbyPeople.map((p) => p.id);
