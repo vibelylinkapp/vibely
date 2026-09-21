@@ -29,6 +29,7 @@ export default async function AdminLayout({
           <Link href={`${base}/events`}>Events</Link>
           <Link href={`${base}/announcements`}>Announcements</Link>
           <Link href={`${base}/feedback`}>Feedback</Link>
+          <Link href={`${base}/paystack-check`}>Paystack check</Link>
           <Link href="/home">Back to app</Link>
         </nav>
       </aside>
