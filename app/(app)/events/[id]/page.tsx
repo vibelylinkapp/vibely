@@ -5,6 +5,7 @@ import EventBookButton from "@/components/EventBookButton";
 import EventForm, { ExistingEvent } from "@/components/EventForm";
 import EventModerationBar from "@/components/EventModerationBar";
 import { compactCount } from "@/lib/format";
+import { KE_TZ } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ function fmtDate(iso: string | null): string {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: KE_TZ,
   });
 }
 function fmtTime(iso: string | null): string {
@@ -22,6 +24,7 @@ function fmtTime(iso: string | null): string {
   return new Date(iso).toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: KE_TZ,
   });
 }
 function fmtPrice(kes: number): string {

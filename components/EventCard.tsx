@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { compactCount } from "@/lib/format";
+import { compactCount, KE_TZ } from "@/lib/format";
 
 export type EventCardData = {
   id: string;
@@ -23,9 +23,14 @@ function fmtWhen(iso: string | null): string {
       weekday: "short",
       day: "numeric",
       month: "short",
+      timeZone: KE_TZ,
     }) +
     " \u00b7 " +
-    d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+    d.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: KE_TZ,
+    })
   );
 }
 

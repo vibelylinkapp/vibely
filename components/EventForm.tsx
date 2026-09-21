@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import CoverUpload from "./CoverUpload";
@@ -134,6 +135,14 @@ export default function EventForm({
     router.push(`/events/${ev.id}`);
   }
 
+  // The trigger lives inside .feed-head, which has a backdrop-filter. That
+  // makes the header the containing block for position:fixed descendants, so
+  // the overlay's inset:0 resolved to the ~72px header instead of the
+  // viewport -- the dialog was clipped to a sliver and the page painted over
+  // it. Portalling to <body> puts it back in the viewport's coordinate space.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <>
       <button
@@ -144,7 +153,7 @@ export default function EventForm({
         {triggerContent ?? triggerLabel ?? "Create an event"}
       </button>
 
-      {open && (
+      {open && mounted && createPortal(
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>{existing ? "Edit event" : "Create an event"}</h3>
@@ -286,7 +295,8 @@ export default function EventForm({
             </div>
             {error && <p className="auth-msg">{error}</p>}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

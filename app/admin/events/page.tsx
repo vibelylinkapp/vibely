@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import EventModerationBar from "@/components/EventModerationBar";
+import { KE_TZ } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,7 @@ function fmt(iso: string | null): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: KE_TZ,
   });
 }
 
