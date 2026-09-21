@@ -70,6 +70,11 @@ export default function EventForm({
   );
   const [image, setImage] = useState(existing?.image_url ?? "");
   const [description, setDescription] = useState(existing?.description ?? "");
+  // Attendees who have paid need a way to reach the organizer: ticket money
+  // settles straight to the organizer, so we cannot refund it for them and
+  // contacting the organizer is their only remedy.
+  const [organizerEmail, setOrganizerEmail] = useState("");
+  const [organizerPhone, setOrganizerPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,6 +82,15 @@ export default function EventForm({
     if (!title.trim()) {
       setError("Give your event a title.");
       return;
+    }
+    const priceNum = price ? Math.max(0, Math.round(Number(price))) : 0;
+    if (priceNum > 0) {
+      if (!organizerEmail.trim() || !organizerPhone.trim()) {
+        setError(
+          "Paid events need an email and phone number so ticket holders can reach you."
+        );
+        return;
+      }
     }
     setBusy(true);
     setError(null);
@@ -126,6 +140,17 @@ export default function EventForm({
       setError(iErr?.message ?? "Could not create the event.");
       setBusy(false);
       return;
+    }
+    if (organizerEmail.trim() || organizerPhone.trim()) {
+      await supabase.from("event_organizer_contacts").upsert(
+        {
+          event_id: ev.id,
+          email: organizerEmail.trim() || null,
+          phone: organizerPhone.trim() || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "event_id" }
+      );
     }
     await supabase
       .from("event_bookings")
@@ -276,6 +301,34 @@ export default function EventForm({
                 onChange={(e) => setDescription(e.target.value)}
               />
             </label>
+            <div className="fld-sec">Contact for attendees</div>
+            <label className="fld">
+              <span className="fld-l">Your email</span>
+              <input
+                className="modal-input"
+                type="email"
+                inputMode="email"
+                placeholder="you@example.com"
+                value={organizerEmail}
+                onChange={(e) => setOrganizerEmail(e.target.value)}
+              />
+            </label>
+            <label className="fld">
+              <span className="fld-l">Your phone</span>
+              <input
+                className="modal-input"
+                type="tel"
+                inputMode="numeric"
+                placeholder="07xx xxx xxx"
+                value={organizerPhone}
+                onChange={(e) => setOrganizerPhone(e.target.value)}
+              />
+            </label>
+            <p className="mpesa-note">
+              Shared only with people who hold a confirmed ticket, so they can
+              reach you if plans change. Required for paid events.
+            </p>
+
             <div className="modal-actions">
               <button
                 type="button"

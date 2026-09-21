@@ -50,7 +50,12 @@ export default async function EventDetail({
     .single();
   if (!e) notFound();
 
-  const [{ count }, { data: mine }, { data: me }] = await Promise.all([
+  const [
+    { count },
+    { data: mine },
+    { data: me },
+    { data: organizerContact },
+  ] = await Promise.all([
     supabase
       .from("event_bookings")
       .select("*", { count: "exact", head: true })
@@ -62,6 +67,14 @@ export default async function EventDetail({
       .eq("profile_id", user.id)
       .maybeSingle(),
     supabase.from("profiles").select("is_admin").eq("id", user.id).single(),
+    // Entitlement is enforced by RLS, not here: this returns a row only for
+    // the organizer, a member holding a CONFIRMED ticket, or an admin. A
+    // pending (unpaid) booking gets nothing.
+    supabase
+      .from("event_organizer_contacts")
+      .select("email, phone")
+      .eq("event_id", id)
+      .maybeSingle(),
   ]);
 
   const going = (count ?? 0) + e.going_base;
@@ -144,6 +157,38 @@ export default async function EventDetail({
             </div>
           </div>
         )}
+
+        {organizerContact &&
+        (organizerContact.email || organizerContact.phone) ? (
+          <div className="metabox">
+            <div className="ic">&#9742;</div>
+            <div>
+              <b>Organizer contact</b>
+              {organizerContact.email ? (
+                <small>
+                  <a href={`mailto:${organizerContact.email}`}>
+                    {organizerContact.email}
+                  </a>
+                </small>
+              ) : null}
+              {organizerContact.phone ? (
+                <small>
+                  <a href={`tel:${organizerContact.phone}`}>
+                    {organizerContact.phone}
+                  </a>
+                </small>
+              ) : null}
+            </div>
+          </div>
+        ) : e.price_kes > 0 ? (
+          <div className="metabox">
+            <div className="ic">&#9742;</div>
+            <div>
+              <b>Organizer contact</b>
+              <small>Shared as soon as your ticket is confirmed.</small>
+            </div>
+          </div>
+        ) : null}
 
         <div className="ev-going">
           <b>{compactCount(going)}</b> going

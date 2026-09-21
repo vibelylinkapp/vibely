@@ -231,6 +231,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      event_organizer_contacts: {
+        Row: {
+          event_id: string;
+          email: string | null;
+          phone: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          event_id: string;
+          email?: string | null;
+          phone?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          event_id?: string;
+          email?: string | null;
+          phone?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       host_payouts: {
         Row: {
           profile_id: string;

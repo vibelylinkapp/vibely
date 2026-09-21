@@ -26,6 +26,8 @@ type Row = {
   created_at: string;
 };
 
+type Contact = { email: string | null; phone: string | null } | null;
+
 function fmt(iso: string | null): string {
   if (!iso) return "Date TBA";
   return new Date(iso).toLocaleString("en-GB", {
@@ -38,7 +40,13 @@ function fmt(iso: string | null): string {
   });
 }
 
-function Card({ e }: { e: Row }) {
+function Card({ e, contact }: { e: Row; contact: Contact }) {
+  // Terms section 12: a paid event must carry an organizer email and phone
+  // before it is published, because ticket money settles straight to the
+  // organizer and contacting them is the buyer's only route to a refund.
+  const needsContact = e.price_kes > 0;
+  const hasContact = Boolean(contact?.email || contact?.phone);
+  const contactMissing = needsContact && !hasContact;
   return (
     <div className="modq-card">
       <div className="modq-main">
@@ -59,6 +67,28 @@ function Card({ e }: { e: Row }) {
             : "Free"}{" "}
           {"\u00b7"} Host {e.host_name ?? "\u2014"}
         </div>
+        <div className="modq-meta">
+          {"Organizer contact: "}
+          {hasContact ? (
+            <>
+              {contact?.email ? contact.email : "\u2014"}
+              {" \u00b7 "}
+              {contact?.phone ? contact.phone : "\u2014"}
+            </>
+          ) : needsContact ? (
+            "missing"
+          ) : (
+            "none (free event)"
+          )}
+        </div>
+        {contactMissing && (
+          <div className="modq-reason">
+            Paid event with no organizer contact. Terms section 12 requires an
+            email and phone before a paid event is published, and section 15
+            makes the organizer solely responsible for refunds. Do not publish
+            until this is supplied.
+          </div>
+        )}
         {e.rejected_reason && (
           <div className="modq-reason">Rejected: {e.rejected_reason}</div>
         )}
@@ -93,6 +123,20 @@ export default async function AdminEventsPage() {
   const pending = (pendingRows ?? []) as Row[];
   const recent = (recentRows ?? []) as Row[];
 
+  // Organizer contact details for everything on screen, so a reviewer can
+  // check them without opening each event.
+  const ids = Array.from(new Set([...pending, ...recent].map((e) => e.id)));
+  const contacts: Record<string, Contact> = {};
+  if (ids.length) {
+    const { data: crows } = await admin
+      .from("event_organizer_contacts")
+      .select("event_id, email, phone")
+      .in("event_id", ids);
+    (crows ?? []).forEach((c) => {
+      contacts[c.event_id] = { email: c.email, phone: c.phone };
+    });
+  }
+
   return (
     <div>
       <h1 className="admin-h1">Event moderation</h1>
@@ -102,7 +146,7 @@ export default async function AdminEventsPage() {
         {pending.length ? (
           <div className="modq-list">
             {pending.map((e) => (
-              <Card key={e.id} e={e} />
+              <Card key={e.id} e={e} contact={contacts[e.id] ?? null} />
             ))}
           </div>
         ) : (
@@ -115,7 +159,7 @@ export default async function AdminEventsPage() {
         {recent.length ? (
           <div className="modq-list">
             {recent.map((e) => (
-              <Card key={e.id} e={e} />
+              <Card key={e.id} e={e} contact={contacts[e.id] ?? null} />
             ))}
           </div>
         ) : (
