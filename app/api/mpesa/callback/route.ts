@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
     const { data: pay } = await admin
       .from("payments")
-      .select("id, profile_id, tier, status")
+      .select("id, profile_id, tier, status, event_id")
       .eq("mpesa_checkout_id", checkoutId)
       .maybeSingle();
 
@@ -80,11 +80,34 @@ export async function POST(req: Request) {
             })
             .eq("profile_id", pay.profile_id);
         }
+
+        // Event ticket: the seat was held as pending_payment by
+        // /api/events/stkpush. Safaricom has now confirmed, so the ticket
+        // becomes real. This is the only path that can confirm a paid
+        // booking -- the browser is blocked from doing it by RLS.
+        if (pay.profile_id && pay.event_id) {
+          await admin
+            .from("event_bookings")
+            .update({ status: "confirmed", payment_id: pay.id })
+            .eq("event_id", pay.event_id)
+            .eq("profile_id", pay.profile_id);
+        }
       } else {
         await admin
           .from("payments")
           .update({ status: "failed", raw_callback: payload })
           .eq("id", pay.id);
+
+        // Payment failed or was cancelled: release the held seat so the
+        // event does not silently fill up with unpaid holds.
+        if (pay.profile_id && pay.event_id) {
+          await admin
+            .from("event_bookings")
+            .delete()
+            .eq("event_id", pay.event_id)
+            .eq("profile_id", pay.profile_id)
+            .eq("status", "pending_payment");
+        }
       }
     }
   }

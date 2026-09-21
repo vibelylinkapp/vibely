@@ -205,9 +205,27 @@ export type Database = {
         Relationships: [];
       };
       event_bookings: {
-        Row: { created_at: string; event_id: string; profile_id: string };
-        Insert: { created_at?: string; event_id: string; profile_id: string };
-        Update: { created_at?: string; event_id?: string; profile_id?: string };
+        Row: {
+          created_at: string;
+          event_id: string;
+          profile_id: string;
+          status: string;
+          payment_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          event_id: string;
+          profile_id: string;
+          status?: string;
+          payment_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          event_id?: string;
+          profile_id?: string;
+          status?: string;
+          payment_id?: string | null;
+        };
         Relationships: [];
       };
       member_contacts: {
@@ -754,6 +772,7 @@ export type Database = {
         Row: {
           amount_kes: number;
           created_at: string;
+          event_id: string | null;
           id: string;
           mpesa_checkout_id: string | null;
           mpesa_receipt: string | null;
@@ -767,6 +786,7 @@ export type Database = {
         Insert: {
           amount_kes: number;
           created_at?: string;
+          event_id?: string | null;
           id?: string;
           mpesa_checkout_id?: string | null;
           mpesa_receipt?: string | null;
@@ -780,6 +800,7 @@ export type Database = {
         Update: {
           amount_kes?: number;
           created_at?: string;
+          event_id?: string | null;
           id?: string;
           mpesa_checkout_id?: string | null;
           mpesa_receipt?: string | null;

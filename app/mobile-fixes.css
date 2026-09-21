@@ -291,3 +291,59 @@
     max-width: none;
   }
 }
+
+
+/* ------------------------------------------------------------------
+   11. M-Pesa ticket checkout (event detail)
+   The paid-ticket flow replaces the single "Get ticket" button with a
+   phone field + Pay button. It has to sit inside the same sticky action
+   row as the old button, so it stretches rather than shrink-wrapping.
+   ------------------------------------------------------------------ */
+.mpesa-pay {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mpesa-label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+.mpesa-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.mpesa-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-size: 16px; /* 16px stops iOS Safari zooming on focus */
+}
+.mpesa-input:disabled {
+  opacity: 0.6;
+}
+.mpesa-go {
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+.mpesa-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.7;
+}
+.mpesa-note.err {
+  opacity: 1;
+  color: #ff8a8a;
+}
