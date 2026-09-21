@@ -243,26 +243,31 @@ export default async function DiscoverPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  // My outgoing WhatsApp requests, so each card renders the right state
-  // without a round trip per card. One small query for the whole grid.
   type WaStatus = "none" | "pending" | "approved" | "declined";
-  const { data: waOutRows } = await supabase
-    .from("contact_requests")
-    .select("target_id, status")
-    .eq("requester_id", user.id);
-  const waOutMap = new Map<string, WaStatus>(
-    (waOutRows ?? []).map((r) => [r.target_id, r.status as WaStatus])
-  );
-
   const nowIso = new Date().toISOString();
 
+  // ---- Wave 1 ----
+  // Everything here keys on user.id or on the querystring, so nothing needs
+  // to wait for anything else. Two of these used to be their own sequential
+  // stages: the outgoing WhatsApp requests ran before this wave, and the
+  // intent filter ran after it.
+  //
+  // The intent filter stays conditional rather than always firing, because
+  // "all" is not a real intent and querying for it would return nothing
+  // useful. Promise.resolve keeps the tuple shape stable either way.
   const [
+    { data: waOutRows },
     { data: blockedRows },
     { data: likedRows },
     { data: boostRows },
     { data: meProfile },
     { data: eventRows },
+    { data: intentFilterRows },
   ] = await Promise.all([
+    supabase
+      .from("contact_requests")
+      .select("target_id, status")
+      .eq("requester_id", user.id),
     supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
     supabase.from("likes").select("liked_id").eq("liker_id", user.id),
     supabase.from("boosts").select("profile_id").gt("expires_at", nowIso),
@@ -280,7 +285,19 @@ export default async function DiscoverPage({
       .gte("starts_at", nowIso)
       .order("starts_at", { ascending: true })
       .limit(24),
+    active === "all"
+      ? Promise.resolve({ data: null as { profile_id: string }[] | null })
+      : supabase
+          .from("profile_intents")
+          .select("profile_id")
+          .eq("intent", active as Intent),
   ]);
+
+  // Each card renders its own WhatsApp state from this map rather than
+  // issuing a round trip per card.
+  const waOutMap = new Map<string, WaStatus>(
+    (waOutRows ?? []).map((r) => [r.target_id, r.status as WaStatus])
+  );
   const excludeIds = new Set<string>([
     ...(blockedRows ?? []).map((b) => b.blocked_id),
     ...(likedRows ?? []).map((l) => l.liked_id),
@@ -288,20 +305,21 @@ export default async function DiscoverPage({
   const boostedSet = new Set<string>((boostRows ?? []).map((b) => b.profile_id));
   boostedSet.delete(user.id);
 
-  let matchSet: Set<string> | null = null;
-  if (active !== "all") {
-    const { data: pi } = await supabase
-      .from("profile_intents")
-      .select("profile_id")
-      .eq("intent", active as Intent);
-    matchSet = new Set((pi ?? []).map((r) => r.profile_id));
-  }
+  // Came back in wave 1, so this is pure computation.
+  const matchSet: Set<string> | null =
+    active === "all"
+      ? null
+      : new Set((intentFilterRows ?? []).map((r) => r.profile_id));
 
   // Boosted profiles that pass the current filter — pinned to the top.
   const boostedCandidateIds = [...boostedSet].filter(
     (id) => !excludeIds.has(id) && (!matchSet || matchSet.has(id))
   );
-  const { data: boostedData } = await supabase
+  // ---- Wave 2 ----
+  // The boosted pins and the main feed both need wave 1, but neither needs
+  // the other. They were two sequential round trips for no reason. Built
+  // first, awaited together.
+  const boostedQuery = supabase
     .from("profiles")
     .select(
       "id, display_name, avatar_url, county, area, birthdate, is_online, is_verified, show_verification"
@@ -310,8 +328,6 @@ export default async function DiscoverPage({
     .eq("onboarding_done", true)
     .eq("is_private", false)
     .eq("invisible_mode", false);
-  // A text search (from Home) filters by name and skips boosted pinning.
-  const boostedProfiles = q ? [] : (boostedData ?? []);
 
   // Normal feed, most-recently-active first.
   let query = supabase
@@ -331,7 +347,13 @@ export default async function DiscoverPage({
   if (q) {
     query = query.ilike("display_name", `%${q}%`);
   }
-  const { data: feedData } = await query;
+
+  const [{ data: boostedData }, { data: feedData }] = await Promise.all([
+    boostedQuery,
+    query,
+  ]);
+  // A text search (from Home) filters by name and skips boosted pinning.
+  const boostedProfiles = q ? [] : (boostedData ?? []);
   const feedProfiles = (feedData ?? []).filter((p) => !excludeIds.has(p.id));
 
   const boostedIdSet = new Set(boostedProfiles.map((p) => p.id));
@@ -342,37 +364,39 @@ export default async function DiscoverPage({
 
   const ids = profiles.map((p) => p.id);
   const intentMap: Record<string, string[]> = {};
+  const vipSet = new Set<string>();
+  const followingSet = new Set<string>();
+
+  // ---- Wave 3 ----
+  // Card intents, VIP badges and follow state all key on the same resolved
+  // id list and nothing else. Three sequential round trips became one, each
+  // previously guarded by its own identical `if (ids.length)`.
   if (ids.length) {
-    const { data: allIntents } = await supabase
-      .from("profile_intents")
-      .select("profile_id, intent")
-      .in("profile_id", ids);
+    const [{ data: allIntents }, { data: vipRows }, { data: followRows }] =
+      await Promise.all([
+        supabase
+          .from("profile_intents")
+          .select("profile_id, intent")
+          .in("profile_id", ids),
+        supabase
+          .from("subscriptions")
+          .select("profile_id")
+          .in("profile_id", ids)
+          .eq("tier", "vip")
+          .eq("status", "active")
+          .gt("expires_at", nowIso),
+        // Own rows only, which is what counts-only RLS permits.
+        supabase
+          .from("follows")
+          .select("following_id")
+          .eq("follower_id", user.id)
+          .in("following_id", ids),
+      ]);
+
     (allIntents ?? []).forEach((r) => {
       (intentMap[r.profile_id] ??= []).push(r.intent);
     });
-  }
-
-  // VIP members get a badge on their card.
-  const vipSet = new Set<string>();
-  if (ids.length) {
-    const { data: vipRows } = await supabase
-      .from("subscriptions")
-      .select("profile_id")
-      .in("profile_id", ids)
-      .eq("tier", "vip")
-      .eq("status", "active")
-      .gt("expires_at", nowIso);
     (vipRows ?? []).forEach((r) => vipSet.add(r.profile_id));
-  }
-
-  // People the viewer already follows (own rows only, allowed under counts-only RLS).
-  const followingSet = new Set<string>();
-  if (ids.length) {
-    const { data: followRows } = await supabase
-      .from("follows")
-      .select("following_id")
-      .eq("follower_id", user.id)
-      .in("following_id", ids);
     (followRows ?? []).forEach((r) => followingSet.add(r.following_id));
   }
 

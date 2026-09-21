@@ -42,48 +42,45 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || !profile.onboarding_done) redirect("/onboarding");
-
-  const { data: intents } = await supabase
-    .from("profile_intents")
-    .select("intent")
-    .eq("profile_id", user.id);
-
-  const { data: myHighlights } = await supabase
-    .from("highlights")
-    .select("id, title, media_url, caption")
-    .eq("profile_id", user.id)
-    .order("position", { ascending: true });
-
-  const { data: subRow } = await supabase
-    .from("subscriptions")
-    .select("tier, status, expires_at")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  const ent = effectiveTier(subRow);
-
   const nowIso = new Date().toISOString();
 
-  const [{ data: followerCountRaw }, { data: followingCountRaw }] =
-    await Promise.all([
-      supabase.rpc("follower_count", { uid: user.id }),
-      supabase.rpc("following_count", { uid: user.id }),
-    ]);
-
-  // Showcase feed data — the member's own posts / events / stories, so /profile
-  // previews exactly what the public /u/[id] page shows others.
+  // ---- One wave ----
+  // Every query here keys on user.id and nothing else: the profile itself,
+  // its intents and highlights, the subscription, both follow counts, and the
+  // showcase feed that previews what /u/[id] shows other people.
+  //
+  // They used to run as six sequential stages -- four single queries followed
+  // by two small waves -- so the page could not paint until each had waited
+  // behind the one before it. None of them ever needed that ordering.
   const [
+    { data: profile },
+    { data: intents },
+    { data: myHighlights },
+    { data: subRow },
+    { data: followerCountRaw },
+    { data: followingCountRaw },
     { data: posts },
     { count: postsCountRaw },
     { data: events },
     { data: stories },
   ] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase
+      .from("profile_intents")
+      .select("intent")
+      .eq("profile_id", user.id),
+    supabase
+      .from("highlights")
+      .select("id, title, media_url, caption")
+      .eq("profile_id", user.id)
+      .order("position", { ascending: true }),
+    supabase
+      .from("subscriptions")
+      .select("tier, status, expires_at")
+      .eq("profile_id", user.id)
+      .maybeSingle(),
+    supabase.rpc("follower_count", { uid: user.id }),
+    supabase.rpc("following_count", { uid: user.id }),
     supabase
       .from("posts")
       .select("id, media_url, caption, created_at")
@@ -112,6 +109,13 @@ export default async function ProfilePage() {
       .order("created_at", { ascending: false })
       .limit(30),
   ]);
+
+  // The guard moves below the wave. A member who still needs onboarding now
+  // costs a handful of wasted parallel queries instead of an extra round trip
+  // for everyone who does not.
+  if (!profile || !profile.onboarding_done) redirect("/onboarding");
+
+  const ent = effectiveTier(subRow);
 
   const postList = (posts ?? []).map((p) => ({
     id: p.id,
