@@ -368,3 +368,26 @@
     flex: 0 0 calc(50% - 16px);
   }
 }
+
+
+/* ------------------------------------------------------------------
+   13. Public profile cover - stop the 16px shift to the left
+
+   .pf3 .pf3-cover sets `width: 100%`, and section 4 above cancels
+   .detail-wrap's gutter on the cover with margin-left/right: -16px
+   so the hero can run full-bleed.
+
+   Those two fight each other. `width: 100%` resolves against the
+   content box (screen - 32px), so the negative margins move the box
+   16px left WITHOUT making it any wider: the cover sits flush to the
+   left edge and leaves a 16px strip of page background down the
+   right. It reads as a crooked header.
+
+   `width: auto` lets the used width be derived from the containing
+   block MINUS the (negative) margins, which is exactly the full
+   screen width the full-bleed look wants. Same root cause as the
+   .sec and .pnear-grid2 fixes: a width that ignores its own margins.
+   ------------------------------------------------------------------ */
+.detail-wrap.pf3 .pf3-cover {
+  width: auto;
+}
