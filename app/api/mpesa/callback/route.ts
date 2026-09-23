@@ -9,18 +9,33 @@ export const dynamic = "force-dynamic";
 
 type CallbackItem = { Name: string; Value?: string | number };
 
-export async function POST(req: Request) {
-  // Optional shared-secret gate. When MPESA_CALLBACK_SECRET is set, the STK
-  // push registers a callback URL carrying ?t=<secret>; reject anything that
-  // doesn't present it, so a stranger who happens to know a pending checkout
-  // id can't POST a fake "success" and self-activate a subscription. Skipped
-  // entirely when unset, so it never breaks an existing deployment.
+// True when the request presents the shared secret that the STK push embedded
+// in the callback URL as ?t=<secret>. Both push routes (mpesa/stkpush and
+// events/stkpush) append it, so a genuine Safaricom callback always carries
+// it; anything else is refused. Without this gate, a stranger who learns a
+// pending checkout id could POST a fake ResultCode 0 and self-activate a paid
+// tier or an event booking.
+//
+// This FAILS CLOSED. The check used to be wrapped in `if (expected)`, so an
+// unset or mistyped MPESA_CALLBACK_SECRET silently disabled it entirely
+// rather than refusing traffic. That is the dangerous direction for a payment
+// webhook and it is indistinguishable from working correctly -- the endpoint
+// returns exactly the same 200s either way. Same posture as the authorized()
+// helper in /api/cron/winback.
+//
+// Operational note: because this now refuses traffic when unconfigured,
+// MPESA_CALLBACK_SECRET must be present in every environment that takes
+// payments, Preview included, and must be rotated on both sides at once.
+function authorized(req: Request): boolean {
   const expected = process.env.MPESA_CALLBACK_SECRET;
-  if (expected) {
-    const token = new URL(req.url).searchParams.get("t");
-    if (token !== expected) {
-      return NextResponse.json({ ok: false }, { status: 401 });
-    }
+  if (!expected) return false;
+  return new URL(req.url).searchParams.get("t") === expected;
+}
+
+export async function POST(req: Request) {
+  // Required shared-secret gate -- see authorized() above.
+  if (!authorized(req)) {
+    return NextResponse.json({ ok: false }, { status: 401 });
   }
 
   let raw: unknown;
