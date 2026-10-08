@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Sora, Fraunces } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import "./landing-hero-plus.css";
 import "./marketing.css";
@@ -9,39 +9,42 @@ import "./discover-plus.css";
 import "./mobile-fixes.css";
 
 /**
- * Fonts are self-hosted by next/font rather than pulled from Google.
+ * Fonts are self-hosted from app/fonts rather than fetched from Google.
  *
- * This is not a preference. The Content-Security-Policy in next.config.mjs
- * sets `style-src 'self' 'unsafe-inline'` and `font-src 'self' data:`, so the
- * `@import url(https://fonts.googleapis.com/...)` that used to sit at the top
- * of globals.css was blocked in production — the stylesheet never loaded and
- * every custom face silently fell back to a system font. next/font downloads
- * the files at build time and serves them same-origin, which satisfies the
- * policy, removes a render-blocking round trip, and preloads without FOUT.
+ * Two reasons:
+ * 1. The Content-Security-Policy in next.config.mjs sets `font-src 'self'
+ *    data:`, so fonts must be served same-origin (a CSS @import from
+ *    fonts.googleapis.com was silently blocked in production).
+ * 2. next/font/google downloads the fonts from Google during every build.
+ *    When that request fails or Google returns an unexpected response, the
+ *    whole build dies with "An error occurred in `next/font`. TypeError:
+ *    Cannot read properties of null (reading '1')" - which happened on
+ *    commit c10d7fe. Local files remove the network from the build.
+ *
+ * The files are the variable "wght" latin subsets from @fontsource-variable
+ * (Plus Jakarta Sans 200-800, Sora 100-800, Fraunces 100-900), so every
+ * weight the CSS uses is still available.
  */
-const sans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+const sans = localFont({
+  src: "./fonts/plus-jakarta-sans-latin-wght-normal.woff2",
+  weight: "200 800",
+  style: "normal",
   variable: "--font-sans",
   display: "swap",
 });
 
-const display = Sora({
-  subsets: ["latin"],
-  weight: ["700", "800"],
+const display = localFont({
+  src: "./fonts/sora-latin-wght-normal.woff2",
+  weight: "100 800",
+  style: "normal",
   variable: "--font-display",
   display: "swap",
 });
 
-/**
- * Fraunces is a variable font, so it must not be pinned to a weight list.
- * next/font rejects `axes` alongside a fixed `weight` ("Axes can only be
- * defined for variable fonts when the weight property is nonexistent or set
- * to `variable`"), which broke the build. Dropping both gives the full
- * variable weight range, which is what the landing headlines want anyway.
- */
-const serif = Fraunces({
-  subsets: ["latin"],
+const serif = localFont({
+  src: "./fonts/fraunces-latin-wght-normal.woff2",
+  weight: "100 900",
+  style: "normal",
   variable: "--font-serif",
   display: "swap",
 });
