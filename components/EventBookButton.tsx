@@ -156,6 +156,7 @@ export default function EventBookButton({
           not_configured: "M-Pesa is not set up on this site yet.",
           already_booked: "You already have a ticket for this event.",
           sold_out: "This event just sold out.",
+          too_many: "Too many payment requests. Please wait 10 minutes and try again.",
         };
         setNote(msg[j.reason || ""] || "Could not start the payment. Try again.");
         return;

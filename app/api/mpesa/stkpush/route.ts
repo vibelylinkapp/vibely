@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stkPush, normalizeKePhone, mpesaConfigured } from "@/lib/mpesa";
+import { stkRateLimited } from "@/lib/rate-limit";
 import { TIER_PRICES, type PaidTier } from "@/lib/tiers";
 
 export const runtime = "nodejs";
@@ -38,6 +39,14 @@ export async function POST(req: Request) {
   }
 
   const amount = TIER_PRICES[tier];
+  // MEDIUM-1: cap prompts per member and per phone number.
+  if (await stkRateLimited(createAdminClient(), user.id, phone)) {
+    return NextResponse.json(
+      { ok: false, reason: "too_many" },
+      { status: 429 }
+    );
+  }
+
   const baseCallback =
     process.env.MPESA_CALLBACK_URL ||
     `${new URL(req.url).origin}/api/mpesa/callback`;

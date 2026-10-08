@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stkPush, normalizeKePhone, mpesaConfigured } from "@/lib/mpesa";
+import { stkRateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -86,6 +87,14 @@ export async function POST(req: Request) {
     if (going >= ev.capacity) {
       return NextResponse.json({ ok: false, reason: "sold_out" }, { status: 409 });
     }
+  }
+
+  // MEDIUM-1: cap prompts per member and per phone number.
+  if (await stkRateLimited(createAdminClient(), user.id, phone)) {
+    return NextResponse.json(
+      { ok: false, reason: "too_many" },
+      { status: 429 }
+    );
   }
 
   const baseCallback =

@@ -231,7 +231,7 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
             </span>
             <span>
               <span className="auth2-live" />
-              2,834+ online now
+              Free to join
             </span>
           </div>
         </div>
@@ -334,8 +334,10 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
                   <input
                     type={showPw ? "text" : "password"}
                     required
-                    minLength={6}
-                    placeholder="Password (min 6 characters)"
+                    minLength={mode === "up" ? 10 : 6}
+                    placeholder={
+                      mode === "up" ? "Password (min 10 characters)" : "Password"
+                    }
                     autoComplete={mode === "in" ? "current-password" : "new-password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

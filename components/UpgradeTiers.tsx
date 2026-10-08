@@ -79,7 +79,9 @@ export default function UpgradeTiers({
       setError(
         msg === "not_configured"
           ? "M-Pesa payments aren't switched on yet. Please check back soon."
-          : msg === "bad_phone"
+          : msg === "too_many"
+            ? "Too many payment requests. Please wait 10 minutes and try again."
+            : msg === "bad_phone"
             ? "That number didn't work. Check it and try again, e.g. 0712 345 678."
             : msg
       );
