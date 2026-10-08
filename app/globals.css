@@ -5319,7 +5319,14 @@ button.create-alt {
 .nb-radar::after{
   content:""; position:absolute; inset:0; border-radius:50%; pointer-events:none; z-index:1;
   background: conic-gradient(from 0deg, rgba(122,47,242,.20), rgba(122,47,242,0) 55%);
-  animation: nb-sweep 5s linear infinite;
+  /* One sweep when results land, then it fades out. It used to spin
+     forever, which read as a loading spinner that never finished. */
+  animation: nb-sweep-once 1.8s ease-out 1 forwards;
+}
+@keyframes nb-sweep-once{
+  0%{ transform: rotate(0deg); opacity:1; }
+  80%{ opacity:1; }
+  100%{ transform: rotate(360deg); opacity:0; }
 }
 @keyframes nb-sweep{ to{ transform: rotate(360deg); } }
 
@@ -5650,3 +5657,45 @@ button.create-alt {
 .fld-err { font-size: 0.78rem; font-weight: 600; color: #d92d52; }
 
 .emp .emp-cta { margin-top: 6px; }
+
+/* ======================= BOOSTED PROFILES ======================= */
+.pcard.is-boosted,
+.nb-card.is-boosted {
+  box-shadow: 0 0 0 2px #ffb020, 0 6px 18px rgba(255, 140, 32, 0.22);
+}
+.pcard-boost {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #ffb020, #ff6a3d);
+}
+.pcard-boost svg { width: 11px; height: 11px; flex: none; }
+.nb-ph { position: relative; }
+.nb-pin.boosted { border-color: #ffb020; box-shadow: 0 0 0 2px #ffb020; }
+
+/* ======================= SAFETY NOTICE ======================= */
+.safety-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 2px 0 0;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: #fff7e6;
+  border: 1px solid #ffe0a3;
+  color: #6b4a00;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.safety-note svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: #e08a00; }
+.safety-note b { font-weight: 800; }
+.safety-note.is-compact { margin-top: 6px; padding: 7px 9px; font-size: 11.5px; }
+.safety-note.is-chat { margin: 0 0 6px; }
+
+/* Paid instant WhatsApp reveal */
+.wa-btn-premium {
+  background: linear-gradient(135deg, #ffb020, #ff6a3d);
+  border-color: transparent;
+  color: #fff;
+}
+.wa-muted a { color: var(--violet); font-weight: 700; }

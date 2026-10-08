@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import SwipeDeck from "./SwipeDeck";
@@ -62,6 +62,11 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
   const [view, setView] = useState<"grid" | "map" | "swipe">("grid");
   const [rows, setRows] = useState<NearbyRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [boosted, setBoosted] = useState<Set<string>>(new Set());
+  // Each search gets an id. Only the newest one may update the results or
+  // clear the loading state, so a slow earlier search (e.g. 10 km finishing
+  // after 25 km was picked) can no longer leave the screen stuck searching.
+  const reqRef = useRef(0);
 
   // Ask the browser for a precise location once; fall back to central Nairobi.
   useEffect(() => {
@@ -69,46 +74,82 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
       setLocated("no");
       return;
     }
+    // The browser's own timeout does not start until the permission prompt
+    // is answered, so an ignored prompt used to leave "Finding your
+    // location..." up forever. Fall back to central Nairobi after 10s.
+    const fallback = setTimeout(
+      () => setLocated((s) => (s === "pending" ? "no" : s)),
+      10000
+    );
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        clearTimeout(fallback);
         setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocated("yes");
       },
-      () => setLocated("no"),
+      () => {
+        clearTimeout(fallback);
+        setLocated("no");
+      },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
     );
+    return () => clearTimeout(fallback);
+  }, []);
+
+  // Active boosts, so promoted profiles can be labelled and listed first.
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .from("boosts")
+      .select("profile_id")
+      .gt("expires_at", new Date().toISOString())
+      .then(({ data }) => {
+        if (cancelled) return;
+        setBoosted(new Set((data ?? []).map((b) => b.profile_id)));
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const fetchNearby = useCallback(async () => {
+    const req = reqRef.current + 1;
+    reqRef.current = req;
     setLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase.rpc("nearby_profiles", {
-      in_lat: center.lat,
-      in_lng: center.lng,
-      radius_m: radiusKm * 1000,
-    });
-    if (error) {
-      setRows([]);
-      setLoading(false);
-      return;
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("nearby_profiles", {
+        in_lat: center.lat,
+        in_lng: center.lng,
+        radius_m: radiusKm * 1000,
+      });
+      if (reqRef.current === req) {
+        setRows(error ? [] : (data ?? []).filter((r) => r.id !== meId));
+      }
+    } catch {
+      if (reqRef.current === req) setRows([]);
+    } finally {
+      if (reqRef.current === req) setLoading(false);
     }
-    setRows((data ?? []).filter((r) => r.id !== meId));
-    setLoading(false);
   }, [center, radiusKm, meId]);
 
   useEffect(() => {
     fetchNearby();
   }, [fetchNearby]);
 
-  const filtered = useMemo(
-    () =>
-      rows.filter(
-        (r) =>
-          (verifiedOnly === false || r.is_verified) &&
-          (onlineOnly === false || r.is_online)
-      ),
-    [rows, verifiedOnly, onlineOnly]
-  );
+  const filtered = useMemo(() => {
+    const list = rows.filter(
+      (r) =>
+        (verifiedOnly === false || r.is_verified) &&
+        (onlineOnly === false || r.is_online)
+    );
+    // Boosted profiles first; otherwise keep the distance order.
+    return [...list].sort(
+      (a, b) => Number(boosted.has(b.id)) - Number(boosted.has(a.id))
+    );
+  }, [rows, verifiedOnly, onlineOnly, boosted]);
+
+  const nextRadius = RADII.find((r) => r > radiusKm);
 
   const onlineCount = useMemo(
     () => filtered.filter((r) => r.is_online).length,
@@ -198,8 +239,6 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
 
       {loading ? (
         <p className="nb-empty">Looking for people near you...</p>
-      ) : view === "swipe" ? (
-        <SwipeDeck rows={filtered} meId={meId} />
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={
@@ -215,14 +254,34 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
               <circle cx="12" cy="10" r="2.5" />
             </svg>
           }
-          title="Nobody here yet"
-          body="Vibely is still new in your area. Widen the radius or clear your filters - and check back, because this fills up as people join."
+          title={`No people found within ${radiusKm} km`}
+          body={
+            verifiedOnly || onlineOnly
+              ? "Try a wider distance or turn off the Verified and Online now filters."
+              : "Try a wider distance. Vibely is still growing in your area, so check back soon."
+          }
+          action={
+            nextRadius ? (
+              <button
+                type="button"
+                className="btn emp-cta"
+                onClick={() => setRadiusKm(nextRadius)}
+              >
+                Search within {nextRadius} km
+              </button>
+            ) : undefined
+          }
         />
+      ) : view === "swipe" ? (
+        <SwipeDeck rows={filtered} meId={meId} />
       ) : view === "grid" ? (
         <div className="nb-grid">
           {filtered.map((r) => (
             <div key={r.id} className="nb-cell">
-              <Link href={`/u/${r.id}`} className="nb-card">
+              <Link
+                href={`/u/${r.id}`}
+                className={"nb-card" + (boosted.has(r.id) ? " is-boosted" : "")}
+              >
               <div className="nb-ph">
                 {r.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -233,6 +292,14 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
                   </span>
                 )}
                 {r.is_online && <span className="nb-dot" />}
+                {boosted.has(r.id) && (
+                  <span className="pcard-boost" title="This profile is boosted">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M13 2 4 14h6l-1 8 9-12h-6z" />
+                    </svg>
+                    Boosted
+                  </span>
+                )}
               </div>
               <div className="nb-info">
                 <span className="nb-name">
@@ -271,7 +338,11 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
               <Link
                 key={r.id}
                 href={`/u/${r.id}`}
-                className={"nb-pin" + (r.is_online ? " online" : "")}
+                className={
+                  "nb-pin" +
+                  (r.is_online ? " online" : "") +
+                  (boosted.has(r.id) ? " boosted" : "")
+                }
                 style={{ left: `${x}%`, top: `${y}%` }}
                 title={`${r.display_name} · ${fmtDistance(r.distance_m)}`}
                 aria-label={`${r.display_name}, ${fmtDistance(r.distance_m)}`}

@@ -292,16 +292,19 @@ export type Database = {
         Row: {
           profile_id: string;
           whatsapp: string | null;
+          allow_premium_reveal: boolean;
           updated_at: string;
         };
         Insert: {
           profile_id: string;
           whatsapp?: string | null;
+          allow_premium_reveal?: boolean;
           updated_at?: string;
         };
         Update: {
           profile_id?: string;
           whatsapp?: string | null;
+          allow_premium_reveal?: boolean;
           updated_at?: string;
         };
         Relationships: [];
@@ -1205,6 +1208,10 @@ export type Database = {
       get_shared_whatsapp: {
         Args: { other_id: string };
         Returns: string | null;
+      };
+      reveal_whatsapp_premium: {
+        Args: { other_id: string };
+        Returns: string;
       };
       start_conversation: {
         Args: { other_id: string };

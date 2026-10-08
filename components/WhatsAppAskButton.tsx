@@ -3,6 +3,7 @@
 import { useState, type MouseEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { waLink } from "@/lib/wa";
+import SafetyNotice from "./SafetyNotice";
 
 type Status = "none" | "pending" | "approved" | "declined";
 
@@ -36,6 +37,9 @@ export default function WhatsAppAskButton({
   const [outgoing, setOutgoing] = useState<Status>(outInit);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set once this member taps Ask, so the safety reminder appears at the
+  // moment it is relevant rather than on every card in the grid.
+  const [asked, setAsked] = useState(false);
   const first = otherName.split(" ")[0];
 
   function stop(e: MouseEvent) {
@@ -56,6 +60,7 @@ export default function WhatsAppAskButton({
       return;
     }
     setOutgoing(((data as Status) || "pending") as Status);
+    setAsked(true);
   }
 
   async function open(e: MouseEvent) {
@@ -85,10 +90,13 @@ export default function WhatsAppAskButton({
 
   if (outgoing === "pending") {
     return (
-      <span className="wa-ask is-wait" aria-live="polite">
-        <WaIcon />
-        Asked {first}
-      </span>
+      <>
+        <span className="wa-ask is-wait" aria-live="polite">
+          <WaIcon />
+          Asked {first}
+        </span>
+        {asked && <SafetyNotice className="is-compact" />}
+      </>
     );
   }
 

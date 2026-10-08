@@ -412,11 +412,14 @@ export default async function DiscoverPage({
     [meProfile?.area, meProfile?.county].filter(Boolean).join(", ") ||
     "East Africa";
 
+  const activeLabel = FILTERS.find((f) => f.id === active)?.label ?? "";
   const peopleHeading = isDefault
     ? "People to connect with"
     : q
       ? `Results for \u201c${q}\u201d`
-      : "People";
+      : activeLabel
+        ? `People into ${activeLabel}`
+        : "People";
 
   return (
     <main className="feed-wrap disc2">
@@ -474,7 +477,16 @@ export default async function DiscoverPage({
         <HomeSearch />
       </div>
 
-      <div className="disc2-cats">
+      <div className="disc2-hint">
+        <b>Find people by interest</b>
+        <span>Tap an interest below to see people who share it.</span>
+      </div>
+
+      <div
+        className="disc2-cats"
+        role="group"
+        aria-label="Find people by interest"
+      >
         {FILTERS.map((f) => (
           <Link
             key={f.id}

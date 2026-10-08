@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { saveWhatsAppNumber } from "@/app/(app)/profile/actions";
 import { forDisplay } from "@/lib/phone";
+import PremiumRevealToggle from "./PremiumRevealToggle";
 
 export default function WhatsAppSetup({
   initial,
@@ -61,6 +62,7 @@ export default function WhatsAppSetup({
       >
         {pending ? "Saving..." : dirty ? "Save number" : "Saved"}
       </button>
+      {savedValue && <PremiumRevealToggle />}
     </div>
   );
 }

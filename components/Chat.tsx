@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { Tables } from "@/lib/database.types";
 import VoiceNote from "@/components/VoiceNote";
+import SafetyNotice from "@/components/SafetyNotice";
 
 type Msg = Pick<
   Tables<"messages">,
@@ -510,6 +511,7 @@ export default function Chat({
   return (
     <div className="chat">
       <div className="chat-scroll">
+        <SafetyNotice className="is-chat" />
         {messages.length === 0 ? (
           <p className="chat-empty">Say hello and start the conversation.</p>
         ) : (

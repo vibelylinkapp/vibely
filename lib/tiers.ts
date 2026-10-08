@@ -29,6 +29,8 @@ export const TIERS: {
       "Everything in Plus",
       "5 profile boosts / month",
       "Priority placement when boosted",
+      "Boosted badge so people notice you",
+      "Reveal WhatsApp numbers members choose to share",
     ],
   },
   {

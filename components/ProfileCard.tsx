@@ -57,7 +57,7 @@ export default function ProfileCard({
   const meta = [age ? String(age) : null, p.county].filter(Boolean).join(" · ");
 
   return (
-    <div className="pcard">
+    <div className={"pcard" + (boosted ? " is-boosted" : "")}>
       <Link
         href={`/u/${p.id}`}
         className="pcard-photo"
@@ -72,7 +72,14 @@ export default function ProfileCard({
           </span>
         )}
         {p.is_online && <span className="pcard-dot" />}
-        {boosted && <span className="pcard-boost">Boosted</span>}
+        {boosted && (
+          <span className="pcard-boost" title="This profile is boosted">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M13 2 4 14h6l-1 8 9-12h-6z" />
+            </svg>
+            Boosted
+          </span>
+        )}
       </Link>
       <div className="pcard-body">
         <div className="pcard-name">

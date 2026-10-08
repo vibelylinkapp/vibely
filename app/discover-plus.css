@@ -315,3 +315,20 @@
     transform: none;
   }
 }
+
+/* ---- Interest hint above the category chips ---- */
+.disc2 .disc2-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 14px 2px 10px;
+}
+.disc2 .disc2-hint b {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--d2-ink);
+}
+.disc2 .disc2-hint span {
+  font-size: 0.8rem;
+  color: var(--d2-muted);
+}

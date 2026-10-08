@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import { waLink } from "@/lib/wa";
+import SafetyNotice from "./SafetyNotice";
 
 type Status = "none" | "pending" | "approved" | "declined";
 
@@ -31,6 +33,10 @@ export default function WhatsAppShare({
   const [busy, setBusy] = useState(false);
   const [needsNumber, setNeedsNumber] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Outcome of the paid instant reveal, when it did not return a number.
+  const [premium, setPremium] = useState<
+    null | "upgrade" | "not_shared" | "unavailable"
+  >(null);
   const first = otherName.split(" ")[0];
 
   async function request() {
@@ -80,6 +86,33 @@ export default function WhatsAppShare({
       return;
     }
     setNumber((data as string | null) ?? "");
+  }
+
+  // Gold and VIP members can reveal a number instantly, but only from
+  // members who switched on "Let Gold and VIP members see my number".
+  // Everything is enforced in reveal_whatsapp_premium (migration 0046).
+  async function premiumReveal() {
+    setBusy(true);
+    setError(null);
+    setPremium(null);
+    const { data, error: e } = await createClient().rpc(
+      "reveal_whatsapp_premium",
+      { other_id: otherId }
+    );
+    setBusy(false);
+    if (e || typeof data !== "string" || data === "blocked") {
+      setPremium("unavailable");
+      return;
+    }
+    if (data === "upgrade_required") {
+      setPremium("upgrade");
+      return;
+    }
+    if (data === "not_shared") {
+      setPremium("not_shared");
+      return;
+    }
+    setNumber(data);
   }
 
   return (
@@ -156,6 +189,34 @@ export default function WhatsAppShare({
           {busy ? "..." : "Ask for WhatsApp number"}
         </button>
       )}
+
+      {number === null && outgoing !== "approved" && (
+        <button
+          type="button"
+          className="wa-btn wa-btn-wide wa-btn-premium"
+          onClick={premiumReveal}
+          disabled={busy}
+        >
+          Reveal instantly with Gold
+        </button>
+      )}
+      {premium === "upgrade" && (
+        <span className="wa-muted">
+          Instant reveal is part of Vibely Gold and VIP.{" "}
+          <Link href="/upgrade">See plans</Link>
+        </span>
+      )}
+      {premium === "not_shared" && (
+        <span className="wa-muted">
+          {first} hasn&apos;t turned on instant reveal. Ask instead and wait
+          for approval.
+        </span>
+      )}
+      {premium === "unavailable" && (
+        <span className="wa-muted">Instant reveal isn&apos;t available right now.</span>
+      )}
+
+      <SafetyNotice />
 
       {error && <p className="auth-msg wa-err">{error}</p>}
     </div>
