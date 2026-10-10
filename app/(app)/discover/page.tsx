@@ -229,15 +229,57 @@ function toCard(e: EventRow): EventCardData {
   };
 }
 
+/** Age-range filter for Discover. Applied server-side on birthdate. */
+type AgeBand = { id: string; label: string; min: number; max: number | null };
+const AGE_BANDS: AgeBand[] = [
+  { id: "18-24", label: "18-24", min: 18, max: 24 },
+  { id: "25-34", label: "25-34", min: 25, max: 34 },
+  { id: "35-44", label: "35-44", min: 35, max: 44 },
+  { id: "45+", label: "45+", min: 45, max: null },
+];
+
+function isoDateYearsAgo(years: number): string {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - years);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Someone aged min..max was born after (today - max - 1y) and on/before (today - min). */
+function birthBounds(b: AgeBand) {
+  return {
+    born_on_or_before: isoDateYearsAgo(b.min),
+    born_after: b.max === null ? null : isoDateYearsAgo(b.max + 1),
+  };
+}
+
+function inAgeBand(birthdate: string | null, b: AgeBand | null): boolean {
+  if (!b) return true;
+  if (!birthdate) return false;
+  const { born_after, born_on_or_before } = birthBounds(b);
+  return birthdate <= born_on_or_before && (!born_after || birthdate > born_after);
+}
+
+/** Build a Discover URL that keeps the other active filters. */
+function discoverHref(intent: string, age: string | null): string {
+  const params = new URLSearchParams();
+  if (intent !== "all") params.set("intent", intent);
+  if (age) params.set("age", age);
+  const qs = params.toString();
+  return qs ? `/discover?${qs}` : "/discover";
+}
+
 export default async function DiscoverPage({
   searchParams,
 }: {
-  searchParams: Promise<{ intent?: string; q?: string }>;
+  searchParams: Promise<{ intent?: string; q?: string; age?: string }>;
 }) {
   const sp = await searchParams;
-  const active = sp.intent ?? "all";
+  const active = FILTERS.some((f) => f.id === sp.intent)
+    ? (sp.intent as string)
+    : "all";
   const q = (sp.q ?? "").trim();
-  const isDefault = !q && active === "all";
+  const ageBand = AGE_BANDS.find((b) => b.id === sp.age) ?? null;
+  const isDefault = !q && active === "all" && !ageBand;
   const supabase = await createClient();
   const {
     data: { user },
@@ -345,6 +387,11 @@ export default async function DiscoverPage({
   if (matchSet) {
     query = query.in("id", matchSet.size ? [...matchSet] : [NO_MATCH]);
   }
+  if (ageBand) {
+    const { born_after, born_on_or_before } = birthBounds(ageBand);
+    query = query.lte("birthdate", born_on_or_before);
+    if (born_after) query = query.gt("birthdate", born_after);
+  }
   if (q) {
     query = query.ilike("display_name", `%${escapeLike(q.slice(0, 60))}%`);
   }
@@ -354,7 +401,9 @@ export default async function DiscoverPage({
     query,
   ]);
   // A text search (from Home) filters by name and skips boosted pinning.
-  const boostedProfiles = q ? [] : (boostedData ?? []);
+  const boostedProfiles = q
+    ? []
+    : (boostedData ?? []).filter((p) => inAgeBand(p.birthdate, ageBand));
   const feedProfiles = (feedData ?? []).filter((p) => !excludeIds.has(p.id));
 
   const boostedIdSet = new Set(boostedProfiles.map((p) => p.id));
@@ -500,7 +549,7 @@ export default async function DiscoverPage({
         {FILTERS.map((f) => (
           <Link
             key={f.id}
-            href={f.id === "all" ? "/discover" : `/discover?intent=${f.id}`}
+            href={discoverHref(f.id, ageBand?.id ?? null)}
             className={"disc2-cat" + (active === f.id ? " on" : "")}
             style={{ "--cat-bg": f.bg, "--cat-fg": f.fg } as CSSProperties}
             aria-current={active === f.id ? "page" : undefined}
@@ -509,6 +558,27 @@ export default async function DiscoverPage({
               {f.icon}
             </span>
             <span className="disc2-cat-label">{f.label}</span>
+          </Link>
+        ))}
+      </div>
+
+      <div className="disc2-ages" role="group" aria-label="Filter by age">
+        <span className="disc2-ages-label">Age</span>
+        <Link
+          href={discoverHref(active, null)}
+          className={"disc2-age" + (ageBand ? "" : " on")}
+          aria-current={ageBand ? undefined : "page"}
+        >
+          Any
+        </Link>
+        {AGE_BANDS.map((b) => (
+          <Link
+            key={b.id}
+            href={discoverHref(active, b.id)}
+            className={"disc2-age" + (ageBand?.id === b.id ? " on" : "")}
+            aria-current={ageBand?.id === b.id ? "page" : undefined}
+          >
+            {b.label}
           </Link>
         ))}
       </div>
