@@ -1,0 +1,147 @@
+/* =========================================================================
+   Events: create-form preview step and the host dashboard (/events/hosting)
+   ========================================================================= */
+
+/* ---- Preview step inside the EventForm modal ---- */
+.ev-prev-note {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.ev-prev-card {
+  pointer-events: none;
+  margin-bottom: 14px;
+}
+
+.ev-prev-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+}
+
+.ev-prev-facts dt {
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.ev-prev-facts dd {
+  margin: 0;
+}
+
+.ev-prev-desc {
+  white-space: pre-wrap;
+}
+
+/* ---- Host dashboard ---- */
+.host-intro {
+  margin: 4px 16px 14px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.host-payout {
+  margin: 0 16px 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(122, 47, 242, 0.18);
+  background: rgba(122, 47, 242, 0.06);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.host-payout b {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.host-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 16px 24px;
+}
+
+.host-ev {
+  display: block;
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(20, 11, 38, 0.08);
+  color: inherit;
+  text-decoration: none;
+}
+
+.host-ev-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.host-ev-title {
+  font-weight: 700;
+}
+
+.host-ev-meta {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.host-status {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.host-status.published {
+  background: #e3f7ea;
+  color: #1c7a3e;
+}
+
+.host-status.pending {
+  background: #fff4dc;
+  color: #8a5a00;
+}
+
+.host-status.rejected {
+  background: #ffe4e4;
+  color: #b42318;
+}
+
+.host-status.past {
+  background: #eee;
+  color: #555;
+}
+
+.host-ev-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.host-ev-stats b {
+  font-weight: 800;
+}
+
+.host-ev-reason {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #b42318;
+}
+
+.host-link {
+  font-weight: 700;
+  color: #7a2ff2;
+  text-decoration: none;
+}

@@ -10,6 +10,7 @@ import "./marketing.css";
 import "./home-plus.css";
 import "./nearby-plus.css";
 import "./discover-plus.css";
+import "./events-plus.css";
 import "./mobile-fixes.css";
 
 /**

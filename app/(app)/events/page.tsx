@@ -68,6 +68,9 @@ export default async function EventsPage() {
     <main className="feed-wrap">
       <div className="feed-head">
         <span className="feed-title">Events</span>
+        <Link href="/events/hosting" className="feed-head-btn">
+          Your events
+        </Link>
         <EventForm triggerLabel="+ Host" triggerClass="feed-head-btn" />
       </div>
 

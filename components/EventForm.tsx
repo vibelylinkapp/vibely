@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import CoverUpload from "./CoverUpload";
+import { KE_TZ } from "@/lib/format";
 
 const CATS = [
   "Nightlife",
@@ -42,6 +43,27 @@ function toLocal(iso: string): string {
   )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** "Sat 12 Dec · 17:00" in Nairobi time, matching EventCard. */
+function previewWhen(local: string): string {
+  if (!local) return "Date TBA";
+  const d = new Date(local);
+  if (Number.isNaN(d.getTime())) return "Date TBA";
+  return (
+    d.toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      timeZone: KE_TZ,
+    }) +
+    " \u00b7 " +
+    d.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: KE_TZ,
+    })
+  );
+}
+
 export default function EventForm({
   existing,
   triggerLabel,
@@ -77,20 +99,44 @@ export default function EventForm({
   const [organizerPhone, setOrganizerPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // New events go through a preview step before they are submitted.
+  const [step, setStep] = useState<"edit" | "preview">("edit");
 
-  async function submit() {
-    if (!title.trim()) {
-      setError("Give your event a title.");
-      return;
+  /** Same checks submit() runs, so problems surface before the preview. */
+  function validate(): string | null {
+    if (!title.trim()) return "Give your event a title.";
+    if (startsAt && new Date(startsAt).getTime() < Date.now()) {
+      return "The start time is in the past. Pick a future date.";
     }
     const priceNum = price ? Math.max(0, Math.round(Number(price))) : 0;
-    if (priceNum > 0) {
-      if (!organizerEmail.trim() || !organizerPhone.trim()) {
-        setError(
-          "Paid events need an email and phone number so ticket holders can reach you."
-        );
-        return;
-      }
+    if (priceNum > 0 && (!organizerEmail.trim() || !organizerPhone.trim())) {
+      return "Paid events need an email and phone number so ticket holders can reach you.";
+    }
+    return null;
+  }
+
+  function goPreview() {
+    const problem = validate();
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    setError(null);
+    setStep("preview");
+  }
+
+  function close() {
+    setOpen(false);
+    setStep("edit");
+    setError(null);
+  }
+
+  async function submit() {
+    const problem = validate();
+    if (problem) {
+      setError(problem);
+      setStep("edit");
+      return;
     }
     setBusy(true);
     setError(null);
@@ -121,12 +167,12 @@ export default function EventForm({
         .update(patch)
         .eq("id", existing.id);
       if (uErr) {
-        setError(uErr.message);
+        setError("Could not save your changes. Please try again.");
         setBusy(false);
         return;
       }
       setBusy(false);
-      setOpen(false);
+      close();
       router.refresh();
       return;
     }
@@ -137,7 +183,7 @@ export default function EventForm({
       .select("id")
       .single();
     if (iErr || !ev) {
-      setError(iErr?.message ?? "Could not create the event.");
+      setError("Could not create the event. Please try again.");
       setBusy(false);
       return;
     }
@@ -156,8 +202,8 @@ export default function EventForm({
       .from("event_bookings")
       .insert({ event_id: ev.id, profile_id: me });
     setBusy(false);
-    setOpen(false);
-    router.push(`/events/${ev.id}`);
+    close();
+    router.push(`/events/${ev.id}?created=1`);
   }
 
   // The trigger lives inside .feed-head, which has a backdrop-filter. That
@@ -179,9 +225,89 @@ export default function EventForm({
       </button>
 
       {open && mounted && createPortal(
-        <div className="modal-overlay" onClick={() => setOpen(false)}>
+        <div className="modal-overlay" onClick={close}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{existing ? "Edit event" : "Create an event"}</h3>
+            <h3>
+              {step === "preview"
+                ? "Preview your event"
+                : existing
+                  ? "Edit event"
+                  : "Create an event"}
+            </h3>
+
+            {step === "preview" ? (
+              <>
+                <p className="ev-prev-note">
+                  This is how your event will look to members. New events are
+                  reviewed by our team before they appear publicly, usually
+                  within a day.
+                </p>
+                <div className="eventcard ev-prev-card" aria-label="Event preview">
+                  <div
+                    className="ph"
+                    style={
+                      image
+                        ? { backgroundImage: `url('${image}')` }
+                        : undefined
+                    }
+                  >
+                    <div className="price">
+                      {Number(price) > 0
+                        ? `KSh ${Math.round(Number(price)).toLocaleString("en-KE")}`
+                        : "Free"}
+                    </div>
+                    {category && <span className="badge">{category}</span>}
+                  </div>
+                  <div className="b">
+                    <b>{title.trim()}</b>
+                    <div className="meta">
+                      <span>
+                        {[venue.trim(), area.trim(), city.trim()]
+                          .filter(Boolean)
+                          .join(", ") || "Location TBA"}
+                      </span>
+                      <span>{previewWhen(startsAt)}</span>
+                    </div>
+                  </div>
+                </div>
+                <dl className="ev-prev-facts">
+                  <dt>Capacity</dt>
+                  <dd>{capacity ? `${capacity} people` : "No limit"}</dd>
+                  <dt>Payment</dt>
+                  <dd>
+                    {Number(price) > 0
+                      ? "Paid with M-Pesa. Tickets are confirmed once payment succeeds."
+                      : "Free. Members book with one tap."}
+                  </dd>
+                  {description.trim() && (
+                    <>
+                      <dt>About</dt>
+                      <dd className="ev-prev-desc">{description.trim()}</dd>
+                    </>
+                  )}
+                </dl>
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn-ghost"
+                    onClick={() => setStep("edit")}
+                    disabled={busy}
+                  >
+                    Back to edit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={submit}
+                    disabled={busy}
+                  >
+                    {busy ? "Submitting..." : "Submit for review"}
+                  </button>
+                </div>
+                {error && <p className="auth-msg">{error}</p>}
+              </>
+            ) : (
+            <>
 
             <div className="fld-sec">Basics</div>
             <label className="fld">
@@ -330,23 +456,21 @@ export default function EventForm({
             </p>
 
             <div className="modal-actions">
-              <button
-                type="button"
-                className="btn-ghost"
-                onClick={() => setOpen(false)}
-              >
+              <button type="button" className="btn-ghost" onClick={close}>
                 Cancel
               </button>
               <button
                 type="button"
                 className="btn"
-                onClick={submit}
+                onClick={existing ? submit : goPreview}
                 disabled={busy}
               >
-                {busy ? "Saving..." : existing ? "Save" : "Create"}
+                {busy ? "Saving..." : existing ? "Save" : "Preview"}
               </button>
             </div>
             {error && <p className="auth-msg">{error}</p>}
+            </>
+            )}
           </div>
         </div>,
         document.body
