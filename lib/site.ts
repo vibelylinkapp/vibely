@@ -5,7 +5,7 @@
 export const SITE = {
   name: "Vibely",
 
-  /** TODO: replace with the registered company name once incorporated. */
+  /** Registered legal entity shown on the legal pages. */
   legalEntity: "Vibely",
 
   city: "Nairobi",

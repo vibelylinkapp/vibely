@@ -1,0 +1,21 @@
+# Regular dependency updates: Dependabot opens a PR each week for outdated
+# npm packages and immediately for any package with a security advisory.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Africa/Nairobi"
+    open-pull-requests-limit: 10
+    groups:
+      supabase:
+        patterns: ["@supabase/*"]
+      react-next:
+        patterns: ["next", "react", "react-dom", "@types/react", "@types/react-dom"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
