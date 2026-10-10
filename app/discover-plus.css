@@ -332,3 +332,11 @@
   font-size: 0.8rem;
   color: var(--d2-muted);
 }
+
+.disc2-reset {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 700;
+  color: #7a2ff2;
+  text-decoration: underline;
+}

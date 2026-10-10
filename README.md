@@ -37,8 +37,9 @@ cp .env.example .env.local   # then fill it in, see below
 npm run dev                  # http://localhost:3000
 ```
 
-Scripts: `dev`, `build`, `start`, `typecheck`, `audit` (npm audit, fails on
-high or critical) and `deps:check`. CI (`.github/workflows/security.yml`) runs
+Scripts: `dev`, `build`, `start`, `typecheck`, `test` (Vitest: security
+helpers and M-Pesa callback scenarios), `check` (typecheck + tests), `audit`
+(npm audit, fails on high or critical) and `deps:check`. CI (`.github/workflows/security.yml`) runs
 the type-check and the audit on every push; Dependabot opens weekly update PRs.
 `npm run build` is still the final gate before merging.
 

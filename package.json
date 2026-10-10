@@ -8,7 +8,9 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "audit": "npm audit --omit=dev --audit-level=high",
-    "deps:check": "npm outdated"
+    "deps:check": "npm outdated",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",
@@ -16,15 +18,16 @@
     "next": "15.5.22",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "web-push": "^3.6.7",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
-    "@types/web-push": "^3.6.4"
+    "@types/web-push": "^3.6.4",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=20.9.0"

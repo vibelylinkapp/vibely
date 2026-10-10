@@ -53,9 +53,16 @@ function VerifiedTick() {
   );
 }
 
+const GEO_CONSENT_KEY = "vb_geo_consent";
+
 export default function NearbyExplorer({ meId }: { meId: string }) {
   const [center, setCenter] = useState(NAIROBI);
-  const [located, setLocated] = useState<"pending" | "yes" | "no">("pending");
+  const [located, setLocated] = useState<"ask" | "pending" | "yes" | "no">(
+    "pending"
+  );
+  // Bumped when the member answers the location explainer, which (re)runs
+  // the geolocation request below.
+  const [geoAsk, setGeoAsk] = useState(0);
   const [radiusKm, setRadiusKm] = useState(10);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [onlineOnly, setOnlineOnly] = useState(false);
@@ -68,12 +75,25 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
   // after 25 km was picked) can no longer leave the screen stuck searching.
   const reqRef = useRef(0);
 
-  // Ask the browser for a precise location once; fall back to central Nairobi.
+  // Location is only requested after the member has read a plain-language
+  // explanation and agreed (remembered on this device). Declining keeps the
+  // search centred on central Nairobi and never prompts the browser.
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setLocated("no");
       return;
     }
+    let consent: string | null = null;
+    try {
+      consent = localStorage.getItem(GEO_CONSENT_KEY);
+    } catch {
+      consent = null;
+    }
+    if (consent !== "yes") {
+      setLocated(consent === "no" ? "no" : "ask");
+      return;
+    }
+    setLocated("pending");
     // The browser's own timeout does not start until the permission prompt
     // is answered, so an ignored prompt used to leave "Finding your
     // location..." up forever. Fall back to central Nairobi after 10s.
@@ -94,7 +114,17 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
     );
     return () => clearTimeout(fallback);
-  }, []);
+  }, [geoAsk]);
+
+  function answerGeo(allow: boolean) {
+    try {
+      localStorage.setItem(GEO_CONSENT_KEY, allow ? "yes" : "no");
+    } catch {
+      // Storage blocked: the choice simply is not remembered.
+    }
+    if (allow) setGeoAsk((n) => n + 1);
+    else setLocated("no");
+  }
 
   // Active boosts, so promoted profiles can be labelled and listed first.
   useEffect(() => {
@@ -158,13 +188,46 @@ export default function NearbyExplorer({ meId }: { meId: string }) {
 
   return (
     <div className="nb">
-      <p className="nb-loc">
-        {located === "yes"
-          ? "Showing people around your current location."
-          : located === "pending"
-            ? "Finding your location..."
-            : "Showing central Nairobi. Allow location for precise results."}
-      </p>
+      {located === "ask" ? (
+        <div className="nb-geo-ask" role="region" aria-label="Location privacy">
+          <b>Use your location to find people nearby?</b>
+          <p>
+            Your exact position is used only to calculate distance. Other
+            members only ever see an approximate distance or your declared
+            area, never your precise location. You can turn off showing your
+            location at any time in Profile &gt; Privacy.
+          </p>
+          <div className="nb-geo-actions">
+            <button type="button" className="btn" onClick={() => answerGeo(true)}>
+              Use my location
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => answerGeo(false)}
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="nb-loc">
+          {located === "yes"
+            ? "Showing people around your current location."
+            : located === "pending"
+              ? "Finding your location..."
+              : "Showing central Nairobi. "}
+          {located === "no" && (
+            <button
+              type="button"
+              className="nb-geo-link"
+              onClick={() => answerGeo(true)}
+            >
+              Use my location instead
+            </button>
+          )}
+        </p>
+      )}
 
       <div className="nb-controls">
         <div className="nb-radii" role="group" aria-label="Search radius">

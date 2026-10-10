@@ -479,8 +479,17 @@ export default async function DiscoverPage({
       </div>
 
       <div className="disc2-hint">
-        <b>Find people by interest</b>
-        <span>Tap an interest below to see people who share it.</span>
+        <b>Find people by what they are looking for</b>
+        <span>
+          Pick Dating, Friendship, Hangouts or Networking. Like someone to
+          match (you can message once you both like each other); follow to see
+          their posts without matching.
+        </span>
+        {!isDefault && (
+          <Link href="/discover" className="disc2-reset">
+            Reset filters
+          </Link>
+        )}
       </div>
 
       <div
