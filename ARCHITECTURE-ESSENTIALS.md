@@ -56,13 +56,12 @@ viewport. That was the white-flash bug.
 
 ## Admin access
 
-Two independent grants, either sufficient: `profiles.is_admin`, or an email on
-the `ADMIN_EMAILS` allowlist. The allowlist is an active security finding —
-see `SECURITY-AUDIT.md`, HIGH-1.
+One grant only: `profiles.is_admin = true`. The old `ADMIN_EMAILS` allowlist
+was removed. Every admin server action re-checks `is_admin` itself.
 
 The panel lives at `/admin` but a direct hit returns 404. It is only reachable
-through the unguessable base path in `lib/admin/path.ts`, rewritten by
-middleware.
+through the base path in `lib/admin/path.ts` (set `ADMIN_PANEL_PATH`; the
+default in the repo is public), rewritten by middleware.
 
 ## Money
 
@@ -89,3 +88,17 @@ with 16 profiles. One env var each.
 This repository has repeatedly presented as broken rendering when the real
 problem was empty data: `last_active_at` was never written, `profiles.geo` was
 entirely null so Nearby returned nobody. Query the table first.
+
+## Security layer
+
+`middleware.ts` runs first on every request: http to https redirect, per-IP
+rate limits for `/api`, a CSRF Origin check on state-changing API calls, then
+session refresh with an idle timeout. Shared helpers live in `lib/security/`
+(sanitise, crypto, password, request). Use them in every new route: validate
+ids with `asUuid`, text with `cleanText`, links with `safeLink`, and never
+return `error.message` to the browser. Details in `SECURITY-AUDIT.md`.
+
+## SEO
+
+`lib/seo.ts` is the single source for titles, keywords, FAQ and JSON-LD. Keep
+the FAQ text identical to what the landing page shows.

@@ -154,14 +154,14 @@ server-side. Create clients inside effects or request handlers.
 
 ## The exclamation-mark escaping artifact
 
-The tooling rewrites `!` as `\!` inside strings written by Python. This has
+The tooling rewrites `!` as `!` inside strings written by Python. This has
 wasted more time than any other single issue.
 
 - Never write `!=` in a helper script. Use `if not (a == b)`.
 - After **every** file write, repair at the byte level:
   `data.replace(bytes([92, 33]), bytes([33]))`.
 - To search for text containing `!`, build the literal with `chr(33)`.
-- Audit with `grep -c '\!' file` and expect zero.
+- Audit with `grep -c '!' file` and expect zero.
 
 String `.replace()` on the text does not reliably fix it. Byte-level repair
 does.
@@ -241,3 +241,25 @@ Say what was verified and how, and say plainly what was not. "Merged" is not
 "working in production". When something rests on an inference — as the Paystack
 split percentages still do — label it and name the observation that would
 confirm it.
+
+---
+
+## Security rules for every change
+
+- Validate every id from the client with `asUuid()` before it touches a query.
+- Clean free text with `cleanText()` / `cleanLine()` and cap its length.
+- Any user- or admin-supplied URL goes through `safeLink()` before it is stored
+  or rendered as an `href`.
+- Never return `error.message` from Supabase, Daraja or Paystack to the
+  browser. Return a short code and call `logServerError()`.
+- Compare secrets with `safeEqual()` / `hasBearer()`, never `===`.
+- Uploads: derive the extension with `extFor(file)`, and make sure the bucket
+  migration sets `file_size_limit` and `allowed_mime_types`.
+- New `/api` routes are rate-limited and CSRF-checked by middleware
+  automatically. A new webhook that cannot send an Origin header must be added
+  to `CSRF_EXEMPT` in `middleware.ts` and authenticated by its own secret.
+- Never import `lib/supabase/admin.ts` into a client component (the
+  `server-only` import makes that a build error).
+- New public pages: add them to `app/sitemap.ts` and give them metadata with
+  `pageMetadata()` from `lib/seo.ts`. Private pages stay `noindex`.
+- Never commit a real key. Add new variables to `.env.example` and `lib/env.ts`.

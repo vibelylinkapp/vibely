@@ -104,16 +104,19 @@ user lookup in React `cache()` and routing all 53 call sites through it.
 
 ### Admin access
 
-`lib/admin/guard.ts` grants admin on **either** `profiles.is_admin` **or** an
-email on the `ADMIN_EMAILS` allowlist. The allowlist is an active security
-finding (`SECURITY-AUDIT.md`, HIGH-1) because signup does not verify email
-ownership.
+Admin is granted by `profiles.is_admin` and nothing else; the `ADMIN_EMAILS`
+allowlist was removed (it allowed escalation through unverified signup).
+`app/admin/layout.tsx` calls `requireAdmin()` once for all pages, and every
+server action in `app/admin/actions.ts` re-checks `is_admin` and validates its
+ids with `asUuid()`. The panel is served only through `/${ADMIN_PATH}`;
+direct `/admin` hits return 404.
 
-The panel is path-cloaked: `/admin` returns a bare 404, and the real routes are
-served only via the unguessable base path in `lib/admin/path.ts`, rewritten by
-middleware. This is defence in depth, not the access control itself.
+### Sessions
 
----
+Supabase cookies are refreshed in middleware and written `Secure` +
+`SameSite=Lax`. An httpOnly `vb_last_seen` cookie enforces an idle timeout
+(`SESSION_IDLE_DAYS`, default 30): an idle session is signed out and sent to
+`/sign-in` (API calls get 401 `session_expired`).
 
 ## 4. Data model
 
@@ -283,3 +286,30 @@ was correct all along.
 - `/discover` and `/nearby` do not surface match scores.
 - `nudges` has RLS enabled with no policies, so it is unreadable by browser
   clients.
+
+## 11. Security layer
+
+Request order: `middleware.ts` (HTTPS redirect, rate limit, CSRF Origin check)
+then `lib/supabase/middleware.ts` (admin rewrite, session refresh, idle expiry)
+then the route. Headers come from `next.config.mjs`.
+
+| Module | Purpose |
+|---|---|
+| `lib/security/sanitize.ts` | `asUuid`, `cleanText`, `cleanLine`, `safeLink`, `escapeLike`, `isEmail` |
+| `lib/security/crypto.ts` | `safeEqual`, `hasBearer` (constant-time secret checks) |
+| `lib/security/password.ts` | Signup password policy (hashing is bcrypt in Supabase Auth) |
+| `lib/security/request.ts` | Size-capped JSON parsing, server-side error logging |
+| `lib/security/rate-limit-edge.ts` | Per-IP, per-route budgets used by middleware |
+| `lib/rate-limit.ts` | STK push limits per member and phone (database-backed) |
+| `lib/upload.ts` | Storage extension from MIME type, image checks |
+| `lib/env.ts` | Site URL, VAPID subject, required env list |
+
+## 12. SEO
+
+`lib/seo.ts` holds the title, description, keyword set, FAQ and schema.org
+builders. `app/layout.tsx` sets site-wide metadata (canonical, OG, Twitter,
+robots, verification tags, `geo.region=KE`) and publishes Organization +
+WebSite + WebApplication JSON-LD. The landing page renders the FAQ visibly and
+as FAQPage schema. Content pages use `pageMetadata()` and breadcrumb schema.
+`app/robots.ts` blocks the private app and API; `app/sitemap.ts` lists the
+public pages; `app/opengraph-image.tsx` renders the 1200x630 share card.

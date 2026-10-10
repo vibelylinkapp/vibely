@@ -155,3 +155,29 @@ select e.id, e.title, e.price_kes
 -- Has the paid ticket path ever completed?
 select status, count(*) from payments where event_id is not null group by status;
 ```
+
+---
+
+## 8. Non-functional requirements
+
+### Security
+
+Production baseline, implemented October 2026 (see `SECURITY-AUDIT.md`):
+rate limiting, input validation, bcrypt password hashing with a password
+policy, no hard-coded keys, same-origin CORS with a CSRF check, parameterised
+queries plus RLS, idle session expiry, HTTPS everywhere, strict security
+headers, and automated dependency updates and audits.
+
+### SEO and discoverability
+
+Goal: rank for Kenyan dating and social-discovery searches such as "dating app
+Kenya", "Nairobi dating", "meet singles in Nairobi", "make friends in Nairobi"
+and "events in Nairobi this weekend", plus Mombasa, Kisumu, Nakuru and East
+Africa variants. Delivered: keyword-led titles and descriptions, canonical
+URLs, Organization / WebSite / WebApplication / FAQPage / Breadcrumb schema, a
+visible FAQ, sitemap, robots rules and a branded social card.
+
+Next steps for ranking: verify the site in Google Search Console and Bing,
+submit the sitemap, move to a custom domain (for example vibely.co.ke), and
+add public city landing pages (Nairobi, Mombasa, Kisumu) and a public events
+page so event listings can carry Event schema.

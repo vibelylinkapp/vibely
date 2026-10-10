@@ -37,13 +37,16 @@ cp .env.example .env.local   # then fill it in, see below
 npm run dev                  # http://localhost:3000
 ```
 
-Scripts are `dev`, `build` and `start`. There is no test suite and no lint step
-in CI, so `npm run build` is the only gate before merging.
+Scripts: `dev`, `build`, `start`, `typecheck`, `audit` (npm audit, fails on
+high or critical) and `deps:check`. CI (`.github/workflows/security.yml`) runs
+the type-check and the audit on every push; Dependabot opens weekly update PRs.
+`npm run build` is still the final gate before merging.
 
 ### Environment
 
-Copy `.env.example` and populate it. The application will not start without the
-first two.
+Copy `.env.example` and populate it; it lists every variable the app reads.
+No key is hard-coded anywhere in the repository. The application will not start
+without the first two.
 
 **Required**
 
@@ -59,16 +62,19 @@ first two.
 |---|---|
 | `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET` | Daraja credentials |
 | `MPESA_SHORTCODE`, `MPESA_PASSKEY` | STK push identity |
-| `MPESA_CALLBACK_SECRET` | Shared secret on the callback URL. **Set this** — the gate is skipped when absent, which lets a forged callback confirm an unpaid ticket. See `SECURITY-AUDIT.md`, HIGH-2. |
+| `MPESA_CALLBACK_SECRET` | Shared secret on the callback URL. **Required**: callbacks are refused when it is missing. |
 | `PAYSTACK_SECRET_KEY` | Host payout subaccounts and split transactions |
 
 **Optional**
 
 | Variable | Purpose |
 |---|---|
-| `ADMIN_EMAILS` | Comma-separated admin allowlist. **Leaving this unset is currently the safer choice** — see `SECURITY-AUDIT.md`, HIGH-1. |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Web push |
-| `CRON_SECRET` | Guards `/api/cron/winback` |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for SEO, sitemap and social cards |
+| `ADMIN_PANEL_PATH` | Secret base path of the admin panel. Set a long random value. |
+| `SESSION_IDLE_DAYS` | Sign out after this many idle days (default 30) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Web push |
+| `CRON_SECRET` | Guards `/api/cron/winback` and `/api/admin/summary` |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`, `NEXT_PUBLIC_BING_SITE_VERIFICATION` | Search Console / Bing Webmaster verification |
 | `NEXT_PUBLIC_FEATURE_*` | Density-dependent surfaces, all default off |
 
 ### Feature flags
@@ -80,9 +86,30 @@ back. See `lib/features.ts`.
 
 ---
 
+## Security
+
+See `SECURITY-AUDIT.md` for the full control list. In short: per-IP rate limits
+and a CSRF origin check in `middleware.ts`, input helpers in
+`lib/security/`, strict headers in `next.config.mjs`, HTTPS redirect plus HSTS,
+idle-session expiry, bcrypt password hashing by Supabase Auth with a password
+policy in `lib/security/password.ts`, and RLS on every table.
+
+---
+
+## SEO
+
+Metadata, keywords, FAQ and schema.org data live in `lib/seo.ts`. The root
+layout publishes Organization, WebSite and WebApplication JSON-LD; the landing
+page adds a visible FAQ plus FAQPage schema; content pages add breadcrumbs.
+`app/robots.ts`, `app/sitemap.ts` and `app/opengraph-image.tsx` generate
+robots.txt, sitemap.xml and the social card. Signed-in and admin pages are
+`noindex`. After deploy, submit `/sitemap.xml` in Google Search Console.
+
+---
+
 ## Database
 
-39 tables, 52 migrations, 103 RLS policies. Row-level security is enabled on
+39 tables, 53 migrations, 103 RLS policies. Row-level security is enabled on
 every table.
 
 **Migrations are applied by hand.** There is no runner in the deploy pipeline.

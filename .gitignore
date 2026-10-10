@@ -7,3 +7,7 @@ out
 .DS_Store
 *.log
 next-env.d.ts
+.env.*
+!.env.example
+*.pem
+coverage
