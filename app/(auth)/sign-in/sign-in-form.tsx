@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { passwordProblem } from "@/lib/security/password";
 
 // Normalise a user-typed Kenyan number to E.164 (what Supabase/Twilio expect).
 // Accepts: +254712345678, 254712345678, 0712345678, 712345678.
@@ -23,6 +24,24 @@ const SHOW_PORTRAITS = [
   { src: "/landing/ashley.jpg", n: "Ashley, 23", d: "Online", cls: "c" },
 ];
 
+/** Map Supabase auth errors to plain, non-revealing messages. */
+function friendlyAuthError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login") || m.includes("invalid credentials")) {
+    return "That email and password do not match. Try again or reset your password.";
+  }
+  if (m.includes("rate") || m.includes("too many")) {
+    return "Too many attempts. Please wait a few minutes and try again.";
+  }
+  if (m.includes("token") || m.includes("otp") || m.includes("expired")) {
+    return "That code is wrong or has expired. Request a new one.";
+  }
+  if (m.includes("phone")) {
+    return "We could not send a code to that number. Check it and try again.";
+  }
+  return "Something went wrong. Please try again.";
+}
+
 export default function SignInForm({ next = "/home" }: { next?: string }) {
   const router = useRouter();
   const [method, setMethod] = useState<"email" | "phone">("email");
@@ -34,6 +53,8 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
   const [sentPhone, setSentPhone] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  // Live password feedback while creating an account.
+  const pwIssue = mode === "up" && password ? passwordProblem(password, email) : null;
   const [loading, setLoading] = useState(false);
 
   async function signInWithGoogle() {
@@ -49,7 +70,7 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
       },
     });
     if (error) {
-      setMsg(error.message);
+      setMsg(friendlyAuthError(error.message));
       setLoading(false);
     }
   }
@@ -61,6 +82,12 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
     const supabase = createClient();
 
     if (mode === "up") {
+      const weak = passwordProblem(password, email);
+      if (weak) {
+        setMsg(weak);
+        setLoading(false);
+        return;
+      }
       // Create the account (already confirmed) via our server route, then sign
       // in normally to establish the session. See app/api/auth/signup/route.ts.
       const res = await fetch("/api/auth/signup", {
@@ -83,7 +110,7 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
         password,
       });
       if (error) {
-        setMsg(error.message);
+        setMsg(friendlyAuthError(error.message));
         setLoading(false);
         return;
       }
@@ -95,7 +122,7 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
         password,
       });
       if (error) {
-        setMsg(error.message);
+        setMsg(friendlyAuthError(error.message));
         setLoading(false);
         return;
       }
@@ -116,7 +143,7 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
     if (error) {
-      setMsg(error.message);
+      setMsg(friendlyAuthError(error.message));
       setLoading(false);
       return;
     }
@@ -137,7 +164,7 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
       type: "sms",
     });
     if (error) {
-      setMsg(error.message);
+      setMsg(friendlyAuthError(error.message));
       setLoading(false);
       return;
     }
@@ -364,11 +391,20 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
                     )}
                   </button>
                 </div>
-                <p className="pw-hint">
+                <p className={"pw-hint" + (pwIssue ? " is-warn" : "")} aria-live="polite">
                   {mode === "up"
-                    ? "Use at least 6 characters. Tap the eye to check what you typed."
+                    ? pwIssue ??
+                      (password
+                        ? "Strong enough. You are good to go."
+                        : "At least 10 characters, with letters and a number or symbol.")
                     : "Tap the eye to reveal your password."}
                 </p>
+                {mode === "up" && (
+                  <p className="auth-trust">
+                    Free to join &middot; 18+ only &middot; Your number and
+                    email are never shown to other members.
+                  </p>
+                )}
                 <button className="btn" type="submit" disabled={loading}>
                   {loading
                     ? "Please wait..."

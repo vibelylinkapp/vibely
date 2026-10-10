@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { escapeLike } from "@/lib/security/sanitize";
-import { DISCOVER_INTERESTS, isInterest } from "@/lib/interests";
+import { DISCOVER_INTERESTS, cleanInterests, isInterest } from "@/lib/interests";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/ProfileCard";
@@ -430,8 +430,27 @@ export default async function DiscoverPage({
 
   const ids = profiles.map((p) => p.id);
   const intentMap: Record<string, string[]> = {};
+  const interestMap: Record<string, string[]> = {};
   const vipSet = new Set<string>();
   const followingSet = new Set<string>();
+
+  // Interests for the cards, viewer's shared interests first. Separate and
+  // error-tolerant: the column arrives in migration 0048, and a missing
+  // column must only hide the chips, never break the page.
+  if (ids.length) {
+    const [{ data: interestRows }, { data: myInterestRow }] = await Promise.all([
+      supabase.from("profiles").select("id, interests").in("id", ids),
+      supabase.from("profiles").select("interests").eq("id", user.id).maybeSingle(),
+    ]);
+    const mine = new Set(cleanInterests(myInterestRow?.interests));
+    (interestRows ?? []).forEach((r) => {
+      const list = cleanInterests(r.interests);
+      interestMap[r.id] = [
+        ...list.filter((i) => mine.has(i)),
+        ...list.filter((i) => !mine.has(i)),
+      ];
+    });
+  }
 
   // ---- Wave 3 ----
   // Card intents, VIP badges and follow state all key on the same resolved
@@ -648,6 +667,7 @@ export default async function DiscoverPage({
                   key={p.id}
                   p={card}
                   intents={intentMap[p.id] ?? []}
+                  interests={interestMap[p.id] ?? []}
                   boosted={boostedIdSet.has(p.id)}
                   vip={vipSet.has(p.id)}
                   showFollow

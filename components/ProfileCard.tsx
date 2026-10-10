@@ -28,6 +28,7 @@ function ageFrom(dateStr: string): number {
 export default function ProfileCard({
   p,
   intents,
+  interests = [],
   boosted,
   vip,
   reason,
@@ -40,6 +41,8 @@ export default function ProfileCard({
 }: {
   p: P;
   intents: string[];
+  /** Shared interests first is the caller's job; we show up to three. */
+  interests?: string[];
   boosted?: boolean;
   vip?: boolean;
   reason?: string;
@@ -107,6 +110,15 @@ export default function ProfileCard({
           <div className="pcard-intents">
             {intents.slice(0, 3).map((i) => (
               <span className="mini" key={i}>
+                {i}
+              </span>
+            ))}
+          </div>
+        )}
+        {interests.length > 0 && (
+          <div className="pcard-interests" aria-label="Interests">
+            {interests.slice(0, 3).map((i) => (
+              <span className="pcard-interest" key={i}>
                 {i}
               </span>
             ))}

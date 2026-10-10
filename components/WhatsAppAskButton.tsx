@@ -56,7 +56,7 @@ export default function WhatsAppAskButton({
     });
     setBusy(false);
     if (err) {
-      setError(err.message);
+      setError("Could not send the request. Try again.");
       return;
     }
     setOutgoing(((data as Status) || "pending") as Status);
@@ -93,8 +93,9 @@ export default function WhatsAppAskButton({
       <>
         <span className="wa-ask is-wait" aria-live="polite">
           <WaIcon />
-          Asked {first}
+          Request pending
         </span>
+        <span className="wa-ask-sub">Waiting for {first} to accept</span>
         {asked && <SafetyNotice className="is-compact" />}
       </>
     );
@@ -104,9 +105,9 @@ export default function WhatsAppAskButton({
     // Deliberately terminal. 0032 keeps a decline final, so there is no
     // "ask again" affordance here either.
     return (
-      <span className="wa-ask is-off">
+      <span className="wa-ask is-off" title={`${first} chose not to share their number`}>
         <WaIcon />
-        Not shared
+        Request declined
       </span>
     );
   }
