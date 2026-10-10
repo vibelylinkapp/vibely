@@ -3,6 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { asUuid, cleanText, safeLink } from "@/lib/security/sanitize";
+
+/** Throws on a malformed id so it never reaches a query. */
+function id(value: unknown): string {
+  const v = asUuid(value);
+  if (!v) throw new Error("Invalid id");
+  return v;
+}
 
 async function assertAdmin(): Promise<string> {
   const supabase = await createClient();
@@ -21,6 +29,7 @@ async function assertAdmin(): Promise<string> {
 
 export async function dismissReport(reportId: string) {
   const adminId = await assertAdmin();
+  reportId = id(reportId);
   const admin = createAdminClient();
   await admin
     .from("reports")
@@ -39,6 +48,9 @@ export async function banUser(
   reason: string
 ) {
   const adminId = await assertAdmin();
+  reportedId = id(reportedId);
+  reportId = id(reportId);
+  reason = cleanText(reason, 500);
   const admin = createAdminClient();
   await admin
     .from("profiles")
@@ -66,6 +78,8 @@ export async function approveVerification(
   kind: "selfie" | "national_id" | "passport"
 ) {
   const adminId = await assertAdmin();
+  requestId = id(requestId);
+  profileId = id(profileId);
   const admin = createAdminClient();
   const now = new Date().toISOString();
   // Setting profiles.verification flips the generated is_verified flag.
@@ -90,6 +104,9 @@ export async function rejectVerification(
   note: string
 ) {
   const adminId = await assertAdmin();
+  requestId = id(requestId);
+  profileId = id(profileId);
+  note = cleanText(note, 500);
   const admin = createAdminClient();
   const now = new Date().toISOString();
   await admin
@@ -108,6 +125,8 @@ export async function rejectVerification(
 
 export async function deletePost(postId: string, reportId: string) {
   const adminId = await assertAdmin();
+  postId = id(postId);
+  reportId = id(reportId);
   const admin = createAdminClient();
 
   // Best-effort: remove the media object from the public post-media bucket.
@@ -150,6 +169,7 @@ export async function deletePost(postId: string, reportId: string) {
 
 export async function approveEvent(eventId: string) {
   const adminId = await assertAdmin();
+  eventId = id(eventId);
   const admin = createAdminClient();
   const now = new Date().toISOString();
   await admin
@@ -175,6 +195,8 @@ export async function approveEvent(eventId: string) {
 
 export async function rejectEvent(eventId: string, reason: string) {
   const adminId = await assertAdmin();
+  eventId = id(eventId);
+  reason = cleanText(reason, 500);
   const admin = createAdminClient();
   const now = new Date().toISOString();
   await admin
@@ -201,6 +223,7 @@ export async function rejectEvent(eventId: string, reason: string) {
 
 export async function toggleFeatureEvent(eventId: string, on: boolean) {
   const adminId = await assertAdmin();
+  eventId = id(eventId);
   const admin = createAdminClient();
   await admin.from("events").update({ is_trending: on }).eq("id", eventId);
   await admin.from("admin_actions").insert({
@@ -223,7 +246,7 @@ export async function createAnnouncement(formData: FormData) {
   if (!body) return;
   const { data } = await admin
     .from("announcements")
-    .insert({ body, link: link || null, active: true, created_by: adminId })
+    .insert({ body, link, active: true, created_by: adminId })
     .select("id")
     .single();
   await admin.from("admin_actions").insert({
@@ -238,14 +261,14 @@ export async function createAnnouncement(formData: FormData) {
 export async function setAnnouncementActive(formData: FormData) {
   const adminId = await assertAdmin();
   const admin = createAdminClient();
-  const id = String(formData.get("id") ?? "");
+  const annId = asUuid(formData.get("id"));
   const active = String(formData.get("active") ?? "") === "true";
-  if (!id) return;
-  await admin.from("announcements").update({ active }).eq("id", id);
+  if (!annId) return;
+  await admin.from("announcements").update({ active }).eq("id", annId);
   await admin.from("admin_actions").insert({
     admin_id: adminId,
     action: active ? "activate_announcement" : "deactivate_announcement",
-    detail: id,
+    detail: annId,
   });
   revalidatePath("/admin/announcements");
   revalidatePath("/home");
@@ -254,13 +277,13 @@ export async function setAnnouncementActive(formData: FormData) {
 export async function deleteAnnouncement(formData: FormData) {
   const adminId = await assertAdmin();
   const admin = createAdminClient();
-  const id = String(formData.get("id") ?? "");
-  if (!id) return;
-  await admin.from("announcements").delete().eq("id", id);
+  const annId = asUuid(formData.get("id"));
+  if (!annId) return;
+  await admin.from("announcements").delete().eq("id", annId);
   await admin.from("admin_actions").insert({
     admin_id: adminId,
     action: "delete_announcement",
-    detail: id,
+    detail: annId,
   });
   revalidatePath("/admin/announcements");
   revalidatePath("/home");

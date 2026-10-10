@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdmin } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { VAPID_SUBJECT } from "@/lib/env";
 
 // Web Push needs Node APIs — never run on the Edge runtime.
 export const runtime = "nodejs";
@@ -14,15 +15,8 @@ type Body = {
   postId?: string;
 };
 
-function admin() {
-  return createAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } }
-  );
-}
-
-const UUIDISH = /^[0-9a-f-]{16,}$/i;
+const UUIDISH =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Payload = { title: string; body: string; url: string; tag: string };
 
@@ -57,7 +51,7 @@ export async function POST(req: Request) {
       : "message";
   const isPost = kind === "post_like" || kind === "post_comment";
 
-  const db = admin();
+  const db = createAdminClient();
 
   // Sender's display name for the notification body (shared by every kind).
   const { data: me } = await db
@@ -158,7 +152,7 @@ export async function POST(req: Request) {
           };
   }
 
-  webpush.setVapidDetails("mailto:hello@vibely.link", pub, priv);
+  webpush.setVapidDetails(VAPID_SUBJECT, pub, priv);
 
   const { data: subs } = await db
     .from("push_subscriptions")

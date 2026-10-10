@@ -36,7 +36,7 @@ export async function saveWhatsAppNumber(
       .select("whatsapp")
       .maybeSingle();
 
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: "Could not save. Please try again." };
     revalidatePath("/profile");
     return { ok: true, value: null };
   }
@@ -55,7 +55,7 @@ export async function saveWhatsAppNumber(
     updated_at: new Date().toISOString(),
   });
 
-  if (writeErr) return { ok: false, error: writeErr.message };
+  if (writeErr) return { ok: false, error: "Could not save. Please try again." };
 
   // Read the row back. The previous version reported success purely from the
   // absence of a write error, so a row silently filtered out by RLS still
@@ -66,7 +66,7 @@ export async function saveWhatsAppNumber(
     .eq("profile_id", user.id)
     .maybeSingle();
 
-  if (readErr) return { ok: false, error: readErr.message };
+  if (readErr) return { ok: false, error: "Could not save. Please try again." };
   if (!confirmed || confirmed.whatsapp !== normalised) {
     return {
       ok: false,

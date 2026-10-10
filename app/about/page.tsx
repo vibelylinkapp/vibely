@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import DocPage from "@/components/DocPage";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "About Vibely",
+export const metadata: Metadata = pageMetadata({
+  title: "About Vibely - the Kenyan dating & social app",
   description:
-    "Vibely is a social discovery app built in Nairobi for Kenya and East Africa — dating, friends, hangouts and networking in one place.",
-};
+    "Vibely is a social discovery app built in Nairobi for Kenya and East Africa: dating, friendship, hangouts, events and networking in one safe, verified community.",
+  path: "/about",
+});
 
 export default function About() {
   return (
@@ -14,6 +17,7 @@ export default function About() {
       title="About Vibely"
       intro="We are building the app we wanted when we moved to a new city."
     >
+      <JsonLd data={breadcrumbJsonLd("About", "/about")} />
       <h2>Why we built it</h2>
       <p>
         In Nairobi, meeting new people still mostly happens through friends of

@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import DocPage from "@/components/DocPage";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Safety on Vibely",
+export const metadata: Metadata = pageMetadata({
+  title: "Dating safety tips & how we protect you",
   description:
-    "How to stay safe meeting people from Vibely, how to spot a scam, and how to use the blocking, reporting and privacy tools built into the app.",
-};
+    "How Vibely keeps you safe: selfie verification, blocking and reporting, location privacy, and practical tips for meeting someone new in Kenya.",
+  path: "/safety",
+});
 
 export default function Safety() {
   return (
@@ -15,6 +18,7 @@ export default function Safety() {
       intro="Most people you meet here are exactly who they say they are. These habits protect you from the ones who are not."
       updated={SITE.lastUpdated}
     >
+      <JsonLd data={breadcrumbJsonLd("Safety", "/safety")} />
       <h2>Before you meet</h2>
       <ul>
         <li>

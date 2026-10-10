@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stkPush, normalizeKePhone, mpesaConfigured } from "@/lib/mpesa";
 import { stkRateLimited } from "@/lib/rate-limit";
+import { asUuid } from "@/lib/security/sanitize";
+import { logServerError } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  const eventId = (body.eventId || "").trim();
+  const eventId = asUuid((body.eventId || "").trim());
   if (!eventId) {
     return NextResponse.json({ ok: false, reason: "bad_event" }, { status: 400 });
   }
@@ -90,7 +92,7 @@ export async function POST(req: Request) {
   }
 
   // MEDIUM-1: cap prompts per member and per phone number.
-  if (await stkRateLimited(createAdminClient(), user.id, phone)) {
+  if (await stkRateLimited(admin, user.id, phone)) {
     return NextResponse.json(
       { ok: false, reason: "too_many" },
       { status: 429 }
@@ -148,8 +150,10 @@ export async function POST(req: Request) {
       amount: price,
     });
   } catch (e) {
+    // Log the provider error server-side; never echo it to the browser.
+    logServerError("stkpush", e);
     return NextResponse.json(
-      { ok: false, reason: e instanceof Error ? e.message : "stk_failed" },
+      { ok: false, reason: "stk_failed" },
       { status: 502 }
     );
   }

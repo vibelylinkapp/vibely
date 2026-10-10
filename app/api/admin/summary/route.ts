@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { VAPID_SUBJECT } from "@/lib/env";
+import { hasBearer } from "@/lib/security/crypto";
 import {
   computeAdminSummary,
   summaryHeadline,
@@ -14,9 +16,7 @@ export const dynamic = "force-dynamic";
 
 // True when the request carries Vercel Cron's Authorization: Bearer <CRON_SECRET>.
 function isCron(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  return hasBearer(req, process.env.CRON_SECRET);
 }
 
 async function isAdminSession(): Promise<boolean> {
@@ -53,7 +53,7 @@ async function pushToAdmins(summary: AdminSummary): Promise<number> {
     .in("profile_id", adminIds);
   if (!subs || subs.length === 0) return 0;
 
-  webpush.setVapidDetails("mailto:hello@vibely.link", pub, priv);
+  webpush.setVapidDetails(VAPID_SUBJECT, pub, priv);
   const payload = JSON.stringify({
     title: "Vibely admin summary",
     body: summaryHeadline(summary),

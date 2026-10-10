@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SUBSCRIPTION_DAYS } from "@/lib/tiers";
-import type { Json } from "@/lib/database.types";
+import { safeEqual } from "@/lib/security/crypto";
 
 // Safaricom calls this endpoint (no user session). Must be public + https.
 export const runtime = "nodejs";
@@ -29,7 +29,8 @@ type CallbackItem = { Name: string; Value?: string | number };
 function authorized(req: Request): boolean {
   const expected = process.env.MPESA_CALLBACK_SECRET;
   if (!expected) return false;
-  return new URL(req.url).searchParams.get("t") === expected;
+  // Constant-time comparison so response timing cannot leak the secret.
+  return safeEqual(new URL(req.url).searchParams.get("t"), expected);
 }
 
 export async function POST(req: Request) {

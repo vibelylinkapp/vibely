@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { VAPID_SUBJECT } from "@/lib/env";
+import { hasBearer } from "@/lib/security/crypto";
 
 // web-push needs Node APIs — never run on the Edge runtime.
 export const runtime = "nodejs";
@@ -17,9 +19,7 @@ const TIER_LABEL: Record<string, string> = {
 
 // True when the request carries Vercel Cron's Authorization: Bearer <CRON_SECRET>.
 function authorized(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  return hasBearer(req, process.env.CRON_SECRET);
 }
 
 export async function GET(req: Request) {
@@ -78,7 +78,7 @@ export async function GET(req: Request) {
     });
   });
 
-  webpush.setVapidDetails("mailto:hello@vibely.link", pub, priv);
+  webpush.setVapidDetails(VAPID_SUBJECT, pub, priv);
 
   let nudged = 0;
   const stale: string[] = [];

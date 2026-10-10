@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { safeLink } from "@/lib/security/sanitize";
 
 const DISMISS_KEY = "vibely.notice.dismissed";
 
@@ -44,22 +45,25 @@ export default function AdminNotice({
     setShow(false);
   }
 
-  const isExternal = link ? /^https?:\/\//i.test(link) : false;
+  // Defence in depth: never render a javascript:/data: href even if one
+  // reached the database before write-side validation existed.
+  const href = safeLink(link);
+  const isExternal = href ? /^https?:\/\//i.test(href) : false;
 
   const inner = (
     <>
       <span className="notice-ic">{megaphone}</span>
       <span className="notice-text">{body}</span>
-      {link && <span className="notice-cta">Open</span>}
+      {href && <span className="notice-cta">Open</span>}
     </>
   );
 
   return (
     <div className="admin-notice">
-      {link ? (
+      {href ? (
         isExternal ? (
           <a
-            href={link}
+            href={href}
             className="notice-main"
             target="_blank"
             rel="noopener noreferrer"
@@ -67,7 +71,7 @@ export default function AdminNotice({
             {inner}
           </a>
         ) : (
-          <Link href={link} className="notice-main">
+          <Link href={href} className="notice-main">
             {inner}
           </Link>
         )

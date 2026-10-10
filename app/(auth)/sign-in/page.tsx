@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { pageMetadata } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/nav/next-path";
 import SignInForm from "./sign-in-form";
@@ -16,6 +18,13 @@ import SignInForm from "./sign-in-form";
 // having to remember an unguessable URL. Validated by safeNextPath, because
 // a raw query value reaching redirect() is an open-redirect hole.
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Sign in or join free",
+  description:
+    "Sign in to Vibely or create a free account in seconds with your phone, email or Google. Meet real, verified people near you in Kenya.",
+  path: "/sign-in",
+});
 
 export default async function SignInPage({
   searchParams,

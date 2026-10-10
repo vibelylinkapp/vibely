@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ ok: false }, { status: 401 });
 
   const checkoutId = new URL(req.url).searchParams.get("checkoutId");
-  if (!checkoutId) {
+  if (!checkoutId || checkoutId.length > 100 || !/^[\w-]+$/.test(checkoutId)) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 

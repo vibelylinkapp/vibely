@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { asUuid } from "@/lib/security/sanitize";
+import { logServerError } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +19,7 @@ export async function POST(req: Request) {
   let targetId = "";
   try {
     const body = (await req.json()) as { targetId?: string };
-    targetId = body.targetId ?? "";
+    targetId = asUuid(body.targetId) ?? "";
   } catch {
     targetId = "";
   }
@@ -33,8 +35,9 @@ export async function POST(req: Request) {
     .insert({ passer_id: user.id, passed_id: targetId });
   // A duplicate (already passed) is fine — treat as success.
   if (error && !/duplicate key/i.test(error.message)) {
+    logServerError("api/pass", error);
     return NextResponse.json(
-      { ok: false, reason: error.message },
+      { ok: false, reason: "server_error" },
       { status: 500 }
     );
   }

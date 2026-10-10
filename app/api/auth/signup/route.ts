@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clientIp, ipRateLimited } from "@/lib/rate-limit";
+import { passwordProblem } from "@/lib/security/password";
+import { isEmail } from "@/lib/security/sanitize";
+import { readJsonObject } from "@/lib/security/request";
 
 // Server-only, service-role. Creates an email/password account that is
 // immediately confirmed, so email sign-up works without waiting on a
@@ -15,10 +18,10 @@ import { clientIp, ipRateLimited } from "@/lib/rate-limit";
 //   as a new one, so this route no longer reveals who has an account. The
 //   client then signs in; that succeeds only with the right password and
 //   otherwise shows the normal "Invalid login credentials" message.
-// - LOW-1: new passwords need at least 10 characters.
+// - LOW-1: password policy in lib/security/password.ts (10+ chars, not a
+//   common password, letters plus a number/symbol, max 72 bytes for bcrypt).
+//   Supabase Auth stores the password as a bcrypt hash; we never see it again.
 export const runtime = "nodejs";
-
-const MIN_PASSWORD = 10;
 
 export async function POST(request: Request) {
   if (ipRateLimited(`signup:${clientIp(request)}`, 5, 10 * 60 * 1000)) {
@@ -28,27 +31,23 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { email?: string; password?: string };
-  try {
-    body = await request.json();
-  } catch {
+  const body = await readJsonObject<{ email: string; password: string }>(request);
+  if (!body) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const email = (body.email ?? "").trim().toLowerCase();
-  const password = body.password ?? "";
+  const email = String(body.email ?? "").trim().toLowerCase();
+  const password = String(body.password ?? "");
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || !isEmail(email)) {
     return NextResponse.json(
       { error: "Enter a valid email address." },
       { status: 400 }
     );
   }
-  if (password.length < MIN_PASSWORD) {
-    return NextResponse.json(
-      { error: `Password must be at least ${MIN_PASSWORD} characters.` },
-      { status: 400 }
-    );
+  const weak = passwordProblem(password, email);
+  if (weak) {
+    return NextResponse.json({ error: weak }, { status: 400 });
   }
 
   const supabase = createAdminClient();

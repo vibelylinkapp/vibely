@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import DocPage from "@/components/DocPage";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — Vibely",
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy policy",
   description:
-    "Exactly what personal data Vibely stores, why, who it is shared with, how long it is kept, and the rights you have under Kenya's Data Protection Act, 2019.",
-};
+    "How Vibely collects, uses and protects your personal data, in line with the Kenya Data Protection Act 2019.",
+  path: "/privacy",
+});
 
 export default function Privacy() {
   return (
@@ -15,6 +18,7 @@ export default function Privacy() {
       intro={`This describes what ${SITE.name} actually stores about you, and what you can do about it. Where something is still a gap, we say so rather than promising it.`}
       updated={SITE.lastUpdated}
     >
+      <JsonLd data={breadcrumbJsonLd("Privacy policy", "/privacy")} />
       <h2>1. Who we are</h2>
       <p>
         {SITE.legalEntity} operates the {SITE.name} app and website from{" "}

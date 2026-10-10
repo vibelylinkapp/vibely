@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { extFor } from "@/lib/upload";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -45,7 +46,7 @@ export default function CreatePost({ userId }: { userId: string }) {
 
     let mediaUrl: string | null = null;
     if (file) {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const ext = extFor(file);
       const path = `${userId}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("post-media")

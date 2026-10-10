@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { extFor } from "@/lib/upload";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -49,7 +50,7 @@ export default function GalleryUpload({
 
     setBusy(true);
     const supabase = createClient();
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const ext = extFor(file);
     const path = `${userId}/gallery/${Date.now()}.${ext}`;
 
     const { error: upErr } = await supabase.storage

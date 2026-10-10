@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { extFor } from "@/lib/upload";
 
 type Story = {
   id: string;
@@ -68,7 +69,7 @@ export default function Stories({
     }
     setBusy(true);
     const supabase = createClient();
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const ext = extFor(file);
     const path = `${currentUserId}/stories/${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("avatars")

@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import JsonLd from "@/components/JsonLd";
+import { SITE_URL } from "@/lib/env";
+import { SITE } from "@/lib/site";
+import { SEO_DESCRIPTION, SEO_KEYWORDS, SEO_TITLE, siteJsonLd } from "@/lib/seo";
 import "./globals.css";
 import "./landing-hero-plus.css";
 import "./marketing.css";
@@ -50,29 +54,56 @@ const serif = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vibely-inky.vercel.app"),
-  title: "Vibely — Meet real people near you",
-  description:
-    "The easiest way to meet real people near you. Dating, friends, hangouts, and networking across Kenya and East Africa.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: SEO_TITLE, template: "%s | Vibely Kenya" },
+  description: SEO_DESCRIPTION,
+  keywords: SEO_KEYWORDS,
+  applicationName: SITE.name,
+  authors: [{ name: SITE.name, url: SITE_URL }],
+  creator: SITE.name,
+  publisher: SITE.name,
+  category: "social networking",
+  alternates: { canonical: "/" },
   manifest: "/manifest.json",
   icons: {
-    icon: "/icons/favicon-32.png",
+    icon: [
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+    ],
     apple: "/icons/apple-touch-icon-180.png",
   },
   openGraph: {
-    title: "Vibely — Meet real people near you",
-    description:
-      "Dating, friends, hangouts, and networking. Find your people across Kenya and East Africa.",
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
+    url: SITE_URL,
     type: "website",
     locale: "en_KE",
-    siteName: "Vibely",
+    siteName: SITE.name,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vibely — Meet real people near you",
-    description:
-      "Dating, friends, hangouts, and networking across Kenya and East Africa.",
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+      : undefined,
+  },
+  other: { "geo.region": "KE", "geo.placename": "Nairobi" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
@@ -87,10 +118,13 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="en-KE"
       className={`${sans.variable} ${display.variable} ${serif.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <JsonLd data={siteJsonLd()} />
+        {children}
+      </body>
     </html>
   );
 }

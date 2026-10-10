@@ -3,6 +3,8 @@ import Link from "next/link";
 import LandingMobileNav from "@/components/LandingMobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { SITE, hasStoreLinks } from "@/lib/site";
+import JsonLd from "@/components/JsonLd";
+import { FAQS, faqJsonLd } from "@/lib/seo";
 
 const IMG = {
   jane: "/landing/jane.jpg",
@@ -552,6 +554,21 @@ export default function Landing() {
               </Link>
             </div>
           </div>
+
+          <section className="lp2-faq" id="faq" aria-labelledby="faq-title">
+            <JsonLd data={faqJsonLd()} />
+            <h2 className="lp2-h2" id="faq-title">
+              Questions about <span className="grad">Vibely</span>
+            </h2>
+            <div className="lp2-faq-list">
+              {FAQS.map((f) => (
+                <details className="lp2-faq-item" key={f.q}>
+                  <summary>{f.q}</summary>
+                  <p>{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
 
           <p className="lp2-foot dark">
             Made in Kenya · for Kenya &amp; East Africa

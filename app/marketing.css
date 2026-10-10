@@ -227,3 +227,53 @@
   max-width: 720px;
   margin: 44px auto 0;
 }
+
+/* -------------------------------------------------------------------------
+   Landing FAQ (also published as FAQPage structured data, see lib/seo.ts)
+   ------------------------------------------------------------------------- */
+.lp2-faq {
+  max-width: 860px;
+  margin: 48px auto 8px;
+  padding: 0 clamp(16px, 4vw, 24px);
+}
+
+.lp2-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.lp2-faq-item {
+  border: 1px solid rgba(20, 11, 38, 0.1);
+  border-radius: 16px;
+  background: #fff;
+  padding: 14px 18px;
+}
+
+.lp2-faq-item summary {
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.lp2-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.lp2-faq-item summary::after {
+  content: "+";
+  float: right;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+.lp2-faq-item[open] summary::after {
+  content: "-";
+}
+
+.lp2-faq-item p {
+  margin: 10px 0 0;
+  line-height: 1.6;
+  opacity: 0.85;
+}

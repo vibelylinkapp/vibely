@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stkPush, normalizeKePhone, mpesaConfigured } from "@/lib/mpesa";
 import { stkRateLimited } from "@/lib/rate-limit";
+import { logServerError } from "@/lib/security/request";
 import { TIER_PRICES, type PaidTier } from "@/lib/tiers";
 
 export const runtime = "nodejs";
@@ -86,8 +87,10 @@ export async function POST(req: Request) {
       message: res.customerMessage,
     });
   } catch (e) {
+    // Log the provider error server-side; never echo it to the browser.
+    logServerError("stkpush", e);
     return NextResponse.json(
-      { ok: false, reason: e instanceof Error ? e.message : "stk_failed" },
+      { ok: false, reason: "stk_failed" },
       { status: 502 }
     );
   }

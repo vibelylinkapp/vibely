@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import BottomNav from "@/components/BottomNav";
+
+/** Signed-in pages are private: keep them out of search engines. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * Shared shell for every signed-in route.

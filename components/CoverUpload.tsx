@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { extFor } from "@/lib/upload";
 
 // Cover photo picker. Uploads straight to the existing public "post-media"
 // bucket under <uid>/covers/<file>, which is what its insert policy requires
@@ -48,7 +49,7 @@ export default function CoverUpload({
       return;
     }
 
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const ext = extFor(file);
     const path = `${me}/covers/${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("post-media")

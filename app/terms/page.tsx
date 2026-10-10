@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import DocPage from "@/components/DocPage";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 import { TIER_PRICES, SUBSCRIPTION_DAYS } from "@/lib/tiers";
 import { FREE_DAILY_LIKE_LIMIT, BOOST_QUOTA } from "@/lib/entitlements";
 
-export const metadata: Metadata = {
-  title: "Terms of Service — Vibely",
+export const metadata: Metadata = pageMetadata({
+  title: "Terms of service",
   description:
-    "The rules for using Vibely: eligibility, acceptable use, what the free and paid tiers include, how M-Pesa payments work, and how accounts end.",
-};
+    "The terms that apply when you use Vibely, including eligibility, payments with M-Pesa, community rules and account deletion.",
+  path: "/terms",
+});
 
 export default function Terms() {
   return (
@@ -17,6 +20,7 @@ export default function Terms() {
       intro={`These terms are the agreement between you and ${SITE.legalEntity} when you use ${SITE.name}.`}
       updated={SITE.lastUpdated}
     >
+      <JsonLd data={breadcrumbJsonLd("Terms of service", "/terms")} />
       <p>
         <em>
           These terms were drafted in plain language and have not been reviewed

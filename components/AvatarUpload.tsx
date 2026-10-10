@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { extFor } from "@/lib/upload";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -39,7 +40,7 @@ export default function AvatarUpload({
 
     setBusy(true);
     const supabase = createClient();
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const ext = extFor(file);
     const path = `${userId}/${Date.now()}.${ext}`;
 
     const { error: upErr } = await supabase.storage

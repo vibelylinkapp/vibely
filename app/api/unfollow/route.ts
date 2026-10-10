@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { asUuid } from "@/lib/security/sanitize";
+import { logServerError } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,7 +18,7 @@ export async function POST(req: Request) {
   let targetId = "";
   try {
     const body = (await req.json()) as { targetId?: string };
-    targetId = body.targetId ?? "";
+    targetId = asUuid(body.targetId) ?? "";
   } catch {
     targetId = "";
   }
@@ -33,8 +35,9 @@ export async function POST(req: Request) {
     .eq("follower_id", user.id)
     .eq("following_id", targetId);
   if (error) {
+    logServerError("api/unfollow", error);
     return NextResponse.json(
-      { ok: false, reason: error.message },
+      { ok: false, reason: "server_error" },
       { status: 500 }
     );
   }

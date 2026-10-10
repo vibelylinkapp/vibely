@@ -3,6 +3,7 @@
 import "@/app/highlights-plus.css";
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { extFor } from "@/lib/upload";
 import type { Highlight } from "@/lib/highlights";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
@@ -91,7 +92,7 @@ export default function HighlightsEditor({
     setBusy(true);
     setError(null);
     const supabase = createClient();
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const ext = extFor(file);
     const path = `${userId}/highlights/${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("avatars")

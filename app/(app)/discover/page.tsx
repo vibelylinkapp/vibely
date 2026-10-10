@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { escapeLike } from "@/lib/security/sanitize";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/ProfileCard";
@@ -345,7 +346,7 @@ export default async function DiscoverPage({
     query = query.in("id", matchSet.size ? [...matchSet] : [NO_MATCH]);
   }
   if (q) {
-    query = query.ilike("display_name", `%${q}%`);
+    query = query.ilike("display_name", `%${escapeLike(q.slice(0, 60))}%`);
   }
 
   const [{ data: boostedData }, { data: feedData }] = await Promise.all([
