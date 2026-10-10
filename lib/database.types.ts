@@ -484,6 +484,7 @@ export type Database = {
           is_private: boolean;
           is_verified: boolean | null;
           languages: string[] | null;
+          interests: string[];
           last_active_at: string | null;
           occupation: string | null;
           onboarding_done: boolean;
@@ -518,6 +519,7 @@ export type Database = {
           is_private?: boolean;
           is_verified?: boolean | null;
           languages?: string[] | null;
+          interests?: string[];
           last_active_at?: string | null;
           occupation?: string | null;
           onboarding_done?: boolean;
@@ -552,6 +554,7 @@ export type Database = {
           is_private?: boolean;
           is_verified?: boolean | null;
           languages?: string[] | null;
+          interests?: string[];
           last_active_at?: string | null;
           occupation?: string | null;
           onboarding_done?: boolean;

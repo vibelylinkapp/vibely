@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { KENYA_COUNTIES } from "@/lib/counties";
 import type { Database } from "@/lib/database.types";
+import { INTERESTS, MAX_INTERESTS, type Interest } from "@/lib/interests";
 
 type Intent = Database["public"]["Enums"]["intent_t"];
 type Gender = Database["public"]["Enums"]["gender_t"];
@@ -36,6 +37,7 @@ export type ProfileInfoInitial = {
   education: string;
   languages: string;
   intents: Intent[];
+  interests: Interest[];
 };
 
 // A real, prefilled "edit your information" form. Saves straight to the
@@ -66,6 +68,7 @@ export default function ProfileInfoForm({
   const [education, setEducation] = useState(initial.education);
   const [languages, setLanguages] = useState(initial.languages);
   const [intents, setIntents] = useState<Intent[]>(initial.intents);
+  const [interests, setInterests] = useState<Interest[]>(initial.interests);
   const [msg, setMsg] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -74,6 +77,17 @@ export default function ProfileInfoForm({
     setOk(false);
     setIntents((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function toggleInterest(id: Interest) {
+    setOk(false);
+    setInterests((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : prev.length >= MAX_INTERESTS
+          ? prev
+          : [...prev, id]
     );
   }
 
@@ -124,19 +138,23 @@ export default function ProfileInfoForm({
       setMsg(
         pErr.code === "23505"
           ? "That username is already taken — pick another one."
-          : pErr.message
+          : "We could not save your changes. Please try again."
       );
       setSaving(false);
       return;
     }
 
-    // Replace the interest set with the current selection.
+    // Best-effort: interests are their own update so the rest of the form
+    // still saves on a database where migration 0048 has not run yet.
+    await supabase.from("profiles").update({ interests }).eq("id", userId);
+
+    // Replace the intent set with the current selection.
     await supabase.from("profile_intents").delete().eq("profile_id", userId);
     const { error: iErr } = await supabase
       .from("profile_intents")
       .insert(intents.map((intent) => ({ profile_id: userId, intent })));
     if (iErr) {
-      setMsg(iErr.message);
+      setMsg("We could not save what you are looking for. Please try again.");
       setSaving(false);
       return;
     }
@@ -296,6 +314,28 @@ export default function ProfileInfoForm({
               onClick={() => toggleIntent(it.id)}
             >
               {it.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="pf4-if-field">
+        <span>
+          Interests <em>up to {MAX_INTERESTS}</em>
+        </span>
+        <div className="pf4-if-chips">
+          {INTERESTS.map((it) => (
+            <button
+              type="button"
+              key={it}
+              className={"pf4-if-chip" + (interests.includes(it) ? " on" : "")}
+              aria-pressed={interests.includes(it)}
+              disabled={
+                !interests.includes(it) && interests.length >= MAX_INTERESTS
+              }
+              onClick={() => toggleInterest(it)}
+            >
+              {it}
             </button>
           ))}
         </div>

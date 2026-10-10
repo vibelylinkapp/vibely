@@ -5,19 +5,25 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { KENYA_COUNTIES } from "@/lib/counties";
 import type { Database } from "@/lib/database.types";
+import { INTERESTS, MAX_INTERESTS, type Interest } from "@/lib/interests";
 
 type Intent = Database["public"]["Enums"]["intent_t"];
 type Gender = Database["public"]["Enums"]["gender_t"];
 
-const INTENTS: { id: Intent; label: string }[] = [
-  { id: "dating", label: "Dating" },
-  { id: "friendship", label: "Friendship" },
-  { id: "hangout", label: "Hangout" },
+/** The four core connection types, shown first with a one-line explainer. */
+const PRIMARY_INTENTS: { id: Intent; label: string; hint: string }[] = [
+  { id: "dating", label: "Dating", hint: "Meet someone special" },
+  { id: "friendship", label: "Friendship", hint: "Make new friends" },
+  { id: "hangout", label: "Hangouts", hint: "Plans, outings, company" },
+  { id: "networking", label: "Networking", hint: "Career and business" },
+];
+
+/** Optional, more specific things to do together. */
+const MORE_INTENTS: { id: Intent; label: string }[] = [
   { id: "weekend", label: "Weekend plans" },
   { id: "gym", label: "Gym partner" },
   { id: "hiking", label: "Hiking" },
   { id: "coffee", label: "Coffee" },
-  { id: "networking", label: "Networking" },
   { id: "business", label: "Business" },
   { id: "travel", label: "Travel" },
   { id: "movies", label: "Movies" },
@@ -44,6 +50,7 @@ export default function OnboardingPage() {
   const [bio, setBio] = useState("");
   const [languages, setLanguages] = useState("");
   const [intents, setIntents] = useState<Intent[]>([]);
+  const [interests, setInterests] = useState<Interest[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -58,6 +65,16 @@ export default function OnboardingPage() {
   function toggleIntent(id: Intent) {
     setIntents((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function toggleInterest(id: Interest) {
+    setInterests((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : prev.length >= MAX_INTERESTS
+          ? prev
+          : [...prev, id]
     );
   }
 
@@ -99,9 +116,15 @@ export default function OnboardingPage() {
       .eq("id", user.id);
 
     if (pErr) {
-      setMsg(pErr.message);
+      setMsg("We could not save your profile. Please try again.");
       setSaving(false);
       return;
+    }
+
+    // Best-effort: interests live in their own update so onboarding still
+    // completes on a database where migration 0048 has not run yet.
+    if (interests.length > 0) {
+      await supabase.from("profiles").update({ interests }).eq("id", user.id);
     }
 
     await supabase.from("profile_intents").delete().eq("profile_id", user.id);
@@ -110,7 +133,7 @@ export default function OnboardingPage() {
       .insert(intents.map((intent) => ({ profile_id: user.id, intent })));
 
     if (iErr) {
-      setMsg(iErr.message);
+      setMsg("We could not save what you are looking for. Please try again.");
       setSaving(false);
       return;
     }
@@ -133,7 +156,8 @@ export default function OnboardingPage() {
       <section className="onboard-card">
         <h1 className="auth-title">Set up your profile</h1>
         <p className="auth-sub">
-          This is how people will find and get to know you.
+          Takes about a minute. Only your name, age and what you are looking
+          for are required; you can change everything later in Profile.
         </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -155,6 +179,10 @@ export default function OnboardingPage() {
               onChange={(e) => setBirthdate(e.target.value)}
               required
             />
+            <small className="onboard-hint">
+              Only your age is shown, never your date of birth. You must be 18
+              or older.
+            </small>
           </label>
 
           <label className="field">
@@ -211,16 +239,59 @@ export default function OnboardingPage() {
           </label>
 
           <div className="field">
-            <span>Looking for</span>
+            <span>What are you looking for?</span>
+            <small className="onboard-hint">
+              Pick one or more. People see this on your card, and Discover
+              uses it to show you the right people.
+            </small>
+            <div className="onboard-intents">
+              {PRIMARY_INTENTS.map((it) => (
+                <button
+                  type="button"
+                  key={it.id}
+                  className={
+                    "onboard-intent" + (intents.includes(it.id) ? " on" : "")
+                  }
+                  aria-pressed={intents.includes(it.id)}
+                  onClick={() => toggleIntent(it.id)}
+                >
+                  <b>{it.label}</b>
+                  <small>{it.hint}</small>
+                </button>
+              ))}
+            </div>
             <div className="chips">
-              {INTENTS.map((it) => (
+              {MORE_INTENTS.map((it) => (
                 <button
                   type="button"
                   key={it.id}
                   className={"chip" + (intents.includes(it.id) ? " chip-on" : "")}
+                  aria-pressed={intents.includes(it.id)}
                   onClick={() => toggleIntent(it.id)}
                 >
                   {it.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="field">
+            <span>
+              Interests <em>optional, up to {MAX_INTERESTS}</em>
+            </span>
+            <div className="chips">
+              {INTERESTS.map((it) => (
+                <button
+                  type="button"
+                  key={it}
+                  className={"chip" + (interests.includes(it) ? " chip-on" : "")}
+                  aria-pressed={interests.includes(it)}
+                  disabled={
+                    !interests.includes(it) && interests.length >= MAX_INTERESTS
+                  }
+                  onClick={() => toggleInterest(it)}
+                >
+                  {it}
                 </button>
               ))}
             </div>

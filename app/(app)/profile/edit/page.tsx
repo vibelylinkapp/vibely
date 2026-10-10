@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cleanInterests } from "@/lib/interests";
 import { createClient } from "@/lib/supabase/server";
 import AvatarUpload from "@/components/AvatarUpload";
 import CoverPhoto from "@/components/CoverPhoto";
@@ -32,6 +33,14 @@ export default async function ProfileEditPage() {
     .select("intent")
     .eq("profile_id", user.id);
 
+  // Separate, error-tolerant read: the interests column arrives in
+  // migration 0048 and the page must keep working before it runs.
+  const { data: interestRow } = await supabase
+    .from("profiles")
+    .select("interests")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const { data: myPhotos } = await supabase
     .from("photos")
     .select("id, url")
@@ -58,6 +67,7 @@ export default async function ProfileEditPage() {
       ? profile.languages.join(", ")
       : "",
     intents: (intentRows ?? []).map((i) => i.intent),
+    interests: cleanInterests(interestRow?.interests),
   };
 
   return (

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { escapeLike } from "@/lib/security/sanitize";
+import { DISCOVER_INTERESTS, isInterest } from "@/lib/interests";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/ProfileCard";
@@ -260,10 +261,15 @@ function inAgeBand(birthdate: string | null, b: AgeBand | null): boolean {
 }
 
 /** Build a Discover URL that keeps the other active filters. */
-function discoverHref(intent: string, age: string | null): string {
+function discoverHref(
+  intent: string,
+  age: string | null,
+  interest: string | null = null
+): string {
   const params = new URLSearchParams();
   if (intent !== "all") params.set("intent", intent);
   if (age) params.set("age", age);
+  if (interest) params.set("interest", interest);
   const qs = params.toString();
   return qs ? `/discover?${qs}` : "/discover";
 }
@@ -271,7 +277,12 @@ function discoverHref(intent: string, age: string | null): string {
 export default async function DiscoverPage({
   searchParams,
 }: {
-  searchParams: Promise<{ intent?: string; q?: string; age?: string }>;
+  searchParams: Promise<{
+    intent?: string;
+    q?: string;
+    age?: string;
+    interest?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const active = FILTERS.some((f) => f.id === sp.intent)
@@ -279,7 +290,8 @@ export default async function DiscoverPage({
     : "all";
   const q = (sp.q ?? "").trim();
   const ageBand = AGE_BANDS.find((b) => b.id === sp.age) ?? null;
-  const isDefault = !q && active === "all" && !ageBand;
+  const interest = isInterest(sp.interest) ? sp.interest : null;
+  const isDefault = !q && active === "all" && !ageBand && !interest;
   const supabase = await createClient();
   const {
     data: { user },
@@ -387,6 +399,9 @@ export default async function DiscoverPage({
   if (matchSet) {
     query = query.in("id", matchSet.size ? [...matchSet] : [NO_MATCH]);
   }
+  if (interest) {
+    query = query.contains("interests", [interest]);
+  }
   if (ageBand) {
     const { born_after, born_on_or_before } = birthBounds(ageBand);
     query = query.lte("birthdate", born_on_or_before);
@@ -401,7 +416,8 @@ export default async function DiscoverPage({
     query,
   ]);
   // A text search (from Home) filters by name and skips boosted pinning.
-  const boostedProfiles = q
+  const boostedProfiles =
+    q || interest
     ? []
     : (boostedData ?? []).filter((p) => inAgeBand(p.birthdate, ageBand));
   const feedProfiles = (feedData ?? []).filter((p) => !excludeIds.has(p.id));
@@ -549,7 +565,7 @@ export default async function DiscoverPage({
         {FILTERS.map((f) => (
           <Link
             key={f.id}
-            href={discoverHref(f.id, ageBand?.id ?? null)}
+            href={discoverHref(f.id, ageBand?.id ?? null, interest)}
             className={"disc2-cat" + (active === f.id ? " on" : "")}
             style={{ "--cat-bg": f.bg, "--cat-fg": f.fg } as CSSProperties}
             aria-current={active === f.id ? "page" : undefined}
@@ -565,7 +581,7 @@ export default async function DiscoverPage({
       <div className="disc2-ages" role="group" aria-label="Filter by age">
         <span className="disc2-ages-label">Age</span>
         <Link
-          href={discoverHref(active, null)}
+          href={discoverHref(active, null, interest)}
           className={"disc2-age" + (ageBand ? "" : " on")}
           aria-current={ageBand ? undefined : "page"}
         >
@@ -574,11 +590,32 @@ export default async function DiscoverPage({
         {AGE_BANDS.map((b) => (
           <Link
             key={b.id}
-            href={discoverHref(active, b.id)}
+            href={discoverHref(active, b.id, interest)}
             className={"disc2-age" + (ageBand?.id === b.id ? " on" : "")}
             aria-current={ageBand?.id === b.id ? "page" : undefined}
           >
             {b.label}
+          </Link>
+        ))}
+      </div>
+
+      <div className="disc2-ages" role="group" aria-label="Filter by interest">
+        <span className="disc2-ages-label">Into</span>
+        <Link
+          href={discoverHref(active, ageBand?.id ?? null, null)}
+          className={"disc2-age" + (interest ? "" : " on")}
+          aria-current={interest ? undefined : "page"}
+        >
+          Anything
+        </Link>
+        {DISCOVER_INTERESTS.map((it) => (
+          <Link
+            key={it}
+            href={discoverHref(active, ageBand?.id ?? null, it)}
+            className={"disc2-age" + (interest === it ? " on" : "")}
+            aria-current={interest === it ? "page" : undefined}
+          >
+            {it}
           </Link>
         ))}
       </div>
