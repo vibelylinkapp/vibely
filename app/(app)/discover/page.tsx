@@ -328,7 +328,7 @@ export default async function DiscoverPage({
     supabase.from("boosts").select("profile_id").gt("expires_at", nowIso),
     supabase
       .from("profiles")
-      .select("area, county")
+      .select("area, county, onboarding_done")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -347,6 +347,9 @@ export default async function DiscoverPage({
           .select("profile_id")
           .eq("intent", active as Intent),
   ]);
+
+  // Same gate as Home: an unfinished profile goes to onboarding first.
+  if (meProfile && !meProfile.onboarding_done) redirect("/onboarding");
 
   // Each card renders its own WhatsApp state from this map rather than
   // issuing a round trip per card.

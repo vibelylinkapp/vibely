@@ -47,7 +47,7 @@ export default function AvatarUpload({
       .from("avatars")
       .upload(path, file, { contentType: file.type, cacheControl: "3600" });
     if (upErr) {
-      setError(upErr.message);
+      setError("Upload failed. Check your connection and try again.");
       setBusy(false);
       return;
     }
@@ -58,7 +58,7 @@ export default function AvatarUpload({
       .update({ avatar_url: pub.publicUrl })
       .eq("id", userId);
     if (dbErr) {
-      setError(dbErr.message);
+      setError("Photo uploaded but could not be saved to your profile. Try again.");
       setBusy(false);
       return;
     }

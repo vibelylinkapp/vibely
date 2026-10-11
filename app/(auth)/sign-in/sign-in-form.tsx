@@ -399,6 +399,11 @@ export default function SignInForm({ next = "/home" }: { next?: string }) {
                         : "At least 10 characters, with letters and a number or symbol.")
                     : "Tap the eye to reveal your password."}
                 </p>
+                {mode === "in" && (
+                  <p className="auth-forgot">
+                    <Link href="/forgot-password">Forgot password?</Link>
+                  </p>
+                )}
                 {mode === "up" && (
                   <p className="auth-trust">
                     Free to join &middot; 18+ only &middot; Your number and

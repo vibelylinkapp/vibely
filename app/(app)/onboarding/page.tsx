@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { KENYA_COUNTIES } from "@/lib/counties";
 import type { Database } from "@/lib/database.types";
-import { INTERESTS, MAX_INTERESTS, type Interest } from "@/lib/interests";
+import { INTERESTS, MAX_INTERESTS, cleanInterests, type Interest } from "@/lib/interests";
+import AvatarUpload from "@/components/AvatarUpload";
 
 type Intent = Database["public"]["Enums"]["intent_t"];
 type Gender = Database["public"]["Enums"]["gender_t"];
@@ -30,6 +31,19 @@ const MORE_INTENTS: { id: Intent; label: string }[] = [
   { id: "nightlife", label: "Nightlife" },
 ];
 
+/** Latest date of birth that is 18 today, as yyyy-mm-dd (local time). */
+function maxBirthdate(): string {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 18);
+  return d.toLocaleDateString("en-CA");
+}
+
+function minBirthdate(): string {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 100);
+  return d.toLocaleDateString("en-CA");
+}
+
 function ageFrom(dateStr: string): number {
   const d = new Date(dateStr);
   const now = new Date();
@@ -42,6 +56,8 @@ function ageFrom(dateStr: string): number {
 export default function OnboardingPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [gender, setGender] = useState<Gender | "">("");
@@ -56,10 +72,43 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.replace("/sign-in");
-      else setReady(true);
-    });
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        router.replace("/sign-in");
+        return;
+      }
+      setUserId(data.user.id);
+      // Prefill anything already saved, so returning here (or refreshing
+      // half-way) never wipes an existing profile on submit.
+      const [{ data: prof }, { data: ints }, { data: extra }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("display_name, birthdate, gender, county, area, bio, languages, avatar_url")
+          .eq("id", data.user.id)
+          .maybeSingle(),
+        supabase.from("profile_intents").select("intent").eq("profile_id", data.user.id),
+        // Separate, error-tolerant read: the column arrives in migration 0048.
+        supabase.from("profiles").select("interests").eq("id", data.user.id).maybeSingle(),
+      ]);
+      if (prof) {
+        setDisplayName(prof.display_name ?? "");
+        setBirthdate(prof.birthdate ?? "");
+        setGender((prof.gender as Gender | null) ?? "");
+        setCounty(prof.county ?? "Nairobi");
+        setArea(prof.area ?? "");
+        setBio(prof.bio ?? "");
+        setLanguages((prof.languages ?? []).join(", "));
+        setAvatarUrl(prof.avatar_url ?? null);
+      }
+      if (ints) setIntents(ints.map((r) => r.intent as Intent));
+      if (extra) {
+        setInterests(
+          cleanInterests((extra as { interests?: unknown }).interests) as Interest[]
+        );
+      }
+      setReady(true);
+    })();
   }, [router]);
 
   function toggleIntent(id: Intent) {
@@ -84,6 +133,8 @@ export default function OnboardingPage() {
     if (!displayName.trim()) return setMsg("Please add your name.");
     if (!birthdate || ageFrom(birthdate) < 18)
       return setMsg("You must be at least 18 to use Vibely.");
+    if (ageFrom(birthdate) > 100)
+      return setMsg("Please check your date of birth.");
     if (intents.length === 0)
       return setMsg("Pick at least one thing you're looking for.");
 
@@ -161,12 +212,33 @@ export default function OnboardingPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
+          {userId && (
+            <div className="field">
+              <span>
+                Profile photo <em>recommended</em>
+              </span>
+              <div className="onboard-photo">
+                <AvatarUpload
+                  userId={userId}
+                  avatarUrl={avatarUrl}
+                  displayName={displayName || "You"}
+                />
+                <small className="onboard-hint">
+                  Profiles with a clear photo of your face get far more
+                  replies. JPG, PNG or WebP, under 5 MB.
+                </small>
+              </div>
+            </div>
+          )}
+
           <label className="field">
             <span>Name</span>
             <input
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="What should people call you?"
+              maxLength={40}
+              autoComplete="given-name"
               required
             />
           </label>
@@ -177,6 +249,8 @@ export default function OnboardingPage() {
               type="date"
               value={birthdate}
               onChange={(e) => setBirthdate(e.target.value)}
+              max={maxBirthdate()}
+              min={minBirthdate()}
               required
             />
             <small className="onboard-hint">
@@ -234,6 +308,7 @@ export default function OnboardingPage() {
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={3}
+              maxLength={500}
               placeholder="A short bio..."
             />
           </label>

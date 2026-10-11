@@ -197,3 +197,20 @@
   opacity: 0.75;
   text-align: center;
 }
+
+.auth-forgot {
+  margin: -4px 0 4px;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.auth-forgot a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.onboard-photo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
